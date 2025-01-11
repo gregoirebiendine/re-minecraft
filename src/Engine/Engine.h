@@ -2,24 +2,21 @@
 #define ENGINE_H
 
 #include <main.h>
-#include <Drawer.h>
+#include "Drawer.h"
+#include "Camera.h"
 
 class Engine {
     GLFWwindow *window = nullptr;
     Drawer *drawer = nullptr;
+    Camera *camera = nullptr;
 
-    private:
+    public:
         Engine() = default;
         ~Engine() = default;
         Engine(const Engine&) = delete;
         Engine& operator=(const Engine&) = delete;
 
-    public:
-        static Engine &Instance() {
-            static Engine instance;
-            return instance;
-        }
-
+        static Engine &Instance();
         static void init();
         static void loop();
         static void draw();

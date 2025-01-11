@@ -1,49 +1,71 @@
 #include "Chunk.h"
 
+std::vector<GLfloat> getUVFromIndex(const char index)
+{
+    const char tiles = 4;
+    glm::vec2 UV(float(index%tiles)/tiles, 1.0f - ((std::round(index/tiles) + 1.0f) * (1.0f/tiles)));
+
+    return {
+            UV.x, UV.y,                                         // Left lower
+            UV.x + (1.0f / tiles), UV.y,                        // Right lower
+            UV.x + (1.0f / tiles), UV.y + (1.0f / tiles),       // Right upper
+            UV.x, UV.y,                                         // Left lower
+            UV.x + (1.0f / tiles), UV.y + (1.0f / tiles),       // Right upper
+            UV.x, UV.y + (1.0f / tiles),                        // Left upper
+    };
+}
+
 Chunk::Chunk()
 {
-    // Create squares
-    squares.push_back( Square({-0.5f, -0.5f}, {0.5f, 0.5f}) );
-    squares.push_back( Square({0.0f, 0.0f}, {0.5f, 0.5f}) );
+    this->vertices = {
+            // Front face
+            -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+            -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f,
 
-    // Merge the vertices of all squares
-    this->registerSquares();
+            // Left face
+            -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f,
+            -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f,
+
+            // Right face
+            1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f,
+            1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f,
+
+            // Back face
+            1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f,
+
+            // Top face
+            -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f,
+            -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f,
+
+            // Bottom face
+            -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f,
+            -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f
+    };
+
+    const char BlockFaces[6] = {1, 1, 1, 1, 2, 0};
+
+    for (char faceIndex : BlockFaces) {
+        auto faceUVs = getUVFromIndex(faceIndex);
+        this->uv.insert(this->uv.end(), faceUVs.begin(), faceUVs.end());
+    }
 
     // Bind VAO
-    this->VAO1.bind();
+    this->VAO.bind();
 
-    // Create EBO and VBO with vertices and indices data
-    this->VBO1.addData(this->verts);
-    this->EBO1.addData(this->inds);
+    // Create VAA and VBO with vertices and UV data
+    this->VAO.linkVertices(this->vertices);
+    this->VAO.linkUV(this->uv);
 
-    // Link attributes of the squares to the VAO
-    this->VAO1.linkSquareAttrib(this->VBO1);
-
-    // Unbind all
-    this->VAO1.unbind();
-    this->VBO1.unbind();
-    this->EBO1.unbind();
+    this->VAO.unbind();
 }
 
 void Chunk::bind() const {
-    this->VAO1.bind();
-}
-
-void Chunk::registerSquares()
-{
-    std::vector<GLuint> squareIndices = {0, 2, 1, 0, 3, 2};
-
-    for (auto square : this->squares)
-        this->verts.insert(this->verts.begin(), std::begin(square.getVertices()), std::end(square.getVertices()));
-
-    for (GLuint i = 0; i < squares.size() * 4; i += 4) {
-        squareIndices = {i, i+2, i+1, i, i+3, i+2};
-        this->inds.insert(this->inds.begin(), std::begin(squareIndices), std::end(squareIndices));
-    }
+    this->VAO.bind();
 }
 
 void Chunk::draw() const
 {
     this->bind();
-    glDrawElements(GL_TRIANGLES, this->squares.size() * 6, GL_UNSIGNED_INT, 0);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 }

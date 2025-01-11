@@ -11,9 +11,9 @@ VBO::~VBO()
     glDeleteBuffers(1, &this->ID);
 }
 
-void VBO::addData(const std::vector<GLfloat> &vertices) const {
-    glBindBuffer(GL_ARRAY_BUFFER, this->ID);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
+void VBO::addData(const std::vector<GLfloat> &data) const {
+    this->bind();
+    glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(GLfloat), data.data(), GL_STATIC_DRAW);
 }
 
 void VBO::bind() const

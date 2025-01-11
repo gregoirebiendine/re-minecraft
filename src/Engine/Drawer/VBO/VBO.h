@@ -12,7 +12,7 @@ class VBO {
 
         GLuint ID = -1;
 
-        void addData(const std::vector<GLfloat> &vertices) const;
+        void addData(const std::vector<GLfloat> &data) const;
         void bind() const;
         void unbind() const;
 };

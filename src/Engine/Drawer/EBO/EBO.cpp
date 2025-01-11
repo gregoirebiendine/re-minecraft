@@ -13,7 +13,7 @@ EBO::~EBO()
 
 void EBO::addData(const std::vector<GLuint> &indices) const {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->ID);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLfloat), indices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
 }
 
 void EBO::bind() const

@@ -7,13 +7,14 @@ set(
         SOURCES
         main.cpp
         src/Engine/Engine.cpp
+        src/Engine/Camera/Camera.cpp
         src/Engine/Drawer/Drawer.cpp
-        src/Engine/Drawer/VBO/VBO.cpp
         src/Engine/Drawer/VAO/VAO.cpp
+        src/Engine/Drawer/CubeVAO/CubeVAO.cpp
+        src/Engine/Drawer/VBO/VBO.cpp
         src/Engine/Drawer/EBO/EBO.cpp
         src/Engine/Drawer/Shaders/Shaders.cpp
         src/Engine/Drawer/Texture/Texture.cpp
-        src/Content/Square/Square.cpp
         src/Content/Chunk/Chunk.cpp
 )
 
@@ -28,13 +29,14 @@ set(
         ${CMAKE_SOURCE_DIR}/lib/
         ${CMAKE_SOURCE_DIR}/src/
         ${CMAKE_SOURCE_DIR}/src/Engine
+        ${CMAKE_SOURCE_DIR}/src/Engine/Camera
         ${CMAKE_SOURCE_DIR}/src/Engine/Drawer
-        ${CMAKE_SOURCE_DIR}/src/Engine/Drawer/VBO
         ${CMAKE_SOURCE_DIR}/src/Engine/Drawer/VAO
+        ${CMAKE_SOURCE_DIR}/src/Engine/Drawer/CubeVAO
+        ${CMAKE_SOURCE_DIR}/src/Engine/Drawer/VBO
         ${CMAKE_SOURCE_DIR}/src/Engine/Drawer/EBO
         ${CMAKE_SOURCE_DIR}/src/Engine/Drawer/Shaders
         ${CMAKE_SOURCE_DIR}/src/Engine/Drawer/Texture
-        ${CMAKE_SOURCE_DIR}/src/Content/Square
         ${CMAKE_SOURCE_DIR}/src/Content/Chunk
 )
 

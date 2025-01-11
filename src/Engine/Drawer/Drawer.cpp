@@ -2,14 +2,18 @@
 
 Drawer::Drawer() :
     shaders("../resources/Shaders/VertexShader.vert","../resources/Shaders/FragmentShader.frag"),
-    texture("../resources/Textures/grass.jpg")
+    texture("../resources/Textures/atlas.png")
 {
-    // Void
+
 }
 
 void Drawer::draw() const
 {
     this->texture.bind();
     this->chunk.draw();
+}
+
+Shaders &Drawer::getShader() {
+    return this->shaders;
 }
 

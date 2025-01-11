@@ -1,26 +1,31 @@
 #ifndef RE_MINECRAFT_CHUNK_H
 #define RE_MINECRAFT_CHUNK_H
 
+#include <cmath>
+#include <iostream>
+#include <glm/glm.hpp>
+#include "CubeVAO.h"
 #include "VAO.h"
 #include "VBO.h"
-#include "EBO.h"
-#include "Square.h"
+
+// UV MAPPING :
+// Left lower, Right lower, Right upper, Left lower, Right upper, Left upper
+
+// Math relation :
+// x = (index%NumTiles)/NumTiles // (index%NumTiles)*(1/NumTiles)
+// y = 1.0 - (round(1/NumTiles) + 1) * (1/NumTiles)
 
 class Chunk {
-    VAO VAO1;
-    VBO VBO1;
-    EBO EBO1;
+    CubeVAO VAO;
 
-    std::vector<Square> squares;
-    std::vector<GLfloat> verts;
-    std::vector<GLuint> inds;
+    std::vector<GLfloat> vertices;
+    std::vector<GLfloat> uv;
 
     public:
         Chunk();
 
         void bind() const;
         void draw() const;
-        void registerSquares();
 };
 
 #endif //RE_MINECRAFT_CHUNK_H
