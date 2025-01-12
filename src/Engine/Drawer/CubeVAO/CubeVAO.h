@@ -11,6 +11,7 @@ class CubeVAO {
     GLuint ID = -1;
     VBO Vertex_VBO;
     VBO UV_VBO;
+    EBO EBO;
 
     public:
         CubeVAO();
@@ -18,6 +19,7 @@ class CubeVAO {
 
         void linkVertices(std::vector<GLfloat> &vertices) const;
         void linkUV(std::vector<GLfloat> &uv) const;
+        void linkIndices(std::vector<GLuint> &indices) const;
         void bind() const;
         void unbind() const;
 };

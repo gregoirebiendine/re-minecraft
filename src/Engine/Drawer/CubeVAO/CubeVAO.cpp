@@ -14,17 +14,23 @@ CubeVAO::~CubeVAO()
 void CubeVAO::linkVertices(std::vector<GLfloat> &vertices) const
 {
     this->Vertex_VBO.addData(vertices);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
     this->Vertex_VBO.unbind();
 }
 
 void CubeVAO::linkUV(std::vector<GLfloat> &uv) const
 {
     this->UV_VBO.addData(uv);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
+    glVertexAttribDivisor(1, 0);
     this->UV_VBO.unbind();
+}
+
+void CubeVAO::linkIndices(std::vector<GLuint> &indices) const
+{
+    this->EBO.addData(indices);
 }
 
 void CubeVAO::bind() const

@@ -20,6 +20,7 @@ class Chunk {
 
     std::vector<GLfloat> vertices;
     std::vector<GLfloat> uv;
+    std::vector<GLuint> indices;
 
     public:
         Chunk();

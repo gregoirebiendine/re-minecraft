@@ -9,6 +9,7 @@ uniform mat4 ViewMatrix;
 
 void main()
 {
-    gl_Position = ViewMatrix * vec4(pos, 1.0);
+    vec3 newPos = vec3(pos.x + (gl_InstanceID*2), pos.y, pos.z);
+    gl_Position = ViewMatrix * vec4(newPos, 1.0);
     texCoord = tex;
 }
