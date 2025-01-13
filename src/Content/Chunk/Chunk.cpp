@@ -44,64 +44,25 @@ Chunk::Chunk()
 //            -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f
 //    };
 
-//    With Indices v1
-//    this->vertices = {
-//            // Front face
-//            -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f,
-//
-//            // Left face
-//            -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f,
-//
-//            // Right face
-//            1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f,
-//
-//            // Back face
-//            1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f,
-//
-//            // Top face
-//            -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f,
-//
-//            // Bottom face
-//            -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f
-//    };
-
-//    With indices v2
+    // With Indices v1
     this->vertices = {
             // Front face
-            -1.0f, -1.0f, 1.0f,
-            1.0f, -1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f,
-            -1.0f, 1.0f, 1.0f,
+            -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f,
 
             // Left face
-            -1.0f, -1.0f, -1.0f,
-            -1.0f, -1.0f, 1.0f,
-            -1.0f, 1.0f, 1.0f,
-            -1.0f, 1.0f, -1.0f,
+            -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f,
 
             // Right face
-            1.0f, -1.0f, 1.0f,
-            1.0f, -1.0f, -1.0f,
-            1.0f, 1.0f, -1.0f,
-            1.0f, 1.0f, 1.0f,
+            1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f,
 
             // Back face
-            1.0f, -1.0f, -1.0f,
-            -1.0f, -1.0f, -1.0f,
-            -1.0f, 1.0f, -1.0f,
-            1.0f, 1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f,
 
             // Top face
-            -1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, -1.0f,
-            -1.0f, 1.0f, -1.0f,
+            -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f,
 
             // Bottom face
-            -1.0f, -1.0f, 1.0f,
-            -1.0f, -1.0f, -1.0f,
-            1.0f, -1.0f, -1.0f,
-            1.0f, -1.0f, 1.0f
+            -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f
     };
 
     this->indices = {
@@ -113,24 +74,23 @@ Chunk::Chunk()
             20, 21, 22, 21, 22, 23
     };
 
-    const char BlockFaces[12] = {
-            1, 1, 1, 1, 2, 0,       // Block 1 (Grass)
-            0, 0, 0, 0, 0, 0,       // Block 2 (Dirt)
+    std::vector<glm::vec3> faces = {
+            {1, 2, 0},       // Block 1 (Grass)
+            {0, 0, 0},      // Block 2 (Dirt)
+            {2, 2, 2},      // Block 2 (Moss)
     };
-
-    for (char faceIndex : BlockFaces) {
-        auto faceUVs = getUVFromIndex(faceIndex);
-        this->uv.insert(this->uv.end(), faceUVs.begin(), faceUVs.end());
-    }
 
     // Bind VAO
     this->VAO.bind();
 
     // Create VAO and VBO with vertices and UV data
     this->VAO.linkVertices(this->vertices);
-    this->VAO.linkUV(this->uv);
     this->VAO.linkIndices(this->indices);
+    this->VAO.linkFaces(faces);
+//    this->VAO.linkUV(this->uv);
 
+
+    // Unbind VAO
     this->VAO.unbind();
 }
 
@@ -143,6 +103,6 @@ void Chunk::draw() const
     this->bind();
 //    glDrawArrays(GL_TRIANGLES, 0, this->vertices.size() / 3);
 //    glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
-//    glDrawArraysInstanced(GL_TRIANGLES, 0, this->vertices.size() / 3, 2);
-    glDrawElementsInstanced(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0, 2);
+//    glDrawArraysInstanced(GL_TRIANGLES, 0, this->vertices.size() / 3, 1);
+    glDrawElementsInstanced(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0, 3);
 }

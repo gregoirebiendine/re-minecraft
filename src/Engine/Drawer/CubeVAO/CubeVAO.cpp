@@ -28,6 +28,16 @@ void CubeVAO::linkUV(std::vector<GLfloat> &uv) const
     this->UV_VBO.unbind();
 }
 
+void CubeVAO::linkFaces(std::vector<glm::vec3> &faces) const
+{
+    this->FACES_VBO.addData(faces);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+    glVertexAttribDivisor(1, 1);
+    this->FACES_VBO.unbind();
+}
+
+
 void CubeVAO::linkIndices(std::vector<GLuint> &indices) const
 {
     this->EBO.addData(indices);
