@@ -10,31 +10,23 @@ uniform mat4 ViewMatrix;
 
 void main()
 {
-//    vec3 indexes = vec3(1, 2, 0);
-//    int index = 0;
-//
-//    if (gl_InstanceID == 1) {
-//        indexes = vec3(2, 2, 2);
-//    }
-
     int index = 0;
+
     if (gl_VertexID < 16) {
         index = int(faces.x);
     } else if (gl_VertexID >= 16 && gl_VertexID < 20) {
         index = int(faces.y);
-    } else {
+    } else if (gl_VertexID >= 20) {
         index = int(faces.z);
     }
 
-    int tiles = 4; // Number of tiles per row/column in the atlas
-    float tileSize = 1.0 / float(tiles); // Size of each tile
+    int tiles = 4;
+    float tileSize = 1.0 / float(tiles);
 
-    // Calculate base UV from the tile index
     vec2 uv = vec2(
         float(index % tiles) * tileSize,
         1.0 - (float(index / tiles + 1) * tileSize)
     );
-
 
     vec2 test[4] = vec2[4](
             vec2(uv.x, uv.y),

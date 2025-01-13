@@ -43,12 +43,12 @@ void Engine::init()
     Engine::Instance().drawer = new Drawer();
 
     // Create Camera with position
-    Engine::Instance().camera = new Camera({-4.0f, 4.0f, 8.0f});
-    Engine::Instance().camera->setRotation({0.5f, -0.5f, -1.0f});
+    Engine::Instance().camera = new Camera({0.0f, 0.0f, 8.0f});
 }
 
 void Engine::loop() {
     while (!glfwWindowShouldClose(Engine::Instance().window)) {
+        Engine::Instance().camera->handleInputs(Engine::Instance().window);
         Engine::draw();
         glfwPollEvents();
     }
