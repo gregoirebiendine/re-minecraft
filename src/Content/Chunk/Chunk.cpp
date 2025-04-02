@@ -2,40 +2,46 @@
 
 Chunk::Chunk()
 {
-    // Vertices v1
+    // Declare base vertices and UVs of a face
     this->vertices = {
-            -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f,         // Front face
-            -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f,     // Left face
-            1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f,     // Back face
-            1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f,         // Right face
-            -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f,         // Top face
-            -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f      // Bottom face
+        0.0f, 0.0f, 0.0f,       0.0f, 0.0f,         // Bottom Left
+        1.0f, 0.0f, 0.0f,       0.25f, 0.0f,        // Bottom Right
+        1.0f, 1.0f, 0.0f,       0.25f, 0.25f,       // Top Right
+        0.0f, 1.0f, 0.0f,       0.0f, 0.25f,        // Top Left
     };
 
-    // Indices v1
+    // Vertices for left side of a cube
+    // this->vertices = {
+    //     0.0f, 0.0f, 0.0f,       0.0f, 0.0f,         // Bottom Left
+    //     0.0f, 0.0f, 1.0f,       0.25f, 0.0f,        // Bottom Right
+    //     0.0f, 1.0f, 1.0f,       0.25f, 0.25f,       // Top Right
+    //     0.0f, 1.0f, 0.0f,       0.0f, 0.25f,        // Top Left
+    // };
+
+    // Declare indices needed to draw a square (face) with 2 triangles
     this->indices = {
             0, 1, 2, 0, 2, 3,
-            4, 5, 6, 4, 6, 7,
-            8, 9, 10, 8, 10, 11,
-            12, 13, 14, 12, 14, 15,
-            16, 17, 18, 16, 18, 19,
-            20, 21, 22, 20, 22, 23
     };
 
-    std::vector<glm::vec3> faces = {
-            {1, 2, 0},      // Block 1 (Grass)
-            {0, 0, 0},      // Block 2 (Dirt)
-            {2, 2, 2},      // Block 3 (Moss)
-            {0, 2, 2},      // Block 4 (Random)
+    // Declare UV offsets per face instance (is equal to atlas texture id)
+    this->UVoffsets = {0, 1, 2}; // Is equal to face ID (0: dirt / 1: grass_side / 2: grass_top)
+
+    glm::mat4 faceMatrices[6] = {
+        glm::translate(glm::mat4(1.0f), glm::vec3( 0.0f,  0.0f,  0.5f)), // Avant
+        glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.5f)), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)), // Arrière
+        glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(-0.5f, 0.0f, 0.0f)), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f)), // Gauche
+        glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.0f, 0.0f)), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)), // Droite
+        glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.5f, 0.0f)), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)), // Haut
+        glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, 0.0f)), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f))  // Bas
     };
 
     // Bind VAO
     this->VAO.bind();
 
-    // Create VAO and VBO with vertices and UV data
-    this->VAO.linkVertices(this->vertices);
+    // Link datas to VA0 before rendering
+    this->VAO.linkVerticesAndUVs(this->vertices);
+    this->VAO.linkOffset(this->UVoffsets);
     this->VAO.linkIndices(this->indices);
-    this->VAO.linkFaces(faces);
 
     // Unbind VAO
     this->VAO.unbind();
@@ -47,6 +53,9 @@ void Chunk::bind() const {
 
 void Chunk::draw() const
 {
+    // Bind VAO
     this->bind();
-    glDrawElementsInstanced(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0, 4);
+
+    // Draw 4 instances (faces)
+    glDrawElementsInstanced(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0, this->UVoffsets.size());
 }

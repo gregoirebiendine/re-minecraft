@@ -16,6 +16,11 @@ void VBO::addData(const std::vector<GLfloat> &data) const {
     glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(GLfloat), data.data(), GL_STATIC_DRAW);
 }
 
+void VBO::addData(const std::vector<GLuint> &data) const {
+    this->bind();
+    glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(GLuint), data.data(), GL_STATIC_DRAW);
+}
+
 void VBO::addData(const std::vector<glm::vec3> &data) const
 {
     this->bind();

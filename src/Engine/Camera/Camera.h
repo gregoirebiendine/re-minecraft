@@ -4,30 +4,31 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 
+#include <memory>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include<glm/glm.hpp>
-#include<glm/gtc/matrix_transform.hpp>
-#include<glm/gtc/type_ptr.hpp>
-#include<glm/gtx/rotate_vector.hpp>
-#include<glm/gtx/vector_angle.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtx/vector_angle.hpp>
 
-#include "Shaders.h"
+#include "Shader.h"
 
 class Camera {
     glm::vec3 _position{};
     glm::vec3 _rotation{0.0f, 0.0f, -1.0f};
     glm::vec3 _up{0.0f, 1.0f, 0.0f};
 
-    float speed = 0.1f;
+    float speed = 0.001f;
     float sensitivity = 100.0f;
 
     bool hasClickedWindow = false;
 
     public:
-        Camera(glm::vec3 position);
+        explicit Camera(glm::vec3 position);
 
-        void applyMatrix(float FOV, Shaders &shaders, float ratio);
+        void applyMatrix(float FOV, std::unique_ptr<Shader> &shaders, float ratio);
         void handleInputs(GLFWwindow *window);
 
         void setPosition(glm::vec3 newPos);

@@ -1,26 +1,34 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include <main.h>
-#include "Drawer.h"
+#include <iostream>
+#include <memory>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+#include "Atlas.h"
+#include "Shader.h"
+#include "Map.h"
 #include "Camera.h"
 
 class Engine {
+    int W  = 1280;
+    int H = 1280;
+
     GLFWwindow *window = nullptr;
-    Drawer *drawer = nullptr;
-    Camera *camera = nullptr;
+
+    std::unique_ptr<Atlas> atlas;
+    std::unique_ptr<Shader> shaders;
+    std::unique_ptr<Map> map;
+    std::unique_ptr<Camera> camera;
 
     public:
-        Engine() = default;
-        ~Engine() = default;
-        Engine(const Engine&) = delete;
-        Engine& operator=(const Engine&) = delete;
+        Engine();
+        ~Engine();
 
-        static Engine &Instance();
-        static void init();
-        static void loop();
-        static void draw();
-        static void destroy();
+        void init();
+        void loop();
+        void draw();
 };
 
 
