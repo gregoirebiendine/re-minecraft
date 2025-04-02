@@ -1,7 +1,7 @@
 
-#include "Shaders.h"
+#include "Shader.h"
 
-std::string Shaders::loadFile(const char* path)
+std::string Shader::loadFile(const char* path)
 {
     std::ifstream file(path);
 
@@ -17,10 +17,10 @@ std::string Shaders::loadFile(const char* path)
     return content;
 }
 
-Shaders::Shaders(const char* vertexSource, const char* fragSource)
+Shader::Shader()
 {
-    const std::string vertexContent = Shaders::loadFile(vertexSource);
-    const std::string fragContent = Shaders::loadFile(fragSource);
+    const std::string vertexContent = Shader::loadFile("../resources/shaders/VertexShader.vert");
+    const std::string fragContent = Shader::loadFile("../resources/shaders/FragmentShader.frag");
     const char *vertexShaderSource = vertexContent.c_str();
     const char *fragmentShaderSource = fragContent.c_str();
 
@@ -50,17 +50,17 @@ Shaders::Shaders(const char* vertexSource, const char* fragSource)
     glUseProgram(this->ID);
 }
 
-Shaders::~Shaders() {
+Shader::~Shader() {
     glDeleteProgram(this->ID);
 }
 
-void Shaders::use() const
+void Shader::use() const
 {
     glUseProgram(this->ID);
 }
 
-void Shaders::setUniformMat4(const char *name, glm::mat4 value) const
+void Shader::setUniformMat4(const char *name, glm::mat4 value) const
 {
-    int loc = glGetUniformLocation(this->ID, name);
+    const int loc = glGetUniformLocation(this->ID, name);
     glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(value));
 }

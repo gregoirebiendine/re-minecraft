@@ -1,36 +1,35 @@
 #include "Engine.h"
 
-Engine &Engine::Instance()
-{
-    static Engine instance;
-    return instance;
-}
-
-void Engine::init()
+Engine::Engine()
 {
     if (!glfwInit())
         throw std::runtime_error("Cannot initialize GLFW3");
 
     // Pass GLFW version to the lib
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     // Create the window
-    Engine::Instance().window = glfwCreateWindow(1000, 1000, "Re Minecraft", nullptr, nullptr);
-    if (!Engine::Instance().window) {
+    this->window = glfwCreateWindow(this->W, this->H, "Re Minecraft", nullptr, nullptr);
+    if (!this->window) {
         glfwTerminate();
         throw std::runtime_error("Failed to open windows");
     }
-    glfwMakeContextCurrent(Engine::Instance().window);
+
+    // Center window
+    glfwSetWindowPos(window, (3440 / 2) - (this->W / 2),  (1440 / 2) - (this->H / 2)); // Should get the monitor size
+
+    // Make window current context for GLFW
+    glfwMakeContextCurrent(this->window);
 
     // Initialize GLAD Manager
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
         throw std::runtime_error("Cannot initialize GLAD");
 
     // Create viewport
-    glViewport(0, 0, 1000, 1000);
+    glViewport(0, 0, this->W, this->H);
 
     // Enable 3D depth
     glEnable(GL_DEPTH_TEST);
@@ -39,17 +38,26 @@ void Engine::init()
     // Setup STBI image load
     stbi_set_flip_vertically_on_load(true);
 
-    // Create Drawer
-    Engine::Instance().drawer = new Drawer();
+    // Create all members
+    this->shaders = std::make_unique<Shader>();
+    this->map = std::make_unique<Map>();
+    this->camera = std::make_unique<Camera>(glm::vec3{0.0f, 0.0f, 8.0f});
+    this->atlas = std::make_unique<Atlas>();
 
-    // Create Camera with position
-    Engine::Instance().camera = new Camera({0.0f, 0.0f, 8.0f});
+    if (!this->shaders || !this->map || !this->camera || !this->atlas)
+        throw std::runtime_error("Failed to initialize shader program");
 }
 
+Engine::~Engine() {
+    glfwDestroyWindow(this->window);
+    glfwTerminate();
+}
+
+
 void Engine::loop() {
-    while (!glfwWindowShouldClose(Engine::Instance().window)) {
-        Engine::Instance().camera->handleInputs(Engine::Instance().window);
-        Engine::draw();
+    while (!glfwWindowShouldClose(this->window)) {
+        this->camera->handleInputs(this->window);
+        this->draw();
         glfwPollEvents();
     }
 }
@@ -58,15 +66,9 @@ void Engine::draw() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    Engine::Instance().camera->applyMatrix(45.0f, Engine::Instance().drawer->getShader(), 1000/1000);
-    Engine::Instance().drawer->draw();
+    this->camera->applyMatrix(45.0f, this->shaders, 1); // Should be width/height
+    this->atlas->bind();
+    this->map->draw();
 
-    glfwSwapBuffers(Engine::Instance().window);
-}
-
-void Engine::destroy() {
-    delete Engine::Instance().drawer;
-    delete Engine::Instance().camera;
-    glfwDestroyWindow(Engine::Instance().window);
-    glfwTerminate();
+    glfwSwapBuffers(this->window);
 }

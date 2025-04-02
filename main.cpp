@@ -1,8 +1,8 @@
 #include <Engine.h>
 
 int main() {
-    Engine::Instance().init(),
-    Engine::Instance().loop();
-    Engine::Instance().destroy();
+    Engine engine;
+
+    engine.loop();
     return 0;
 }

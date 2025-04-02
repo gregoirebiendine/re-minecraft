@@ -1,12 +1,16 @@
 
-#include "Texture.h"
+#include "Atlas.h"
 
-Texture::Texture(const char *path) {
+Atlas::Atlas() {
     int width, height, chan;
-    unsigned char *image = stbi_load(path, &width, &height, &chan, 0);
+
+    unsigned char *image = stbi_load("../resources/textures/atlas.png", &width, &height, &chan, 0);
+
+    if (!image)
+        throw std::runtime_error(stbi_failure_reason());
 
     glGenTextures(1, &this->ID);
-    glActiveTexture(GL_TEXTURE0);
+
     glBindTexture(GL_TEXTURE_2D, this->ID);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -15,17 +19,18 @@ Texture::Texture(const char *path) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
     glGenerateMipmap(GL_TEXTURE_2D);
 
-    glBindTexture(GL_TEXTURE_2D, 0);
-
     stbi_image_free(image);
 
+    glActiveTexture(GL_TEXTURE0);
     glUniform1i(glGetUniformLocation(this->ID, "tex0"), 0);
+
+    glBindTexture(GL_TEXTURE_2D, this->ID);
 }
 
-Texture::~Texture() {
+Atlas::~Atlas() {
     glDeleteTextures(1, &this->ID);
 }
 
-void Texture::bind() const {
+void Atlas::bind() const {
     glBindTexture(GL_TEXTURE_2D, this->ID);
 }

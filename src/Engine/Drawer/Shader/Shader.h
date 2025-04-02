@@ -1,5 +1,5 @@
-#ifndef SHADERS_H
-#define SHADERS_H
+#ifndef SHADER_H
+#define SHADER_H
 
 #include <iostream>
 #include <fstream>
@@ -10,17 +10,17 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-class Shaders {
+class Shader {
     static std::string loadFile(const char *path);
 
     public:
         GLuint ID;
 
-        Shaders(const char* vertexSource, const char* fragSource);
-        ~Shaders();
+        Shader();
+        ~Shader();
 
         void use() const;
         void setUniformMat4(const char *name, glm::mat4 value) const;
 };
 
-#endif //SHADERS_H
+#endif
