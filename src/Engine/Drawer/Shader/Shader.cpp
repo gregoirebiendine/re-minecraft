@@ -64,3 +64,9 @@ void Shader::setUniformMat4(const char *name, glm::mat4 value) const
     const int loc = glGetUniformLocation(this->ID, name);
     glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(value));
 }
+
+void Shader::setUniformMat4Array(const char *name, glm::mat4 *value) const
+{
+    const int loc = glGetUniformLocation(this->ID, name);
+    glUniformMatrix4fv(loc, 6, GL_FALSE, glm::value_ptr(value[0]));
+}
