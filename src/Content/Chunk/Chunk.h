@@ -1,18 +1,11 @@
 #ifndef RE_MINECRAFT_CHUNK_H
 #define RE_MINECRAFT_CHUNK_H
 
-#define GLM_ENABLE_EXPERIMENTAL
-
 #include <iostream>
 #include <cmath>
 #include <array>
 #include <iostream>
 #include <glm/glm.hpp>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/rotate_vector.hpp>
-#include <glm/gtx/vector_angle.hpp>
 
 #include "CubeVAO.h"
 #include "VAO.h"
@@ -22,7 +15,9 @@ class Chunk {
 
     std::vector<GLfloat> vertices;
     std::vector<GLuint> indices;
-    std::vector<uint32_t> UVoffsets;
+    std::vector<GLuint> texOffsets;
+    std::vector<GLfloat> posOffsets;
+    std::vector<GLint> renderedSides;
 
     public:
         Chunk();

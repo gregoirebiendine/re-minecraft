@@ -11,9 +11,10 @@ CubeVAO::~CubeVAO()
     glDeleteVertexArrays(1, &this->ID);
 }
 
-void CubeVAO::linkVerticesAndUVs(std::vector<GLfloat> &verticesAndUvs) const
+void CubeVAO::linkVertices(std::vector<GLfloat> &vertices, std::vector<GLuint> &indices) const
 {
-    this->TEST_VBO.addData(verticesAndUvs);
+    // Handle vertices
+    this->VerticesVBO.addData(vertices);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
@@ -21,47 +22,46 @@ void CubeVAO::linkVerticesAndUVs(std::vector<GLfloat> &verticesAndUvs) const
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
     glEnableVertexAttribArray(1);
 
-    this->TEST_VBO.unbind();
+    this->VerticesVBO.unbind();
+
+    // Handle indices
+    this->EBO.addData(indices);
+    // this->EBO.unbind();
 }
 
-void CubeVAO::linkVertices(std::vector<GLfloat> &vertices) const
+void CubeVAO::linkTexOffset(std::vector<GLuint> &offsets) const
 {
-    this->Vertex_VBO.addData(vertices);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
-    this->Vertex_VBO.unbind();
-}
-
-void CubeVAO::linkUV(std::vector<GLfloat> &uv) const
-{
-    this->UV_VBO.addData(uv);
-
-    // glEnableVertexAttribArray(1);
-    // glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (void *)0);
-    // glVertexAttribDivisor(1, 1);
-
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(2);
-    glVertexAttribDivisor(2, 1);
-
-    this->UV_VBO.unbind();
-}
-
-void CubeVAO::linkOffset(std::vector<GLuint> &offsets) const
-{
-    this->OffsetVBO.addData(offsets);
+    this->TextOffsetVBO.addData(offsets);
 
     glVertexAttribIPointer(2, 1, GL_UNSIGNED_INT, 0, (void *)0);
     glEnableVertexAttribArray(2);
     glVertexAttribDivisor(2, 1);
 
-    this->OffsetVBO.unbind();
+    this->TextOffsetVBO.unbind();
 }
 
-void CubeVAO::linkIndices(std::vector<GLuint> &indices) const
+void CubeVAO::linkPosOffset(std::vector<GLfloat> &offsets) const
 {
-    this->EBO.addData(indices);
+    this->PosOffsetVBO.addData(offsets);
+
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
+    glEnableVertexAttribArray(3);
+    glVertexAttribDivisor(3, 6);
+
+    this->PosOffsetVBO.unbind();
 }
+
+void CubeVAO::linkRenderedSides(std::vector<GLint> &sides) const
+{
+    this->RenderedSidesVBO.addData(sides);
+
+    glEnableVertexAttribArray(4);
+    glVertexAttribIPointer(4, 4, GL_INT, sizeof(GLint), (void *)0);
+    glVertexAttribDivisor(4, 1);
+
+    this->RenderedSidesVBO.unbind();
+}
+
 
 void CubeVAO::bind() const
 {

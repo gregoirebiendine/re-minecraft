@@ -21,6 +21,7 @@ class Shader {
 
         void use() const;
         void setUniformMat4(const char *name, glm::mat4 value) const;
+        void setUniformMat4Array(const char *name, glm::mat4 *value) const;
 };
 
 #endif

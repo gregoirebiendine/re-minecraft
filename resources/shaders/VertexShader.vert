@@ -1,22 +1,30 @@
 #version 460 core
 
-layout (location = 0) in vec3 pos;
-layout (location = 1) in vec2 tex;
-layout (location = 2) in uint UVoffset;
-//layout (location = 3) in vec3 POSoffset;
+layout (location = 0) in vec3 basePos;
+layout (location = 1) in vec2 baseTex;
+layout (location = 2) in uint texOffset;
+layout (location = 3) in vec3 posOffset;
+layout (location = 4) in int renderedSide;
 
 out vec2 TexCoord;
 
 uniform mat4 ViewMatrix;
+uniform mat4 TransMatrix[6];
 
 void main()
 {
     // Compute UV offset for this tile
-    vec2 off = vec2(0.25f * (UVoffset % 4), floor(UVoffset / 4) / 4);
+    vec2 computedTexOffset = vec2(0.25f * (texOffset % 4), floor(texOffset / 4) / 4);
 
     // Final UV coordinate
-    TexCoord = tex + off;
+    TexCoord = baseTex + computedTexOffset;
 
     // Final vertex coordinate
-    gl_Position = ViewMatrix * vec4(pos + vec3(gl_InstanceID, 0, 0), 1.0);
+    vec4 worldPosition = TransMatrix[renderedSide] * vec4(basePos, 1.0);
+    worldPosition.xyz += posOffset;
+
+    if (renderedSide == -1)
+        gl_Position = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    else
+        gl_Position = ViewMatrix * worldPosition;
 }
