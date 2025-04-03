@@ -11,8 +11,10 @@
 #include "VAO.h"
 
 class Chunk {
-    CubeVAO VAO;
+    // std::array<uint16_t, 16*16*16> cubes;
+    std::vector<uint8_t> cubes;
 
+    CubeVAO VAO;
     std::vector<GLfloat> vertices;
     std::vector<GLuint> indices;
     std::vector<GLuint> texOffsets;
