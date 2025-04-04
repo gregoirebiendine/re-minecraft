@@ -11,8 +11,7 @@
 #include "VAO.h"
 
 class Chunk {
-    // std::array<uint16_t, 16*16*16> cubes;
-    std::vector<uint8_t> cubes;
+    std::vector<uint8_t> data;
 
     CubeVAO VAO;
     std::vector<GLfloat> vertices;

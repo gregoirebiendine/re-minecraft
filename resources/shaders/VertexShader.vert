@@ -23,8 +23,5 @@ void main()
     vec4 worldPosition = TransMatrix[renderedSide] * vec4(basePos, 1.0);
     worldPosition.xyz += posOffset;
 
-    if (renderedSide == -1)
-        gl_Position = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    else
-        gl_Position = ViewMatrix * worldPosition;
+    gl_Position = ViewMatrix * worldPosition;
 }
