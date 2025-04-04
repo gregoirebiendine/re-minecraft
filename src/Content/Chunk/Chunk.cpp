@@ -1,23 +1,54 @@
 #include "Chunk.h"
 
+constexpr uint16_t MAX_BLOCK = 4096;
+
 Chunk::Chunk() :
-    cubes(16*16*16)
+    data(MAX_BLOCK, 1)
 {
-    // cubes.assign(16, 1);
+    // const int index = 2047;
+    // const int size = 16;
+    // int x = index / (size * size);
+    // int y = (index / size) % size;
+    // int z = index % size;
 
-    for (int i = 0; i < 16; i++) {
-        for (int j = 0; j < 16; j++) {
-            this->texOffsets.insert(this->texOffsets.end(), {1, 1, 1, 1, 2, 0});
-            this->posOffsets.insert(this->posOffsets.end(), {j, 0.0f, i});
 
-            if (i == 0)
-                this->renderedSides.insert(this->renderedSides.end(), {0, 1, 2, -1, 4, 5});
-            else if (i == 15)
-                this->renderedSides.insert(this->renderedSides.end(), {0, 1, -1, 3, 4, 5});
-            else
-                this->renderedSides.insert(this->renderedSides.end(), {0, 1, -1, -1, 4, 5});
+    std::vector<GLint> renderedSidesPerBlock;
+    std::vector<GLuint> texOffsetsPerBlock;
+
+    for (int i = 0; i < MAX_BLOCK; i++) {
+        if (i == 0) {
+            renderedSidesPerBlock = {0, 1, 2, 4, 5};
+            texOffsetsPerBlock = {1, 1, 1, 2, 0};
+        }
+        else if (i == MAX_BLOCK - 1) {
+            renderedSidesPerBlock = {0, 1, 3, 4, 5};
+            texOffsetsPerBlock = {1, 1, 1, 2, 0};
+        }
+        else {
+            renderedSidesPerBlock = {0, 1, 4, 5};
+            texOffsetsPerBlock = {1, 1, 2, 0};
+        }
+
+        this->renderedSides.insert(this->renderedSides.end(), renderedSidesPerBlock.begin(), renderedSidesPerBlock.end());
+        this->texOffsets.insert(this->texOffsets.end(), texOffsetsPerBlock.begin(), texOffsetsPerBlock.end());
+        for (int j = 0; j < renderedSidesPerBlock.size(); j++) {
+            this->posOffsets.insert(this->posOffsets.end(), {static_cast<float>(i), 0.0f, 0.0f});
         }
     }
+
+    // for (int i = 0; i < 16; i++) {
+    //     for (int j = 0; j < 16; j++) {
+    //         this->texOffsets.insert(this->texOffsets.end(), {1, 1, 1, 1, 2, 0});
+    //         this->posOffsets.insert(this->posOffsets.end(), {j, 0.0f, i});
+    //
+    //         if (i == 0)
+    //             this->renderedSides.insert(this->renderedSides.end(), {0, 1, 2, -1, 4, 5});
+    //         else if (i == 15)
+    //             this->renderedSides.insert(this->renderedSides.end(), {0, 1, -1, 3, 4, 5});
+    //         else
+    //             this->renderedSides.insert(this->renderedSides.end(), {0, 1, -1, -1, 4, 5});
+    //     }
+    // }
 
     // Declare base vertices and UVs of a face
     this->vertices = {
@@ -43,7 +74,22 @@ Chunk::Chunk() :
     // Declare position offset of each cubes
     // this->posOffsets = {
     //     0.0f, 0.0f, 0.0f,
+    //     0.0f, 0.0f, 0.0f,
+    //     0.0f, 0.0f, 0.0f,
+    //     0.0f, 0.0f, 0.0f,
+    //     0.0f, 0.0f, 0.0f,
+    //     0.0f, 0.0f, 0.0f,
     //     1.0f, 0.0f, 0.0f,
+    //     1.0f, 0.0f, 0.0f,
+    //     1.0f, 0.0f, 0.0f,
+    //     1.0f, 0.0f, 0.0f,
+    //     1.0f, 0.0f, 0.0f,
+    //     1.0f, 0.0f, 0.0f,
+    //     2.0f, 0.0f, 0.0f,
+    //     2.0f, 0.0f, 0.0f,
+    //     2.0f, 0.0f, 0.0f,
+    //     2.0f, 0.0f, 0.0f,
+    //     2.0f, 0.0f, 0.0f,
     //     2.0f, 0.0f, 0.0f,
     // };
 
@@ -78,5 +124,5 @@ void Chunk::draw() const
     this->bind();
 
     // Draw instances (faces)
-    glDrawElementsInstanced(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0, 6 * 16*16);
+    glDrawElementsInstanced(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0, this->renderedSides.size());
 }

@@ -8,11 +8,8 @@ Camera::Camera(glm::vec3 position)
 
 void Camera::applyMatrix(float FOV, std::unique_ptr<Shader> &shaders, float ratio)
 {
-    glm::mat4 view(1.0f);
-    glm::mat4 projection(1.0f);
-
-    view = glm::lookAt(this->_position, this->_position + this->_rotation, this->_up);
-    projection = glm::perspective(glm::radians(FOV), ratio, 0.1f, 100.f);
+    glm::mat4 view = glm::lookAt(this->_position, this->_position + this->_rotation, this->_up);
+    glm::mat4 projection = glm::perspective(glm::radians(FOV), ratio, 0.1f, 100.f);
 
     shaders->setUniformMat4("ViewMatrix", projection * view);
 }
@@ -55,7 +52,6 @@ void Camera::handleInputs(GLFWwindow *window)
         double mouseY;
 
         glfwGetCursorPos(window, &mouseX, &mouseY);
-
 
         float rotX = sensitivity * (float)(mouseY - (1280 / 2)) / 1280; // height
         float rotY = sensitivity * (float)(mouseX - (1280 / 2)) / 1280; // width
