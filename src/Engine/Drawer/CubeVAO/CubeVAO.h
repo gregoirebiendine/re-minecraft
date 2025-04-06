@@ -10,7 +10,7 @@
 class CubeVAO {
     GLuint ID = -1;
     VBO VerticesVBO;
-    VBO TextOffsetVBO;
+    VBO TexOffsetVBO;
     VBO PosOffsetVBO;
     VBO RenderedSidesVBO;
     EBO EBO;
@@ -20,6 +20,7 @@ class CubeVAO {
         ~CubeVAO();
 
         void linkVertices(std::vector<GLfloat> &vertices, std::vector<GLuint> &indices) const;
+        void linkTex(std::vector<GLfloat> &tex) const;
 
         void linkTexOffset(std::vector<GLuint> &offsets) const;
         void linkPosOffset(std::vector<GLfloat> &offsets) const;
