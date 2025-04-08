@@ -12,8 +12,7 @@
 #include "VAO.h"
 
 class Chunk {
-    // std::vector<uint8_t> data;
-    uint8_t chunkData[16][16][16];
+    uint8_t chunkData[16][16][16]{};
 
     CubeVAO VAO;
     std::vector<GLuint> vertices;
