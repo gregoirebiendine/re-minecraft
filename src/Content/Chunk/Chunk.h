@@ -6,16 +6,17 @@
 #include <array>
 #include <iostream>
 #include <glm/glm.hpp>
+#include <map>
 
 #include "CubeVAO.h"
 #include "VAO.h"
 
 class Chunk {
-    std::vector<uint8_t> data;
+    // std::vector<uint8_t> data;
+    uint8_t chunkData[16][16][16];
 
     CubeVAO VAO;
     std::vector<GLuint> vertices;
-    std::vector<GLuint> indices;
     std::vector<GLfloat> tex;
 
     public:
