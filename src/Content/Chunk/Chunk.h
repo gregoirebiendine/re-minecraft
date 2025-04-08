@@ -14,12 +14,9 @@ class Chunk {
     std::vector<uint8_t> data;
 
     CubeVAO VAO;
-    std::vector<GLfloat> vertices;
+    std::vector<GLuint> vertices;
     std::vector<GLuint> indices;
     std::vector<GLfloat> tex;
-    // std::vector<GLuint> texOffsets;
-    // std::vector<GLfloat> posOffsets;
-    // std::vector<GLint> renderedSides;
 
     public:
         Chunk();
