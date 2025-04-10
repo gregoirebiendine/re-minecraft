@@ -14,12 +14,14 @@
 class Chunk {
     uint8_t chunkData[16][16][16]{};
 
+    glm::ivec3 chunkOffset{};
+
     CubeVAO VAO;
     std::vector<GLuint> vertices;
     std::vector<GLfloat> tex;
 
     public:
-        Chunk();
+        Chunk(glm::ivec3 offset);
 
         void bind() const;
         void draw() const;

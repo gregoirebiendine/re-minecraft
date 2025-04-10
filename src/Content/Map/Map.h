@@ -9,7 +9,7 @@ class Map {
     Chunk chunk;
 
     public:
-        Map() = default;
+        Map();
 
         void draw() const;
 };

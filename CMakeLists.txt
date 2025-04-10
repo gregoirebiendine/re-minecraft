@@ -12,7 +12,6 @@ set(
         main.cpp
         src/Engine/Engine.cpp
         src/Engine/Camera/Camera.cpp
-        src/Engine/Drawer/Drawer.cpp
         src/Engine/Drawer/VAO/VAO.cpp
         src/Engine/Drawer/CubeVAO/CubeVAO.cpp
         src/Engine/Drawer/VBO/VBO.cpp
@@ -28,7 +27,6 @@ set(
         ${CMAKE_SOURCE_DIR}/lib
         ${CMAKE_SOURCE_DIR}/src/Engine
         ${CMAKE_SOURCE_DIR}/src/Engine/Camera
-        ${CMAKE_SOURCE_DIR}/src/Engine/Drawer
         ${CMAKE_SOURCE_DIR}/src/Engine/Drawer/VAO
         ${CMAKE_SOURCE_DIR}/src/Engine/Drawer/CubeVAO
         ${CMAKE_SOURCE_DIR}/src/Engine/Drawer/VBO
