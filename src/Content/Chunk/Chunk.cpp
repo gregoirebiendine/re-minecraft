@@ -30,14 +30,14 @@ Chunk::Chunk(glm::ivec3 offset)
     }
 
     // Fill first layer with grass for better look
-    for (auto &z : this->chunkData) {
-        for (uint8_t x = 0; x < CHUNK_SIZE; x++) {
-            z[15][x] = 2;
-        }
-    }
+    // for (auto &z : this->chunkData) {
+    //     for (uint8_t x = 0; x < CHUNK_SIZE; x++) {
+    //         z[15][x] = 2;
+    //     }
+    // }
 
     // Add air in top of the chunk to test robustness of the code
-    this->chunkData[8][15][8] = 0;
+    // this->chunkData[8][15][8] = 0;
 
     // Iterate over all Materials to construct blocks
     for (uint8_t z = 0; z < CHUNK_SIZE; z++) {
@@ -55,10 +55,10 @@ Chunk::Chunk(glm::ivec3 offset)
                     this->vertices.insert(this->vertices.end(), {
                         1 + x + chunkOffset.x, y + chunkOffset.y, 1 + z + chunkOffset.z,
                         x + chunkOffset.x, y + chunkOffset.y, 1 + z + chunkOffset.z,
-                        x + chunkOffset.x, 1 + y + chunkOffset.y, 1 + z + chunkOffset.z,
+                        x + chunkOffset.x, 1 - y + chunkOffset.y, 1 + z + chunkOffset.z,
                         1 + x + chunkOffset.x, y + chunkOffset.y, 1 + z + chunkOffset.z,
-                        x + chunkOffset.x, 1 + y + chunkOffset.y, 1 + z + chunkOffset.z,
-                        1 + x + chunkOffset.x, 1 + y + chunkOffset.y, 1 + z + chunkOffset.z,
+                        x + chunkOffset.x, 1 - y + chunkOffset.y, 1 + z + chunkOffset.z,
+                        1 + x + chunkOffset.x, 1 - y + chunkOffset.y, 1 + z + chunkOffset.z,
                     });
                     renderedFaces.push_back(BlockFaces::FRONT);
                 }
@@ -68,10 +68,10 @@ Chunk::Chunk(glm::ivec3 offset)
                     this->vertices.insert(this->vertices.end(), {
                         x + chunkOffset.x, y + chunkOffset.y, z + chunkOffset.z,
                         1 + x + chunkOffset.x, y + chunkOffset.y, z + chunkOffset.z,
-                        1 + x + chunkOffset.x, 1 + y + chunkOffset.y, z + chunkOffset.z,
+                        1 + x + chunkOffset.x, 1 - y + chunkOffset.y, z + chunkOffset.z,
                         x + chunkOffset.x, y + chunkOffset.y, z + chunkOffset.z,
-                        1 + x + chunkOffset.x, 1 + y + chunkOffset.y, z + chunkOffset.z,
-                        x + chunkOffset.x, 1 + y + chunkOffset.y, z + chunkOffset.z,
+                        1 + x + chunkOffset.x, 1 - y + chunkOffset.y, z + chunkOffset.z,
+                        x + chunkOffset.x, 1 - y + chunkOffset.y, z + chunkOffset.z,
                     });
                     renderedFaces.push_back(BlockFaces::BACK);
                 }
@@ -81,10 +81,10 @@ Chunk::Chunk(glm::ivec3 offset)
                     this->vertices.insert(this->vertices.end(), {
                         x + chunkOffset.x, y + chunkOffset.y, 1 + z + chunkOffset.z,
                         x + chunkOffset.x, y + chunkOffset.y, z + chunkOffset.z,
-                        x + chunkOffset.x, 1 + y + chunkOffset.y, z + chunkOffset.z,
+                        x + chunkOffset.x, 1 - y + chunkOffset.y, z + chunkOffset.z,
                         x + chunkOffset.x, y + chunkOffset.y, 1 + z + chunkOffset.z,
-                        x + chunkOffset.x, 1 + y + chunkOffset.y, z + chunkOffset.z,
-                        x + chunkOffset.x, 1 + y + chunkOffset.y, 1 + z + chunkOffset.z,
+                        x + chunkOffset.x, 1 - y + chunkOffset.y, z + chunkOffset.z,
+                        x + chunkOffset.x, 1 - y + chunkOffset.y, 1 + z + chunkOffset.z,
                     });
                     renderedFaces.push_back(BlockFaces::LEFT);
                 }
@@ -94,23 +94,23 @@ Chunk::Chunk(glm::ivec3 offset)
                     this->vertices.insert(this->vertices.end(), {
                         1 + x + chunkOffset.x, y + chunkOffset.y, z + chunkOffset.z,
                         1 + x + chunkOffset.x, y + chunkOffset.y, 1 + z + chunkOffset.z,
-                        1 + x + chunkOffset.x, 1 + y + chunkOffset.y, 1 + z + chunkOffset.z,
+                        1 + x + chunkOffset.x, 1 - y + chunkOffset.y, 1 + z + chunkOffset.z,
                         1 + x + chunkOffset.x, y + chunkOffset.y, z + chunkOffset.z,
-                        1 + x + chunkOffset.x, 1 + y + chunkOffset.y, 1 + z + chunkOffset.z,
-                        1 + x + chunkOffset.x, 1 + y + chunkOffset.y, z + chunkOffset.z,
+                        1 + x + chunkOffset.x, 1 - y + chunkOffset.y, 1 + z + chunkOffset.z,
+                        1 + x + chunkOffset.x, 1 - y + chunkOffset.y, z + chunkOffset.z,
                     });
                     renderedFaces.push_back(BlockFaces::RIGHT);
                 }
 
                 // Top face (4)
-                if (y == CHUNK_SIZE - 1 || (y != CHUNK_SIZE - 1 && this->chunkData[z][y + 1][x] == 0)) {
+                if (y == CHUNK_SIZE - 1 || (y != CHUNK_SIZE - 1 && this->chunkData[z][y - 1][x] == 0)) {
                     this->vertices.insert(this->vertices.end(), {
-                        x + chunkOffset.x, 1 + y + chunkOffset.y, z + chunkOffset.z,
-                        1 + x + chunkOffset.x, 1 + y + chunkOffset.y, z + chunkOffset.z,
-                        1 + x + chunkOffset.x, 1 + y + chunkOffset.y, 1 + z + chunkOffset.z,
-                        x + chunkOffset.x, 1 + y + chunkOffset.y, z + chunkOffset.z,
-                        1 + x + chunkOffset.x, 1 + y + chunkOffset.y, 1 + z + chunkOffset.z,
-                        x + chunkOffset.x, 1 + y + chunkOffset.y, 1 + z + chunkOffset.z,
+                        x + chunkOffset.x, 1 - y + chunkOffset.y, z + chunkOffset.z,
+                        1 + x + chunkOffset.x, 1 - y + chunkOffset.y, z + chunkOffset.z,
+                        1 + x + chunkOffset.x, 1 - y + chunkOffset.y, 1 + z + chunkOffset.z,
+                        x + chunkOffset.x, 1 - y + chunkOffset.y, z + chunkOffset.z,
+                        1 + x + chunkOffset.x, 1 - y + chunkOffset.y, 1 + z + chunkOffset.z,
+                        x + chunkOffset.x, 1 - y + chunkOffset.y, 1 + z + chunkOffset.z,
                     });
                     renderedFaces.push_back(BlockFaces::TOP);
                 }
