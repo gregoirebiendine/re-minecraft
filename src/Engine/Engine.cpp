@@ -15,11 +15,11 @@ Engine::Engine()
     this->window = glfwCreateWindow(this->W, this->H, "Re Minecraft", nullptr, nullptr);
     if (!this->window) {
         glfwTerminate();
-        throw std::runtime_error("Failed to open windows");
+        throw std::runtime_error("Failed to open window");
     }
 
     // Center window
-    glfwSetWindowPos(window, (3440 / 2) - (this->W / 2),  (1440 / 2) - (this->H / 2)); // Should get the monitor size
+    glfwSetWindowPos(window, (1920 / 2) - (this->W / 2),  (1080 / 2) - (this->H / 2)); // Should get the monitor size
 
     // Make window current context for GLFW
     glfwMakeContextCurrent(this->window);
@@ -41,7 +41,7 @@ Engine::Engine()
     // Create all members
     this->shaders = std::make_unique<Shader>();
     this->map = std::make_unique<Map>();
-    this->camera = std::make_unique<Camera>(glm::vec3{0.0f, 0.0f, 8.0f});
+    this->camera = std::make_unique<Camera>(glm::vec3{0.0f, 16.0f, 18.0f});
     this->atlas = std::make_unique<Atlas>();
 
     if (!this->shaders || !this->map || !this->camera || !this->atlas)

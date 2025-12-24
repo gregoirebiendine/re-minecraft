@@ -20,7 +20,7 @@ class Camera {
     glm::vec3 _rotation{0.0f, 0.0f, -1.0f};
     glm::vec3 _up{0.0f, 1.0f, 0.0f};
 
-    float speed = 0.001f;
+    float speed = 0.4f;
     float sensitivity = 100.0f;
 
     bool hasClickedWindow = false;
