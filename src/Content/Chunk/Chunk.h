@@ -19,7 +19,7 @@ class Chunk {
     static constexpr uint16_t VOLUME = SIZE * SIZE * SIZE;
 
     std::array<BlockID, VOLUME> blocks{};
-    glm::uvec3 _offset{};
+    glm::uvec3 position{};
 
     CubeVAO VAO;
     std::vector<GLuint> vertices;
@@ -31,7 +31,11 @@ class Chunk {
         [[nodiscard]] static inline uint16_t index(uint8_t x, uint8_t y, uint8_t z);
         [[nodiscard]] static inline uint8_t clamp(uint8_t v);
 
+        // Getters
         [[nodiscard]] BlockID getBlock(uint8_t x, uint8_t y, uint8_t z) const;
+        [[nodiscard]] bool isAir(uint8_t x, uint8_t y, uint8_t z) const;
+
+        // Setters
         void setBlock(uint8_t x, uint8_t y, uint8_t z, BlockID id);
 
         void bind() const;

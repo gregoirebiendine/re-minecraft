@@ -27,7 +27,7 @@ std::map<BlockID, std::array<uint8_t, 6>> texAtlas = {
 
 Chunk::Chunk(const glm::uvec3 offset)
 {
-    this->_offset = offset;
+    this->position = offset;
 
     // Fill the chunk with DIRT
     this->blocks.fill(BlockID::DIRT);
@@ -47,86 +47,87 @@ Chunk::Chunk(const glm::uvec3 offset)
                 const BlockID block = getBlock(x, y, z);
 
                 // Skip AIR
-                if (block == BlockID::AIR) continue;
+                if (this->isAir(x, y, z)) continue;
+                // if (block == BlockID::AIR) continue;
 
                 // Retrieve faces atlas indexes
                 const std::array<uint8_t, 6> blockTexFaces = texAtlas[block];
                 std::vector<BlockFaces> renderedFaces;
 
                 // Front face (0)
-                if (z == SIZE - 1 || (z != SIZE - 1 && getBlock(x, y, z + 1) == AIR)) {
+                if (z == SIZE - 1 || (z != SIZE - 1 && this->isAir(x, y, z + 1))) {
                     this->vertices.insert(this->vertices.end(), {
-                        1 + x + _offset.x, y + _offset.y, 1 + z + _offset.z,
-                        x + _offset.x, y + _offset.y, 1 + z + _offset.z,
-                        x + _offset.x, 1 + y + _offset.y, 1 + z + _offset.z,
-                        1 + x + _offset.x, y + _offset.y, 1 + z + _offset.z,
-                        x + _offset.x, 1 + y + _offset.y, 1 + z + _offset.z,
-                        1 + x + _offset.x, 1 + y + _offset.y, 1 + z + _offset.z,
+                        1 + x + position.x, y + position.y, 1 + z + position.z,
+                        x + position.x, y + position.y, 1 + z + position.z,
+                        x + position.x, 1 + y + position.y, 1 + z + position.z,
+                        1 + x + position.x, y + position.y, 1 + z + position.z,
+                        x + position.x, 1 + y + position.y, 1 + z + position.z,
+                        1 + x + position.x, 1 + y + position.y, 1 + z + position.z,
                     });
                     renderedFaces.push_back(BlockFaces::FRONT);
                 }
 
                 // Back face (1)
-                if (z == 0 || (z != 0 && getBlock(x, y, z - 1) == AIR)) {
+                if (z == 0 || (z != 0 && this->isAir(x, y, z - 1))) {
                     this->vertices.insert(this->vertices.end(), {
-                        x + _offset.x, y + _offset.y, z + _offset.z,
-                        1 + x + _offset.x, y + _offset.y, z + _offset.z,
-                        1 + x + _offset.x, 1 + y + _offset.y, z + _offset.z,
-                        x + _offset.x, y + _offset.y, z + _offset.z,
-                        1 + x + _offset.x, 1 + y + _offset.y, z + _offset.z,
-                        x + _offset.x, 1 + y + _offset.y, z + _offset.z,
+                        x + position.x, y + position.y, z + position.z,
+                        1 + x + position.x, y + position.y, z + position.z,
+                        1 + x + position.x, 1 + y + position.y, z + position.z,
+                        x + position.x, y + position.y, z + position.z,
+                        1 + x + position.x, 1 + y + position.y, z + position.z,
+                        x + position.x, 1 + y + position.y, z + position.z,
                     });
                     renderedFaces.push_back(BlockFaces::BACK);
                 }
 
                 // Left face (2)
-                if (x == 0 || (x != 0 && getBlock(x - 1, y, z) == AIR)) {
+                if (x == 0 || (x != 0 && this->isAir(x - 1, y, z))) {
                     this->vertices.insert(this->vertices.end(), {
-                        x + _offset.x, y + _offset.y, 1 + z + _offset.z,
-                        x + _offset.x, y + _offset.y, z + _offset.z,
-                        x + _offset.x, 1 + y + _offset.y, z + _offset.z,
-                        x + _offset.x, y + _offset.y, 1 + z + _offset.z,
-                        x + _offset.x, 1 + y + _offset.y, z + _offset.z,
-                        x + _offset.x, 1 + y + _offset.y, 1 + z + _offset.z,
+                        x + position.x, y + position.y, 1 + z + position.z,
+                        x + position.x, y + position.y, z + position.z,
+                        x + position.x, 1 + y + position.y, z + position.z,
+                        x + position.x, y + position.y, 1 + z + position.z,
+                        x + position.x, 1 + y + position.y, z + position.z,
+                        x + position.x, 1 + y + position.y, 1 + z + position.z,
                     });
                     renderedFaces.push_back(BlockFaces::LEFT);
                 }
 
                 // Right face (3)
-                if (x == SIZE - 1 || (x != SIZE - 1 && getBlock(x + 1, y, z) == AIR)) {
+                if (x == SIZE - 1 || (x != SIZE - 1 && this->isAir(x + 1, y, z))) {
                     this->vertices.insert(this->vertices.end(), {
-                        1 + x + _offset.x, y + _offset.y, z + _offset.z,
-                        1 + x + _offset.x, y + _offset.y, 1 + z + _offset.z,
-                        1 + x + _offset.x, 1 + y + _offset.y, 1 + z + _offset.z,
-                        1 + x + _offset.x, y + _offset.y, z + _offset.z,
-                        1 + x + _offset.x, 1 + y + _offset.y, 1 + z + _offset.z,
-                        1 + x + _offset.x, 1 + y + _offset.y, z + _offset.z,
+                        1 + x + position.x, y + position.y, z + position.z,
+                        1 + x + position.x, y + position.y, 1 + z + position.z,
+                        1 + x + position.x, 1 + y + position.y, 1 + z + position.z,
+                        1 + x + position.x, y + position.y, z + position.z,
+                        1 + x + position.x, 1 + y + position.y, 1 + z + position.z,
+                        1 + x + position.x, 1 + y + position.y, z + position.z,
                     });
                     renderedFaces.push_back(BlockFaces::RIGHT);
                 }
 
                 // Top face (4)
-                if (y == SIZE - 1 || (y != SIZE - 1 && getBlock(x, y + 1, z) == AIR)) {
+                if (y == SIZE - 1 || (y != SIZE - 1 && this->isAir(x, y + 1, z))) {
                     this->vertices.insert(this->vertices.end(), {
-                        x + _offset.x, 1 + y + _offset.y, z + _offset.z,
-                        1 + x + _offset.x, 1 + y + _offset.y, z + _offset.z,
-                        1 + x + _offset.x, 1 + y + _offset.y, 1 + z + _offset.z,
-                        x + _offset.x, 1 + y + _offset.y, z + _offset.z,
-                        1 + x + _offset.x, 1 + y + _offset.y, 1 + z + _offset.z,
-                        x + _offset.x, 1 + y + _offset.y, 1 + z + _offset.z,
+                        x + position.x, 1 + y + position.y, z + position.z,
+                        1 + x + position.x, 1 + y + position.y, z + position.z,
+                        1 + x + position.x, 1 + y + position.y, 1 + z + position.z,
+                        x + position.x, 1 + y + position.y, z + position.z,
+                        1 + x + position.x, 1 + y + position.y, 1 + z + position.z,
+                        x + position.x, 1 + y + position.y, 1 + z + position.z,
                     });
                     renderedFaces.push_back(BlockFaces::TOP);
                 }
 
                 // Bottom face (5)
-                if (y == 0 || (y != 0 && getBlock(x, y - 1, z) == AIR)) {
+                if (y == 0 || (y != 0 && this->isAir(x, y - 1, z))) {
                     this->vertices.insert(this->vertices.end(), {
-                        x + _offset.x, y + _offset.y, z + _offset.z,
-                        x + _offset.x, y + _offset.y, 1 + z + _offset.z,
-                        1 + x + _offset.x, y + _offset.y, 1 + z + _offset.z,
-                        x + _offset.x, y + _offset.y, z + _offset.z,
-                        1 + x + _offset.x, y + _offset.y, 1 + z + _offset.z,
-                        1 + x + _offset.x, y + _offset.y, z + _offset.z,
+                        x + position.x, y + position.y, z + position.z,
+                        x + position.x, y + position.y, 1 + z + position.z,
+                        1 + x + position.x, y + position.y, 1 + z + position.z,
+                        x + position.x, y + position.y, z + position.z,
+                        1 + x + position.x, y + position.y, 1 + z + position.z,
+                        1 + x + position.x, y + position.y, z + position.z,
                     });
                     renderedFaces.push_back(BlockFaces::BOTTOM);
                 }
@@ -166,6 +167,11 @@ uint8_t Chunk::clamp(const uint8_t v)
 BlockID Chunk::getBlock(const uint8_t x, const uint8_t y, const uint8_t z) const
 {
     return blocks[index(x, y, z)];
+}
+
+bool Chunk::isAir(const uint8_t x, const uint8_t y, const uint8_t z) const
+{
+    return blocks[index(x, y, z)] == AIR;
 }
 
 void Chunk::setBlock(const uint8_t x, const uint8_t y, const uint8_t z, const BlockID id)

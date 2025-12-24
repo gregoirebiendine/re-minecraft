@@ -20,8 +20,8 @@
 #include "Camera.h"
 
 class Engine {
-    int W  = 900;
-    int H = 900;
+    int W  = 1100;
+    int H = 1100;
 
     GLFWwindow *window = nullptr;
 

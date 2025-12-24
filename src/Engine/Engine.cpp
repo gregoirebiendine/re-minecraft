@@ -19,7 +19,7 @@ Engine::Engine()
     }
 
     // Center window
-    glfwSetWindowPos(window, (1920 / 2) - (this->W / 2),  (1080 / 2) - (this->H / 2)); // Should get the monitor size
+    glfwSetWindowPos(window, (2048 / 2) - (this->W / 2),  (1280 / 2) - (this->H / 2)); // Should get the monitor size
 
     // Make window current context for GLFW
     glfwMakeContextCurrent(this->window);

@@ -3,9 +3,9 @@
 layout (location = 0) in uvec3 pos;
 layout (location = 1) in vec2 tex;
 
-out vec2 TexCoord;
-
 uniform mat4 ViewMatrix;
+
+out vec2 TexCoord;
 
 void main()
 {
