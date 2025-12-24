@@ -16,7 +16,7 @@
 
 #include "Atlas.h"
 #include "Shader.h"
-#include "Map.h"
+#include "World.h"
 #include "Camera.h"
 
 class Engine {
@@ -27,7 +27,7 @@ class Engine {
 
     std::unique_ptr<Atlas> atlas;
     std::unique_ptr<Shader> shaders;
-    std::unique_ptr<Map> map;
+    std::unique_ptr<World> world;
     std::unique_ptr<Camera> camera;
 
     public:
@@ -35,7 +35,7 @@ class Engine {
         ~Engine();
 
         void loop();
-        void draw();
+        void render();
 };
 
 

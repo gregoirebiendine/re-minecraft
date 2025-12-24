@@ -30,12 +30,7 @@ Chunk::Chunk(const glm::uvec3 offset)
     this->_offset = offset;
 
     // Fill the chunk with DIRT
-    for (uint8_t z = 0; z < SIZE; ++z)
-        for (uint8_t y = 0; y < SIZE; ++y)
-            for (uint8_t x = 0; x < SIZE; ++x)
-            {
-                this->setBlock(x, y, z, BlockID::DIRT);
-            }
+    this->blocks.fill(BlockID::DIRT);
 
     // Fill first layer with grass for better look
     for (uint8_t z = 0; z < SIZE; ++z)
@@ -43,15 +38,6 @@ Chunk::Chunk(const glm::uvec3 offset)
         {
             this->setBlock(x, 15, z, BlockID::GRASS);
         }
-
-    // Add air to test robustness of the code
-    for (uint8_t x = 0; x < SIZE; ++x)
-    {
-        this->setBlock(x, 8, 7, BlockID::AIR);
-        this->setBlock(x, 8, 8, BlockID::AIR);
-        this->setBlock(x, 7, 7, BlockID::AIR);
-        this->setBlock(x, 7, 8, BlockID::AIR);
-    }
 
 
     // Iterate over all Materials to construct blocks
@@ -191,7 +177,7 @@ void Chunk::bind() const {
     this->VAO.bind();
 }
 
-void Chunk::draw() const
+void Chunk::render() const
 {
     this->VAO.bind();
     glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(this->vertices.size()));

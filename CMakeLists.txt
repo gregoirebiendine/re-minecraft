@@ -19,7 +19,7 @@ set(
         src/Engine/Drawer/Shader/Shader.cpp
         src/Engine/Drawer/Atlas/Atlas.cpp
         src/Content/Chunk/Chunk.cpp
-        src/Content/Map/Map.cpp
+        src/Content/Map/World.cpp
 )
 
 set(

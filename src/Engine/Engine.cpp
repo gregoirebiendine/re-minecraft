@@ -40,11 +40,11 @@ Engine::Engine()
 
     // Create all members
     this->shaders = std::make_unique<Shader>();
-    this->map = std::make_unique<Map>();
+    this->world = std::make_unique<World>();
     this->camera = std::make_unique<Camera>(glm::vec3{0.0f, 16.0f, 18.0f});
     this->atlas = std::make_unique<Atlas>();
 
-    if (!this->shaders || !this->map || !this->camera || !this->atlas)
+    if (!this->shaders || !this->world || !this->camera || !this->atlas)
         throw std::runtime_error("Failed to initialize shader program");
 }
 
@@ -57,18 +57,18 @@ Engine::~Engine() {
 void Engine::loop() {
     while (!glfwWindowShouldClose(this->window)) {
         this->camera->handleInputs(this->window);
-        this->draw();
+        this->render();
         glfwPollEvents();
     }
 }
 
-void Engine::draw() {
+void Engine::render() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     this->camera->applyMatrix(45.0f, this->shaders, 1); // Should be width/height
     this->atlas->bind();
-    this->map->draw();
+    this->world->render();
 
     glfwSwapBuffers(this->window);
 }

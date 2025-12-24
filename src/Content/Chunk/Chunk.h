@@ -18,7 +18,7 @@ class Chunk {
     static constexpr uint8_t SIZE = 16;
     static constexpr uint16_t VOLUME = SIZE * SIZE * SIZE;
 
-    BlockID blocks[VOLUME]{};
+    std::array<BlockID, VOLUME> blocks{};
     glm::uvec3 _offset{};
 
     CubeVAO VAO;
@@ -35,7 +35,7 @@ class Chunk {
         void setBlock(uint8_t x, uint8_t y, uint8_t z, BlockID id);
 
         void bind() const;
-        void draw() const;
+        void render() const;
 };
 
 #endif //RE_MINECRAFT_CHUNK_H
