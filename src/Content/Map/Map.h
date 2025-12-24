@@ -7,9 +7,10 @@
 class Map {
     // std::array<Chunk, 1> chunks;
     Chunk chunk;
+    Chunk chunk2;
 
     public:
-        Map() = default;
+        Map();
 
         void draw() const;
 };

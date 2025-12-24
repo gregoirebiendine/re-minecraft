@@ -1,117 +1,190 @@
 #include "Chunk.h"
 
-constexpr uint16_t MAX_BLOCK = 4096;
-
-Chunk::Chunk() :
-    data(MAX_BLOCK, 1)
+enum BlockID : uint8_t
 {
-    // const int index = 2047;
-    // const int size = 16;
-    // int x = index / (size * size);
-    // int y = (index / size) % size;
-    // int z = index % size;
+    AIR,
+    DIRT,
+    GRASS,
+    MOSS,
+};
 
+enum BlockFaces
+{
+    FRONT,
+    BACK,
+    LEFT,
+    RIGHT,
+    TOP,
+    BOTTOM
+};
 
-    std::vector<GLint> renderedSidesPerBlock;
-    std::vector<GLuint> texOffsetsPerBlock;
+std::map<BlockID, std::array<uint8_t, 6>> texAtlas = {
+    {AIR, {0, 0, 0, 0, 0, 0}},
+    {DIRT, {0, 0, 0, 0, 0, 0}},
+    {GRASS, {1, 1, 1, 1, 2, 0}},
+    {MOSS, {2, 2, 2, 2, 2, 2}},
+};
 
-    for (int i = 0; i < MAX_BLOCK; i++) {
-        if (i == 0) {
-            renderedSidesPerBlock = {0, 1, 2, 4, 5};
-            texOffsetsPerBlock = {1, 1, 1, 2, 0};
-        }
-        else if (i == MAX_BLOCK - 1) {
-            renderedSidesPerBlock = {0, 1, 3, 4, 5};
-            texOffsetsPerBlock = {1, 1, 1, 2, 0};
-        }
-        else {
-            renderedSidesPerBlock = {0, 1, 4, 5};
-            texOffsetsPerBlock = {1, 1, 2, 0};
+Chunk::Chunk(const glm::uvec3 offset)
+{
+    this->_offset = offset;
+
+    // Fill the chunk with DIRT
+    for (uint8_t z = 0; z < SIZE; ++z)
+        for (uint8_t y = 0; y < SIZE; ++y)
+            for (uint8_t x = 0; x < SIZE; ++x)
+            {
+                this->setBlock(x, y, z, BlockID::DIRT);
+            }
+
+    // Fill first layer with grass for better look
+    for (uint8_t z = 0; z < SIZE; ++z)
+        for (uint8_t x = 0; x < SIZE; ++x)
+        {
+            this->setBlock(x, 15, z, BlockID::GRASS);
         }
 
-        this->renderedSides.insert(this->renderedSides.end(), renderedSidesPerBlock.begin(), renderedSidesPerBlock.end());
-        this->texOffsets.insert(this->texOffsets.end(), texOffsetsPerBlock.begin(), texOffsetsPerBlock.end());
-        for (int j = 0; j < renderedSidesPerBlock.size(); j++) {
-            this->posOffsets.insert(this->posOffsets.end(), {static_cast<float>(i), 0.0f, 0.0f});
-        }
+    // Add air to test robustness of the code
+    for (uint8_t x = 0; x < SIZE; ++x)
+    {
+        this->setBlock(x, 8, 7, BlockID::AIR);
+        this->setBlock(x, 8, 8, BlockID::AIR);
+        this->setBlock(x, 7, 7, BlockID::AIR);
+        this->setBlock(x, 7, 8, BlockID::AIR);
     }
 
-    // for (int i = 0; i < 16; i++) {
-    //     for (int j = 0; j < 16; j++) {
-    //         this->texOffsets.insert(this->texOffsets.end(), {1, 1, 1, 1, 2, 0});
-    //         this->posOffsets.insert(this->posOffsets.end(), {j, 0.0f, i});
-    //
-    //         if (i == 0)
-    //             this->renderedSides.insert(this->renderedSides.end(), {0, 1, 2, -1, 4, 5});
-    //         else if (i == 15)
-    //             this->renderedSides.insert(this->renderedSides.end(), {0, 1, -1, 3, 4, 5});
-    //         else
-    //             this->renderedSides.insert(this->renderedSides.end(), {0, 1, -1, -1, 4, 5});
-    //     }
-    // }
 
-    // Declare base vertices and UVs of a face
-    this->vertices = {
-        0.0f, 0.0f, 0.0f,       0.0f, 0.0f,         // Bottom Left
-        1.0f, 0.0f, 0.0f,       0.25f, 0.0f,        // Bottom Right
-        1.0f, 1.0f, 0.0f,       0.25f, 0.25f,       // Top Right
-        0.0f, 1.0f, 0.0f,       0.0f, 0.25f,        // Top Left
-    };
+    // Iterate over all Materials to construct blocks
+    for (uint8_t z = 0; z < SIZE; z++) {
+        for (uint8_t y = 0; y < SIZE; y++) {
+            for (uint8_t x = 0; x < SIZE; x++) {
+                const BlockID block = getBlock(x, y, z);
 
-    // Declare indices needed to draw a square (face) with 2 triangles
-    this->indices = {
-        0, 1, 2, 0, 2, 3,
-    };
+                // Skip AIR
+                if (block == BlockID::AIR) continue;
 
-    // Declare UV offsets per face instance.
-    // Is equal to atlas texture id (0: dirt / 1: grass_side / 2: grass_top / ...)
-    // this->texOffsets = {
-    //     1, 1, 1, 1, 2, 0, // Block 1
-    //     0, 0, 0, 0, 0, 0, // Block 2
-    //     2, 2, 2, 2, 2, 2, // Block 3
-    // };
+                // Retrieve faces atlas indexes
+                const std::array<uint8_t, 6> blockTexFaces = texAtlas[block];
+                std::vector<BlockFaces> renderedFaces;
 
-    // Declare position offset of each cubes
-    // this->posOffsets = {
-    //     0.0f, 0.0f, 0.0f,
-    //     0.0f, 0.0f, 0.0f,
-    //     0.0f, 0.0f, 0.0f,
-    //     0.0f, 0.0f, 0.0f,
-    //     0.0f, 0.0f, 0.0f,
-    //     0.0f, 0.0f, 0.0f,
-    //     1.0f, 0.0f, 0.0f,
-    //     1.0f, 0.0f, 0.0f,
-    //     1.0f, 0.0f, 0.0f,
-    //     1.0f, 0.0f, 0.0f,
-    //     1.0f, 0.0f, 0.0f,
-    //     1.0f, 0.0f, 0.0f,
-    //     2.0f, 0.0f, 0.0f,
-    //     2.0f, 0.0f, 0.0f,
-    //     2.0f, 0.0f, 0.0f,
-    //     2.0f, 0.0f, 0.0f,
-    //     2.0f, 0.0f, 0.0f,
-    //     2.0f, 0.0f, 0.0f,
-    // };
+                // Front face (0)
+                if (z == SIZE - 1 || (z != SIZE - 1 && getBlock(x, y, z + 1) == AIR)) {
+                    this->vertices.insert(this->vertices.end(), {
+                        1 + x + _offset.x, y + _offset.y, 1 + z + _offset.z,
+                        x + _offset.x, y + _offset.y, 1 + z + _offset.z,
+                        x + _offset.x, 1 + y + _offset.y, 1 + z + _offset.z,
+                        1 + x + _offset.x, y + _offset.y, 1 + z + _offset.z,
+                        x + _offset.x, 1 + y + _offset.y, 1 + z + _offset.z,
+                        1 + x + _offset.x, 1 + y + _offset.y, 1 + z + _offset.z,
+                    });
+                    renderedFaces.push_back(BlockFaces::FRONT);
+                }
 
-    // Declare rendered faces of each cubes (-1 to not render)
-    // Front, Back, Left, Right, Top, Bottom
-    // this->renderedSides = {
-    //     0, 1, 2, -1, 4, 5,
-    //     0, 1, -1, -1, 4, 5,
-    //     0, 1, -1, 3, 4, 5,
-    // };
+                // Back face (1)
+                if (z == 0 || (z != 0 && getBlock(x, y, z - 1) == AIR)) {
+                    this->vertices.insert(this->vertices.end(), {
+                        x + _offset.x, y + _offset.y, z + _offset.z,
+                        1 + x + _offset.x, y + _offset.y, z + _offset.z,
+                        1 + x + _offset.x, 1 + y + _offset.y, z + _offset.z,
+                        x + _offset.x, y + _offset.y, z + _offset.z,
+                        1 + x + _offset.x, 1 + y + _offset.y, z + _offset.z,
+                        x + _offset.x, 1 + y + _offset.y, z + _offset.z,
+                    });
+                    renderedFaces.push_back(BlockFaces::BACK);
+                }
+
+                // Left face (2)
+                if (x == 0 || (x != 0 && getBlock(x - 1, y, z) == AIR)) {
+                    this->vertices.insert(this->vertices.end(), {
+                        x + _offset.x, y + _offset.y, 1 + z + _offset.z,
+                        x + _offset.x, y + _offset.y, z + _offset.z,
+                        x + _offset.x, 1 + y + _offset.y, z + _offset.z,
+                        x + _offset.x, y + _offset.y, 1 + z + _offset.z,
+                        x + _offset.x, 1 + y + _offset.y, z + _offset.z,
+                        x + _offset.x, 1 + y + _offset.y, 1 + z + _offset.z,
+                    });
+                    renderedFaces.push_back(BlockFaces::LEFT);
+                }
+
+                // Right face (3)
+                if (x == SIZE - 1 || (x != SIZE - 1 && getBlock(x + 1, y, z) == AIR)) {
+                    this->vertices.insert(this->vertices.end(), {
+                        1 + x + _offset.x, y + _offset.y, z + _offset.z,
+                        1 + x + _offset.x, y + _offset.y, 1 + z + _offset.z,
+                        1 + x + _offset.x, 1 + y + _offset.y, 1 + z + _offset.z,
+                        1 + x + _offset.x, y + _offset.y, z + _offset.z,
+                        1 + x + _offset.x, 1 + y + _offset.y, 1 + z + _offset.z,
+                        1 + x + _offset.x, 1 + y + _offset.y, z + _offset.z,
+                    });
+                    renderedFaces.push_back(BlockFaces::RIGHT);
+                }
+
+                // Top face (4)
+                if (y == SIZE - 1 || (y != SIZE - 1 && getBlock(x, y + 1, z) == AIR)) {
+                    this->vertices.insert(this->vertices.end(), {
+                        x + _offset.x, 1 + y + _offset.y, z + _offset.z,
+                        1 + x + _offset.x, 1 + y + _offset.y, z + _offset.z,
+                        1 + x + _offset.x, 1 + y + _offset.y, 1 + z + _offset.z,
+                        x + _offset.x, 1 + y + _offset.y, z + _offset.z,
+                        1 + x + _offset.x, 1 + y + _offset.y, 1 + z + _offset.z,
+                        x + _offset.x, 1 + y + _offset.y, 1 + z + _offset.z,
+                    });
+                    renderedFaces.push_back(BlockFaces::TOP);
+                }
+
+                // Bottom face (5)
+                if (y == 0 || (y != 0 && getBlock(x, y - 1, z) == AIR)) {
+                    this->vertices.insert(this->vertices.end(), {
+                        x + _offset.x, y + _offset.y, z + _offset.z,
+                        x + _offset.x, y + _offset.y, 1 + z + _offset.z,
+                        1 + x + _offset.x, y + _offset.y, 1 + z + _offset.z,
+                        x + _offset.x, y + _offset.y, z + _offset.z,
+                        1 + x + _offset.x, y + _offset.y, 1 + z + _offset.z,
+                        1 + x + _offset.x, y + _offset.y, z + _offset.z,
+                    });
+                    renderedFaces.push_back(BlockFaces::BOTTOM);
+                }
+
+                // Add tex offset based on rendered faces
+                for (const auto &face : renderedFaces) {
+                    const auto t = glm::vec2(0.25f * static_cast<float>(blockTexFaces[face] % 4), floor(static_cast<double>(blockTexFaces[face]) / 4) / 4);
+                    this->tex.insert(this->tex.end(), {
+                        t.x, t.y,     0.25f + t.x, t.y,    0.25f + t.x, 0.25f + t.y,   t.x, t.y,     0.25f + t.x, 0.25f + t.y,   t.x, 0.25f + t.y,
+                    });
+                }
+            }
+        }
+    }
 
     // Bind VAO
     this->VAO.bind();
 
     // Link datas to VA0 before rendering
-    this->VAO.linkVertices(this->vertices, this->indices);
-    this->VAO.linkTexOffset(this->texOffsets);
-    this->VAO.linkPosOffset(this->posOffsets);
-    this->VAO.linkRenderedSides(this->renderedSides);
+    this->VAO.linkVertices(this->vertices);
+    this->VAO.linkTex(this->tex);
 
     // Unbind VAO
     this->VAO.unbind();
+}
+
+uint16_t Chunk::index(const uint8_t x, const uint8_t y, const uint8_t z)
+{
+    return clamp(x) + SIZE * (clamp(y) + SIZE * clamp(z));
+}
+
+uint8_t Chunk::clamp(const uint8_t v)
+{
+    return std::clamp(v, static_cast<uint8_t>(0), SIZE);
+}
+
+BlockID Chunk::getBlock(const uint8_t x, const uint8_t y, const uint8_t z) const
+{
+    return blocks[index(x, y, z)];
+}
+
+void Chunk::setBlock(const uint8_t x, const uint8_t y, const uint8_t z, const BlockID id)
+{
+    blocks[index(x, y, z)] = id;
 }
 
 void Chunk::bind() const {
@@ -120,9 +193,7 @@ void Chunk::bind() const {
 
 void Chunk::draw() const
 {
-    // Bind VAO
-    this->bind();
-
-    // Draw instances (faces)
-    glDrawElementsInstanced(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0, this->renderedSides.size());
+    this->VAO.bind();
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(this->vertices.size()));
+    this->VAO.unbind();
 }

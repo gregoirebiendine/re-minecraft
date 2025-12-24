@@ -5,25 +5,18 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "VBO.h"
-#include "EBO.h"
 
 class CubeVAO {
     GLuint ID = -1;
     VBO VerticesVBO;
-    VBO TextOffsetVBO;
-    VBO PosOffsetVBO;
-    VBO RenderedSidesVBO;
-    EBO EBO;
+    VBO TexOffsetVBO;
 
     public:
         CubeVAO();
         ~CubeVAO();
 
-        void linkVertices(std::vector<GLfloat> &vertices, std::vector<GLuint> &indices) const;
-
-        void linkTexOffset(std::vector<GLuint> &offsets) const;
-        void linkPosOffset(std::vector<GLfloat> &offsets) const;
-        void linkRenderedSides(std::vector<GLint> &sides) const;
+        void linkVertices(std::vector<GLuint> &vertices) const;
+        void linkTex(std::vector<GLfloat> &tex) const;
 
         void bind() const;
         void unbind() const;
