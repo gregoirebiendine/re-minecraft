@@ -6,10 +6,10 @@ Camera::Camera(glm::vec3 position)
     this->_position = position;
 }
 
-void Camera::applyMatrix(float FOV, std::unique_ptr<Shader> &shaders, float ratio)
+void Camera::applyMatrix(const float FOV, const std::unique_ptr<Shader> &shaders, const float ratio) const
 {
-    glm::mat4 view = glm::lookAt(this->_position, this->_position + this->_rotation, this->_up);
-    glm::mat4 projection = glm::perspective(glm::radians(FOV), ratio, 0.1f, 100.f);
+    const glm::mat4 view = glm::lookAt(this->_position, this->_position + this->_rotation, this->_up);
+    const glm::mat4 projection = glm::perspective(glm::radians(FOV), ratio, 0.1f, 100.f);
 
     shaders->setUniformMat4("ViewMatrix", projection * view);
 }

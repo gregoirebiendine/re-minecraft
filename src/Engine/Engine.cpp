@@ -19,7 +19,7 @@ Engine::Engine()
     }
 
     // Center window
-    glfwSetWindowPos(window, (2048 / 2) - (this->W / 2),  (1280 / 2) - (this->H / 2)); // Should get the monitor size
+    glfwSetWindowPos(window, (1920 / 2) - (this->W / 2),  (1080 / 2) - (this->H / 2)); // Should get the monitor size
 
     // Make window current context for GLFW
     glfwMakeContextCurrent(this->window);
@@ -41,7 +41,7 @@ Engine::Engine()
     // Create all members
     this->shaders = std::make_unique<Shader>();
     this->world = std::make_unique<World>();
-    this->camera = std::make_unique<Camera>(glm::vec3{0.0f, 16.0f, 18.0f});
+    this->camera = std::make_unique<Camera>(glm::vec3{0.0f, 0.0f, 0.0f});
     this->atlas = std::make_unique<Atlas>();
 
     if (!this->shaders || !this->world || !this->camera || !this->atlas)
@@ -54,7 +54,8 @@ Engine::~Engine() {
 }
 
 
-void Engine::loop() {
+void Engine::loop() const
+{
     while (!glfwWindowShouldClose(this->window)) {
         this->camera->handleInputs(this->window);
         this->render();
@@ -62,13 +63,15 @@ void Engine::loop() {
     }
 }
 
-void Engine::render() {
+void Engine::render() const
+{
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    this->camera->applyMatrix(45.0f, this->shaders, 1); // Should be width/height
+    this->camera->applyMatrix(45.0f, this->shaders, static_cast<float>(this->W)/static_cast<float>(this->H));
+
     this->atlas->bind();
-    this->world->render();
+    this->world->render(*this->shaders);
 
     glfwSwapBuffers(this->window);
 }

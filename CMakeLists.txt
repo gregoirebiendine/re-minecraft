@@ -12,12 +12,14 @@ set(
         main.cpp
         src/Engine/Engine.cpp
         src/Engine/Camera/Camera.cpp
-        src/Engine/Drawer/VAO/VAO.cpp
-        src/Engine/Drawer/CubeVAO/CubeVAO.cpp
-        src/Engine/Drawer/VBO/VBO.cpp
-        src/Engine/Drawer/EBO/EBO.cpp
-        src/Engine/Drawer/Shader/Shader.cpp
-        src/Engine/Drawer/Atlas/Atlas.cpp
+        src/Engine/Render/VAO/VAO.cpp
+        src/Engine/Render/CubeVAO/CubeVAO.cpp
+        src/Engine/Render/VBO/VBO.cpp
+        src/Engine/Render/EBO/EBO.cpp
+        src/Engine/Render/Shader/Shader.cpp
+        src/Engine/Render/Atlas/Atlas.cpp
+        src/Engine/Render/ChunkMesh/ChunkMesh.cpp
+        src/Engine/Render/ChunkMeshManager/ChunkMeshManager.cpp
         src/Content/Chunk/Chunk.cpp
         src/Content/Map/World.cpp
 )
@@ -27,14 +29,17 @@ set(
         ${CMAKE_SOURCE_DIR}/lib
         ${CMAKE_SOURCE_DIR}/src/Engine
         ${CMAKE_SOURCE_DIR}/src/Engine/Camera
-        ${CMAKE_SOURCE_DIR}/src/Engine/Drawer/VAO
-        ${CMAKE_SOURCE_DIR}/src/Engine/Drawer/CubeVAO
-        ${CMAKE_SOURCE_DIR}/src/Engine/Drawer/VBO
-        ${CMAKE_SOURCE_DIR}/src/Engine/Drawer/EBO
-        ${CMAKE_SOURCE_DIR}/src/Engine/Drawer/Shader
-        ${CMAKE_SOURCE_DIR}/src/Engine/Drawer/Atlas
+        ${CMAKE_SOURCE_DIR}/src/Engine/Render/VAO
+        ${CMAKE_SOURCE_DIR}/src/Engine/Render/CubeVAO
+        ${CMAKE_SOURCE_DIR}/src/Engine/Render/VBO
+        ${CMAKE_SOURCE_DIR}/src/Engine/Render/EBO
+        ${CMAKE_SOURCE_DIR}/src/Engine/Render/Shader
+        ${CMAKE_SOURCE_DIR}/src/Engine/Render/Atlas
+        ${CMAKE_SOURCE_DIR}/src/Engine/Render/ChunkMesh
+        ${CMAKE_SOURCE_DIR}/src/Engine/Render/ChunkMeshManager
         ${CMAKE_SOURCE_DIR}/src/Content/Chunk
         ${CMAKE_SOURCE_DIR}/src/Content/Map
+        ${CMAKE_SOURCE_DIR}/src/Content/Materials
 )
 
 add_executable(

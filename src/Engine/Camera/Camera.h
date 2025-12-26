@@ -28,7 +28,7 @@ class Camera {
     public:
         explicit Camera(glm::vec3 position);
 
-        void applyMatrix(float FOV, std::unique_ptr<Shader> &shaders, float ratio);
+        void applyMatrix(float FOV, const std::unique_ptr<Shader> &shaders, float ratio) const;
         void handleInputs(GLFWwindow *window);
 
         void setPosition(glm::vec3 newPos);
