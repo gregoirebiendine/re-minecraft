@@ -1,7 +1,5 @@
 #include "World.h"
 
-#include <ranges>
-
 World::World()
 {
     this->getOrCreateChunk(0, 0, 0);

@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include <memory>
+#include <ranges>
 
 #include <ChunkMeshManager.h>
 #include <Chunk.h>

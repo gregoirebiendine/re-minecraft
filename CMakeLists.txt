@@ -9,6 +9,12 @@ set(
         SOURCES
         lib/glad/src/glad.c
         lib/stbi/stb_image.cpp
+        lib/imgui/src/imgui.cpp
+        lib/imgui/src/imgui_draw.cpp
+        lib/imgui/src/imgui_impl_opengl3.cpp
+        lib/imgui/src/imgui_impl_glfw.cpp
+        lib/imgui/src/imgui_tables.cpp
+        lib/imgui/src/imgui_widgets.cpp
         main.cpp
         src/Engine/Engine.cpp
         src/Engine/Camera/Camera.cpp
@@ -27,6 +33,7 @@ set(
 set(
         HEADERS
         ${CMAKE_SOURCE_DIR}/lib
+        ${CMAKE_SOURCE_DIR}/lib/imgui
         ${CMAKE_SOURCE_DIR}/src/Engine
         ${CMAKE_SOURCE_DIR}/src/Engine/Camera
         ${CMAKE_SOURCE_DIR}/src/Engine/Render/VAO
