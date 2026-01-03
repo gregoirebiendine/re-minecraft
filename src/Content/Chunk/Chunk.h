@@ -5,6 +5,7 @@
 
 #include <array>
 #include <algorithm>
+#include <iostream>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
@@ -27,6 +28,16 @@ struct ChunkPosHash {
         return h1 ^ (h2 << 1) ^ (h3 << 2);
     }
 };
+
+inline std::ostream& operator<<(std::ostream& os, const ChunkPos pos)
+{
+    return os << "(" << pos.x << ' ' << pos.y << ' ' << pos.z << ")";
+}
+
+inline ChunkPos operator*(const ChunkPos pos, const int mul)
+{
+     return {pos.x * mul, pos.y * mul, pos.z * mul};
+}
 
 class Chunk {
     public:

@@ -11,10 +11,10 @@ CubeVAO::~CubeVAO()
     glDeleteVertexArrays(1, &this->ID);
 }
 
-void CubeVAO::linkVertices(std::vector<GLuint> &vertices) const
+void CubeVAO::linkVertices(const std::vector<GLint> &vertices) const
 {
     this->VerticesVBO.addData(vertices);
-    glVertexAttribIPointer(0, 3, GL_UNSIGNED_INT, 3 * sizeof(GLuint), (void*)0);
+    glVertexAttribIPointer(0, 3, GL_UNSIGNED_INT, 3 * sizeof(GLint), (void*)0);
     glEnableVertexAttribArray(0);
     this->VerticesVBO.unbind();
 }

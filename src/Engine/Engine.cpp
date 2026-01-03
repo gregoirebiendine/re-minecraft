@@ -62,7 +62,7 @@ Engine::Engine()
     // Create all members
     this->shaders = std::make_unique<Shader>();
     this->atlas = std::make_unique<Atlas>();
-    this->camera = std::make_unique<Camera>(glm::vec3{16.0f, 32.0f, 48.0f});
+    this->camera = std::make_unique<Camera>(glm::vec3{16.0f, 26.0f, 35.0f});
     this->world = std::make_unique<World>();
 
     if (!this->shaders || !this->world || !this->camera || !this->atlas)

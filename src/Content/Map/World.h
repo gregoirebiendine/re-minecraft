@@ -24,9 +24,11 @@ class World {
         Chunk& getOrCreateChunk(int cx, int cy, int cz);
         [[nodiscard]] Chunk* getChunk(int cx, int cy, int cz);
         [[nodiscard]] Material getBlock(int wx, int wy, int wz) const;
+        [[nodiscard]] bool isAir(int wx, int wy, int wz) const;
 
         // Setters
         void setBlock(int wx, int wy, int wz, Material id);
+        void markNeighborsDirty(const ChunkPos& cp);
 
         void render(const Shader& shaders);
 };

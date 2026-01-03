@@ -1,22 +1,29 @@
 #include "ChunkMesh.h"
+#include "World.h"
 
-void ChunkMesh::rebuild(Chunk& chunk)
+void ChunkMesh::rebuild(Chunk& chunk, const World& world)
 {
+    const auto [cx, cy, cz] = chunk.getPosition() * Chunk::SIZE;
+
+    std::cout << "Mesh at " << chunk.getPosition() << " is rebuilt" << std::endl;
+
+    // Set chunk as not dirty, meaning it will not rebuild next frame
+    chunk.setDirty(false);
+
     // Iterate over all Materials to construct blocks
-    for (GLuint z = 0; z < Chunk::SIZE; z++) {
-        for (GLuint y = 0; y < Chunk::SIZE; y++) {
-            for (GLuint x = 0; x < Chunk::SIZE; x++) {
+    for (int z = 0; z < Chunk::SIZE; z++) {
+        for (int y = 0; y < Chunk::SIZE; y++) {
+            for (int x = 0; x < Chunk::SIZE; x++) {
                 // Skip AIR
                 if (chunk.isAir(x, y, z)) continue;
-
-                const Material block = chunk.getBlock(x, y, z);
     
-                // Retrieve faces atlas indexes
+                // Retrieve Material atlas indexes
+                const Material block = chunk.getBlock(x, y, z);
                 const std::array<uint8_t, 6> blockTexFaces = MaterialTexFaces[block];
                 std::vector<MaterialFace> renderedFaces;
     
                 // Front face (0)
-                if (z == Chunk::SIZE - 1 || chunk.isAir(x, y, z + 1)) {
+                if (world.isAir(cx + x, cy + y, cz + z + 1)) {
                     this->vertices.insert(this->vertices.end(), {
                         1 + x, y, 1 + z,
                         x, y, 1 + z,
@@ -29,7 +36,7 @@ void ChunkMesh::rebuild(Chunk& chunk)
                 }
     
                 // Back face (1)
-                if (z == 0 || chunk.isAir(x, y, z - 1)) {
+                if (world.isAir(cx + x, cy + y, cz + z - 1)) {
                     this->vertices.insert(this->vertices.end(), {
                         x, y, z,
                         1 + x, y, z,
@@ -42,7 +49,7 @@ void ChunkMesh::rebuild(Chunk& chunk)
                 }
     
                 // Left face (2)
-                if (x == 0 || chunk.isAir(x - 1, y, z)) {
+                if (world.isAir(cx + x - 1, cy + y, cz + z)) {
                     this->vertices.insert(this->vertices.end(), {
                         x, y, 1 + z,
                         x, y, z,
@@ -55,7 +62,7 @@ void ChunkMesh::rebuild(Chunk& chunk)
                 }
     
                 // Right face (3)
-                if (x == Chunk::SIZE - 1 || chunk.isAir(x + 1, y, z)) {
+                if (world.isAir(cx + x + 1, cy + y, cz + z)) {
                     this->vertices.insert(this->vertices.end(), {
                         1 + x, y, z,
                         1 + x, y, 1 + z,
@@ -68,7 +75,7 @@ void ChunkMesh::rebuild(Chunk& chunk)
                 }
     
                 // Top face (4)
-                if (y == Chunk::SIZE - 1 || chunk.isAir(x, y + 1, z)) {
+                if (world.isAir(cx + x, cy + y + 1, cz + z)) {
                     this->vertices.insert(this->vertices.end(), {
                         x, 1 + y, z,
                         1 + x, 1 + y, z,
@@ -81,7 +88,7 @@ void ChunkMesh::rebuild(Chunk& chunk)
                 }
     
                 // Bottom face (5)
-                if (y == 0 || chunk.isAir(x, y - 1, z)) {
+                if (world.isAir(cx + x, cy + y - 1, cz + z)) {
                     this->vertices.insert(this->vertices.end(), {
                         x, y, z,
                         x, y, 1 + z,
@@ -113,9 +120,6 @@ void ChunkMesh::rebuild(Chunk& chunk)
     
     // Unbind VAO
     this->VAO.unbind();
-
-    // Set chunk as not dirty, meaning it will not rebuild next frame
-    chunk.setDirty(false);
 }
 
 void ChunkMesh::render() const

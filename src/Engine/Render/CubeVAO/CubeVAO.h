@@ -3,7 +3,6 @@
 #define RE_MINECRAFT_CUBE_VAO_H
 
 #include "glad/glad.h"
-#include "GLFW/glfw3.h"
 #include "VBO.h"
 
 class CubeVAO {
@@ -15,7 +14,7 @@ class CubeVAO {
         CubeVAO();
         ~CubeVAO();
 
-        void linkVertices(std::vector<GLuint> &vertices) const;
+        void linkVertices(const std::vector<GLint> &vertices) const;
         void linkTex(std::vector<GLfloat> &tex) const;
 
         void bind() const;

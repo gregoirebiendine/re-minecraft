@@ -1,6 +1,9 @@
 #ifndef RE_MINECRAFT_CHUNKMESH_H
 #define RE_MINECRAFT_CHUNKMESH_H
 
+#pragma once
+
+class World; // forward declaration
 
 #include <glad/glad.h>
 #include <vector>
@@ -14,12 +17,12 @@ class ChunkMesh
         ChunkMesh() = default;
         ~ChunkMesh() = default;
 
-        void rebuild(Chunk& chunk);
+        void rebuild(Chunk& chunk, const World& world);
         void render() const;
 
     private:
         CubeVAO VAO;
-        std::vector<GLuint> vertices;
+        std::vector<GLint> vertices;
         std::vector<GLfloat> uvs;
 };
 
