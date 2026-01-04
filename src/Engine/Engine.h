@@ -24,8 +24,8 @@
 #include "InputState.h"
 
 class Engine {
-    int W  = 900;
-    int H = 900;
+    const glm::ivec2 WindowSize{1280, 720};
+    glm::ivec2 ScreenSize{};
 
     GLFWwindow *window = nullptr;
 

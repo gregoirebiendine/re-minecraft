@@ -12,14 +12,31 @@ Engine::Engine()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     // Create the window
-    this->window = glfwCreateWindow(this->W, this->H, "Re Minecraft", nullptr, nullptr);
+    this->window = glfwCreateWindow(WindowSize.x, WindowSize.y, "Re Minecraft", nullptr, nullptr);
     if (!this->window) {
         glfwTerminate();
         throw std::runtime_error("Failed to open window");
     }
 
+    // Get main monitor and get monitor screen size
+    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+    if (!monitor)
+    {
+        glfwTerminate();
+        throw std::runtime_error("Failed to get main monitor");
+    }
+
+    const GLFWvidmode* videoMode = glfwGetVideoMode(monitor);
+    if (!videoMode)
+    {
+        glfwTerminate();
+        throw std::runtime_error("Failed to get video mode");
+    }
+
+    this->ScreenSize = glm::ivec2(videoMode->width, videoMode->height);
+
     // Center window
-    glfwSetWindowPos(window, (1920 / 2) - (this->W / 2),  (1080 / 2) - (this->H / 2)); // Should get the monitor size
+    glfwSetWindowPos(window, (videoMode->width / 2) - (WindowSize.x / 2),  (videoMode->height / 2) - (WindowSize.y / 2));
 
     // Make window current context for GLFW
     glfwMakeContextCurrent(this->window);
@@ -29,7 +46,7 @@ Engine::Engine()
         throw std::runtime_error("Cannot initialize GLAD");
 
     // Create viewport
-    glViewport(0, 0, this->W, this->H);
+    glViewport(0, 0, WindowSize.x, WindowSize.y);
 
     // Enable 3D depth
     glEnable(GL_DEPTH_TEST);
@@ -139,7 +156,7 @@ void Engine::render() const
     ImGui::NewFrame();
 
     // Apply camera position and rotation
-    this->camera->applyMatrix(90.0f, this->shaders, static_cast<float>(this->W)/static_cast<float>(this->H));
+    this->camera->applyMatrix(90.0f, this->shaders, static_cast<float>(WindowSize.x)/static_cast<float>(WindowSize.y));
 
     // Render World (chunks)
     this->atlas->bind();
