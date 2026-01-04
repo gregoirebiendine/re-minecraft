@@ -7,6 +7,7 @@ add_compile_options(-Wall -Wextra -Wpedantic)
 
 set(
         SOURCES
+
         lib/glad/src/glad.c
         lib/stbi/stb_image.cpp
         lib/imgui/src/imgui.cpp
@@ -15,19 +16,18 @@ set(
         lib/imgui/src/imgui_impl_glfw.cpp
         lib/imgui/src/imgui_tables.cpp
         lib/imgui/src/imgui_widgets.cpp
+
         main.cpp
         src/Engine/Engine.cpp
         src/Engine/Camera/Camera.cpp
         src/Engine/Render/VAO/VAO.cpp
-        src/Engine/Render/CubeVAO/CubeVAO.cpp
         src/Engine/Render/VBO/VBO.cpp
-        src/Engine/Render/EBO/EBO.cpp
         src/Engine/Render/Shader/Shader.cpp
         src/Engine/Render/Atlas/Atlas.cpp
-        src/Engine/Render/ChunkMesh/ChunkMesh.cpp
-        src/Engine/Render/ChunkMeshManager/ChunkMeshManager.cpp
+        src/Content/ChunkMesh/ChunkMesh.cpp
+        src/Content/ChunkMeshManager/ChunkMeshManager.cpp
         src/Content/Chunk/Chunk.cpp
-        src/Content/Map/World.cpp
+        src/Content/World/World.cpp
 )
 
 set(
@@ -39,15 +39,13 @@ set(
         ${CMAKE_SOURCE_DIR}/src/Engine/Input
         ${CMAKE_SOURCE_DIR}/src/Engine/Raycast
         ${CMAKE_SOURCE_DIR}/src/Engine/Render/VAO
-        ${CMAKE_SOURCE_DIR}/src/Engine/Render/CubeVAO
         ${CMAKE_SOURCE_DIR}/src/Engine/Render/VBO
-        ${CMAKE_SOURCE_DIR}/src/Engine/Render/EBO
         ${CMAKE_SOURCE_DIR}/src/Engine/Render/Shader
         ${CMAKE_SOURCE_DIR}/src/Engine/Render/Atlas
-        ${CMAKE_SOURCE_DIR}/src/Engine/Render/ChunkMesh
-        ${CMAKE_SOURCE_DIR}/src/Engine/Render/ChunkMeshManager
+        ${CMAKE_SOURCE_DIR}/src/Content/ChunkMesh
+        ${CMAKE_SOURCE_DIR}/src/Content/ChunkMeshManager
         ${CMAKE_SOURCE_DIR}/src/Content/Chunk
-        ${CMAKE_SOURCE_DIR}/src/Content/Map
+        ${CMAKE_SOURCE_DIR}/src/Content/World
         ${CMAKE_SOURCE_DIR}/src/Content/Materials
 )
 

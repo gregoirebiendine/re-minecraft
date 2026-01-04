@@ -118,7 +118,7 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world)
     
     // Link datas to VA0 before rendering
     this->VAO.linkVertices(this->vertices);
-    this->VAO.linkTex(this->uvs);
+    this->VAO.linkUvs(this->uvs);
     
     // Unbind VAO
     this->VAO.unbind();

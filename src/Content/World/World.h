@@ -5,9 +5,9 @@
 #include <memory>
 #include <ranges>
 
-#include <ChunkMeshManager.h>
-#include <Chunk.h>
-#include <Shader.h>
+#include "ChunkMeshManager.h"
+#include "Chunk.h"
+#include "Shader.h"
 
 class World {
     std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash> chunks;

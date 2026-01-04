@@ -9,7 +9,7 @@ class World; // forward declaration
 #include <vector>
 
 #include "Chunk.h"
-#include "CubeVAO.h"
+#include "VAO.h"
 
 class ChunkMesh
 {
@@ -21,7 +21,7 @@ class ChunkMesh
         void render() const;
 
     private:
-        CubeVAO VAO;
+        VAO VAO;
         std::vector<GLint> vertices;
         std::vector<GLfloat> uvs;
 };

@@ -18,10 +18,7 @@ class VBO {
         GLuint ID = -1;
 
         void addData(const std::vector<GLfloat> &data) const;
-        void addData(const std::vector<GLuint> &data) const;
         void addData(const std::vector<GLint> &data) const;
-        void addData(const std::vector<glm::vec3> &data) const;
-        void addTransformMatrix() const;
         void bind() const;
         void unbind() const;
 };

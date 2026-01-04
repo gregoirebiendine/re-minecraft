@@ -110,10 +110,14 @@ void Engine::handleInputs() const
 
     if (this->inputs.mousePressed[GLFW_MOUSE_BUTTON_LEFT])
     {
-        Raycast::Hit raycast = this->camera->raycast(*this->world);
-
-        if (raycast.hit)
+        if (const Raycast::Hit raycast = this->camera->raycast(*this->world); raycast.hit)
             this->world->setBlock(raycast.pos.x, raycast.pos.y, raycast.pos.z, Material::AIR);
+    }
+
+    if (this->inputs.mousePressed[GLFW_MOUSE_BUTTON_RIGHT])
+    {
+        if (const Raycast::Hit raycast = this->camera->raycast(*this->world); raycast.hit)
+            this->world->setBlock(raycast.previousPos.x, raycast.previousPos.y, raycast.previousPos.z, Material::GRASS);
     }
 
     if (this->inputs.keyPressed[GLFW_KEY_SPACE])

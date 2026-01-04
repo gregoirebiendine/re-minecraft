@@ -11,17 +11,20 @@ VAO::~VAO()
     glDeleteVertexArrays(1, &this->ID);
 }
 
-void VAO::linkAttrib(VBO &VBO, GLuint layout, GLint size, GLenum type, GLsizei stride, void *offset) const
+void VAO::linkVertices(const std::vector<GLint> &vertices) const
 {
-    VBO.bind();
-    glEnableVertexAttribArray(layout);
-    glVertexAttribPointer(layout, size, type, GL_FALSE, stride, offset);
-    VBO.unbind();
+    this->verticesVBO.addData(vertices);
+    glVertexAttribIPointer(0, 3, GL_UNSIGNED_INT, 3 * sizeof(GLint), (void*)0);
+    glEnableVertexAttribArray(0);
+    this->verticesVBO.unbind();
 }
 
-void VAO::linkSquareAttrib(VBO &VBO) const {
-    this->linkAttrib(VBO, 0, 3, GL_FLOAT, 5 * sizeof(float), 0);
-    this->linkAttrib(VBO, 1, 2, GL_FLOAT, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+void VAO::linkUvs(const std::vector<GLfloat> &uvs) const
+{
+    this->uvsVBO.addData(uvs);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (void*)0);
+    glEnableVertexAttribArray(1);
+    this->uvsVBO.unbind();
 }
 
 void VAO::bind() const
