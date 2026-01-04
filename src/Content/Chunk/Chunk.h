@@ -23,12 +23,14 @@ class Chunk {
         // Getters
         [[nodiscard]] glm::mat<4, 4, float> getChunkModel() const;
         [[nodiscard]] ChunkPos getPosition() const;
+        [[nodiscard]] bool isDirty() const;
+
         [[nodiscard]] Material getBlock(uint8_t x, uint8_t y, uint8_t z) const;
         [[nodiscard]] bool isAir(uint8_t x, uint8_t y, uint8_t z) const;
-        [[nodiscard]] bool isDirty() const;
 
         // Setters
         void setBlock(uint8_t x, uint8_t y, uint8_t z, Material id);
+        void fill(glm::ivec3 from, glm::ivec3 to, Material id);
         void setDirty(bool dirty);
 
     private:

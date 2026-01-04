@@ -2,7 +2,7 @@
 
 World::World()
 {
-    const std::vector<glm::vec3> nn = {
+    const std::vector<glm::ivec3> nn = {
         {-1, 0, -1},
         {0, 0, -1},
         {1, 0, -1},
@@ -69,6 +69,16 @@ void World::setBlock(const int wx, const int wy, const int wz, const Material id
 
     chunk.setBlock(lx, ly, lz, id);
     this->markNeighborsDirty(cp);
+}
+
+void World::fill(const glm::ivec3 from, const glm::ivec3 to, const Material id)
+{
+    for (int z = from.z; z <= to.z; ++z)
+        for (int y = from.y; y <= to.y; ++y)
+            for (int x = from.x; x <= to.x; ++x)
+            {
+                this->setBlock(x, y, z, id);
+            }
 }
 
 void World::markNeighborsDirty(const ChunkPos& cp)

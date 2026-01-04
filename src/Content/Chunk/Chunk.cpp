@@ -8,11 +8,7 @@ Chunk::Chunk(const ChunkPos pos)
     this->_blocks.fill(Material::DIRT);
 
     // Fill first layer with grass for better look
-    for (uint8_t z = 0; z < SIZE; ++z)
-        for (uint8_t x = 0; x < SIZE; ++x)
-        {
-            this->setBlock(x, 15, z, Material::GRASS);
-        }
+    this->fill({0, 15, 0}, {15, 15, 15}, Material::GRASS);
 }
 
 glm::mat<4, 4, float> Chunk::getChunkModel() const
@@ -50,6 +46,17 @@ void Chunk::setBlock(const uint8_t x, const uint8_t y, const uint8_t z, const Ma
     this->_blocks[index(x, y, z)] = id;
     this->setDirty(true);
 }
+
+void Chunk::fill(const glm::ivec3 from, const glm::ivec3 to, const Material id)
+{
+    for (int z = from.z; z <= to.z; ++z)
+        for (int y = from.y; y <= to.y; ++y)
+            for (int x = from.x; x <= to.x; ++x)
+            {
+                this->setBlock(x, y, z, id);
+            }
+}
+
 
 void Chunk::setDirty(const bool dirty)
 {

@@ -28,6 +28,7 @@ class World {
 
         // Setters
         void setBlock(int wx, int wy, int wz, Material id);
+        void fill(glm::ivec3 from, glm::ivec3 to, Material id);
         void markNeighborsDirty(const ChunkPos& cp);
 
         void render(const Shader& shaders);
