@@ -34,6 +34,7 @@ set(
         HEADERS
         ${CMAKE_SOURCE_DIR}/lib
         ${CMAKE_SOURCE_DIR}/lib/imgui
+        ${CMAKE_SOURCE_DIR}/lib/fastnoiselite
         ${CMAKE_SOURCE_DIR}/src/Engine
         ${CMAKE_SOURCE_DIR}/src/Engine/Camera
         ${CMAKE_SOURCE_DIR}/src/Engine/Input

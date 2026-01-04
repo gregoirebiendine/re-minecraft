@@ -150,8 +150,8 @@ void Engine::clearInputs()
 
 void Engine::render() const
 {
-    // Clear window and buffer
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    // Clear window and buffer (sky : 130,200,229)
+    glClearColor(0.509f, 0.784f, 0.898f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Create ImGui frame

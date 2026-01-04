@@ -5,6 +5,8 @@
 #include <memory>
 #include <ranges>
 
+#include <FastNoiseLite.h>
+
 #include "ChunkMeshManager.h"
 #include "Chunk.h"
 #include "Shader.h"
@@ -25,6 +27,11 @@ class World {
         [[nodiscard]] Chunk* getChunk(int cx, int cy, int cz);
         [[nodiscard]] Material getBlock(int wx, int wy, int wz) const;
         [[nodiscard]] bool isAir(int wx, int wy, int wz) const;
+        [[nodiscard]] bool chunkExist(int cx, int cy, int cz) const;
+
+        // Terrain
+        static int getTerrainHeight(int worldX, int worldZ, const FastNoiseLite &noise);
+        static void generateChunkTerrain(Chunk& chunk, const FastNoiseLite &noise);
 
         // Setters
         void setBlock(int wx, int wy, int wz, Material id);

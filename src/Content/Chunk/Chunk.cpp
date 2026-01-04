@@ -4,11 +4,8 @@ Chunk::Chunk(const ChunkPos pos)
 {
     this->_position = pos;
 
-    // Fill the chunk with DIRT
-    this->_blocks.fill(Material::DIRT);
-
-    // Fill first layer with grass for better look
-    this->fill({0, 15, 0}, {15, 15, 15}, Material::GRASS);
+    // Fill the chunk with AIR
+    this->_blocks.fill(Material::AIR);
 }
 
 glm::mat<4, 4, float> Chunk::getChunkModel() const

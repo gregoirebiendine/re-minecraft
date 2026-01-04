@@ -2,20 +2,19 @@
 
 World::World()
 {
-    const std::vector<glm::ivec3> nn = {
-        {-1, 0, -1},
-        {0, 0, -1},
-        {1, 0, -1},
-        {-1, 0, 0},
-        {0, 0, 0},
-        {1, 0, 0},
-        {-1, 0, 1},
-        {0, 0, 1},
-        {1, 0, 1},
-    };
+    FastNoiseLite noise;
+    noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2S);
+    noise.SetFrequency(0.030);
+    noise.SetSeed(3120);
 
-    for (const auto n : nn)
-        this->getOrCreateChunk(n.x, n.y, n.z);
+    for (int cx = -1; cx <= 1; cx++) {
+        for (int cz = -1; cz <= 1; cz++) {
+            for (int cy = 0; cy <= 2; cy++) {
+                Chunk& chunk = this->getOrCreateChunk(cx, cy, cz);
+                generateChunkTerrain(chunk, noise);
+            }
+        }
+    }
 }
 
 Chunk* World::getChunk(const int cx, const int cy, const int cz)
@@ -58,6 +57,12 @@ bool World::isAir(const int wx, const int wy, const int wz) const
     return this->getBlock(wx, wy, wz) == Material::AIR;
 }
 
+bool World::chunkExist(const int cx, const int cy, const int cz) const
+{
+    const ChunkPos pos{cx, cy, cz};
+    return this->chunks.contains(pos);
+}
+
 void World::setBlock(const int wx, const int wy, const int wz, const Material id)
 {
     const auto cp = worldToChunk(wx, wy, wz);
@@ -96,6 +101,39 @@ void World::markNeighborsDirty(const ChunkPos& cp)
 
         if (const auto neighbor = this->getChunk(pos.x, pos.y, pos.z))
             neighbor->setDirty(true);
+    }
+}
+
+int World::getTerrainHeight(const int worldX, const int worldZ, const FastNoiseLite &noise)
+{
+    const float n = noise.GetNoise(static_cast<float>(worldX), static_cast<float>(worldZ));
+    constexpr int baseHeight = 10;
+    constexpr int amplitude = 8;
+
+    return baseHeight + static_cast<int>(n * amplitude);
+}
+
+void World::generateChunkTerrain(Chunk& chunk, const FastNoiseLite &noise)
+{
+    for (int x = 0; x < Chunk::SIZE; x++) {
+        for (int z = 0; z < Chunk::SIZE; z++) {
+            const auto [cx, cy, cz] = chunk.getPosition();
+
+            const int wx = cx * Chunk::SIZE + x;
+            const int wz = cz * Chunk::SIZE + z;
+            const int height = getTerrainHeight(wx, wz, noise);
+
+            for (int y = 0; y < Chunk::SIZE; y++) {
+                int wy = cy * Chunk::SIZE + y;
+
+                if (wy < height)
+                    chunk.setBlock(x, y, z, Material::DIRT);
+                else if (wy == height)
+                    chunk.setBlock(x, y, z, Material::GRASS);
+                else
+                    chunk.setBlock(x, y, z, Material::AIR);
+            }
+        }
     }
 }
 
