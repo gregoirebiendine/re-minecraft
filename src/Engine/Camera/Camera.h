@@ -14,6 +14,8 @@
 #include <glm/gtx/vector_angle.hpp>
 
 #include "Shader.h"
+#include "World.h"
+#include "Raycast.h"
 
 class Camera {
     glm::vec3 _position{};
@@ -25,8 +27,6 @@ class Camera {
 
     bool isMouseCaptured = false;
 
-    [[nodiscard]] glm::vec3 getForwardVector() const;
-
     public:
         explicit Camera(glm::vec3 position);
 
@@ -34,7 +34,9 @@ class Camera {
 
         void moveCamera(double mouseX, double mouseY);
         void move(glm::vec3 direction);
+        Raycast::Hit raycast(const World& world) const;
 
+        [[nodiscard]] glm::vec3 getForwardVector() const;
         [[nodiscard]] bool getMouseCapture() const;
         [[nodiscard]] glm::vec3 getPosition() const;
         [[nodiscard]] glm::vec2 getRotation() const;

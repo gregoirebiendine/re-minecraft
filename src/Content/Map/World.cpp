@@ -2,7 +2,7 @@
 
 World::World()
 {
-    constexpr glm::vec3 nn[9] = {
+    const std::vector<glm::vec3> nn = {
         {-1, 0, -1},
         {0, 0, -1},
         {1, 0, -1},
@@ -34,7 +34,6 @@ Chunk& World::getOrCreateChunk(const int cx, const int cy, const int cz)
 
     if (!chunk)
         chunk = std::make_unique<Chunk>(pos);
-    std::cout << "Creating chunk at " << pos << ". Chunk is marked " << (chunk->isDirty() ? "dirty" : "undirty") << std::endl;
     this->markNeighborsDirty(pos);
     return *chunk;
 }

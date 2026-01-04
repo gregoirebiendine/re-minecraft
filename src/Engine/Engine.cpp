@@ -53,11 +53,10 @@ Engine::Engine()
     // Forward input state array to GLFW
     glfwSetWindowUserPointer(this->window, &this->inputs);
 
-    // Register input callback function to GLFW
+    // Register inputs callback functions to GLFW
     glfwSetKeyCallback(window, keyInputCallback);
-
-    // Register mouse callback function to GLFW
     glfwSetCursorPosCallback(window, mouseInputCallback);
+    glfwSetMouseButtonCallback(window, mouseButtonInputCallback);
 
     // Create all members
     this->shaders = std::make_unique<Shader>();
@@ -82,12 +81,9 @@ void Engine::loop()
 {
     while (!glfwWindowShouldClose(this->window)) {
         glfwPollEvents();
-
         this->handleInputs();
         this->render();
-
-        std::fill_n(this->inputs.pressed, sizeof(this->inputs.pressed), false);
-        std::fill_n(this->inputs.released, sizeof(this->inputs.released), false);
+        this->clearInputs();
     }
 }
 
@@ -95,26 +91,41 @@ void Engine::handleInputs() const
 {
     this->camera->moveCamera(this->inputs.mouseX, this->inputs.mouseY);
 
-    if (this->inputs.pressed[GLFW_KEY_SPACE])
+    if (this->inputs.mousePressed[GLFW_MOUSE_BUTTON_LEFT])
+    {
+        Raycast::Hit raycast = this->camera->raycast(*this->world);
+
+        if (raycast.hit)
+            this->world->setBlock(raycast.pos.x, raycast.pos.y, raycast.pos.z, Material::AIR);
+    }
+
+    if (this->inputs.keyPressed[GLFW_KEY_SPACE])
     {
         glfwSetInputMode(window, GLFW_CURSOR, !this->camera->getMouseCapture() ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
         this->camera->toggleMouseCapture();
     }
 
-    if (this->inputs.down[GLFW_KEY_W])
+    if (this->inputs.keyDown[GLFW_KEY_W])
         this->camera->move({0,0,1});
-    if (this->inputs.down[GLFW_KEY_S])
+    if (this->inputs.keyDown[GLFW_KEY_S])
         this->camera->move({0,0,-1});
-    if (this->inputs.down[GLFW_KEY_A])
+    if (this->inputs.keyDown[GLFW_KEY_A])
         this->camera->move({-1,0,0});
-    if (this->inputs.down[GLFW_KEY_D])
+    if (this->inputs.keyDown[GLFW_KEY_D])
         this->camera->move({1,0,0});
-    if (this->inputs.down[GLFW_KEY_Q])
+    if (this->inputs.keyDown[GLFW_KEY_Q])
         this->camera->move({0,1,0});
-    if (this->inputs.down[GLFW_KEY_E])
+    if (this->inputs.keyDown[GLFW_KEY_E])
         this->camera->move({0,-1,0});
 }
 
+void Engine::clearInputs()
+{
+    std::fill_n(this->inputs.keyPressed, sizeof(this->inputs.keyPressed), false);
+    std::fill_n(this->inputs.keyReleased, sizeof(this->inputs.keyReleased), false);
+    std::fill_n(this->inputs.mousePressed, sizeof(this->inputs.mousePressed), false);
+    std::fill_n(this->inputs.mouseReleased, sizeof(this->inputs.mouseReleased), false);
+}
 
 void Engine::render() const
 {
@@ -134,6 +145,7 @@ void Engine::render() const
     this->atlas->bind();
     this->world->render(*this->shaders);
 
+    // Get Camera state for GUI
     const auto cameraPos = this->camera->getPosition();
     const auto cameraRotation = this->camera->getRotation();
 
@@ -142,7 +154,6 @@ void Engine::render() const
     ImGui::Text("X: %.2f, Y: %.2f, Z: %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
     ImGui::Text("Yaw: %.2f, Pitch: %.2f", cameraRotation.x, cameraRotation.y);
     ImGui::End();
-
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -150,6 +161,7 @@ void Engine::render() const
     glfwSwapBuffers(this->window);
 }
 
+// Statics callback
 void keyInputCallback(GLFWwindow* window, const int key, const int scancode, const int action, const int mods)
 {
     const auto glfwPointer = glfwGetWindowUserPointer(window);
@@ -161,13 +173,34 @@ void keyInputCallback(GLFWwindow* window, const int key, const int scancode, con
 
     if (action == GLFW_PRESS)
     {
-        input->down[key] = true;
-        input->pressed[key] = true;
+        input->keyDown[key] = true;
+        input->keyPressed[key] = true;
     }
     else if (action == GLFW_RELEASE)
     {
-        input->down[key] = false;
-        input->released[key] = true;
+        input->keyDown[key] = false;
+        input->keyReleased[key] = true;
+    }
+}
+
+void mouseButtonInputCallback(GLFWwindow* window, const int button, const int action, const int mods)
+{
+    const auto glfwPointer = glfwGetWindowUserPointer(window);
+
+    if (glfwPointer == nullptr || button < 0 || button > GLFW_MOUSE_BUTTON_LAST)
+        return;
+
+    auto* input = static_cast<InputState*>(glfwPointer);
+
+    if (action == GLFW_PRESS)
+    {
+        input->mouseDown[button] = true;
+        input->mousePressed[button] = true;
+    }
+    else if (action == GLFW_RELEASE)
+    {
+        input->mouseDown[button] = false;
+        input->mouseReleased[button] = true;
     }
 }
 

@@ -19,6 +19,40 @@ void Camera::applyMatrix(const float FOV, const std::unique_ptr<Shader> &shaders
     shaders->setUniformMat4("ViewMatrix", projection * view);
 }
 
+Raycast::Hit Camera::raycast(const World& world) const
+{
+    const glm::vec3 origin = this->getPosition();
+    const glm::vec3 dir = this->getForwardVector();
+
+    glm::vec3 pos = origin;
+    glm::ivec3 lastBlock(-1);
+
+    for (float t = 0.0f; t < Raycast::MAX_DISTANCE; t += Raycast::STEP) {
+        pos = origin + dir * t;
+
+        glm::ivec3 blockPos = glm::floor(pos);
+
+        if (blockPos == lastBlock)
+            continue;
+
+        lastBlock = blockPos;
+
+        if (world.getBlock(blockPos.x, blockPos.y, blockPos.z)) {
+            return {
+                true,
+                blockPos,
+                glm::floor(origin + dir * (t - Raycast::STEP))
+            };
+        }
+    }
+
+    return {
+        false,
+        lastBlock,
+        lastBlock
+    };
+}
+
 bool Camera::getMouseCapture() const
 {
     return this->isMouseCaptured;
@@ -80,7 +114,6 @@ void Camera::move(const glm::vec3 direction)
     if (direction.z != 0)
         this->_position += direction.z * forward * speed;
 }
-
 
 void Camera::setPosition(const glm::vec3 newPos)
 {

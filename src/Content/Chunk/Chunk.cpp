@@ -47,13 +47,13 @@ bool Chunk::isDirty() const
 
 void Chunk::setBlock(const uint8_t x, const uint8_t y, const uint8_t z, const Material id)
 {
-    _blocks[index(x, y, z)] = id;
+    this->_blocks[index(x, y, z)] = id;
+    this->setDirty(true);
 }
 
 void Chunk::setDirty(const bool dirty)
 {
     this->_isDirty = dirty;
-    std::cout << "Chunk at " << this->_position << " is marked " << (dirty ? "dirty" : "undirty") << std::endl;
 }
 
 // Statics

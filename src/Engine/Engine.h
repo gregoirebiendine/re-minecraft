@@ -11,25 +11,17 @@
 #include <imgui_impl_glfw.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-// #include <glm/glm.hpp>
-// #include <glm/gtc/matrix_transform.hpp>
-// #include <glm/gtc/type_ptr.hpp>
-// #include <glm/gtx/rotate_vector.hpp>
-// #include <glm/gtx/vector_angle.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtx/vector_angle.hpp>
 
 #include "Atlas.h"
 #include "Shader.h"
 #include "World.h"
 #include "Camera.h"
-
-struct InputState
-{
-    bool down[GLFW_KEY_LAST + 1]{};
-    bool pressed[GLFW_KEY_LAST + 1]{};
-    bool released[GLFW_KEY_LAST + 1]{};
-    double mouseX{};
-    double mouseY{};
-};
+#include "InputState.h"
 
 class Engine {
     int W  = 900;
@@ -49,10 +41,12 @@ class Engine {
 
         void loop();
         void handleInputs() const;
+        void clearInputs();
         void render() const;
 };
 
 void keyInputCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void mouseButtonInputCallback(GLFWwindow* window, int button, int action, int mods);
 void mouseInputCallback(GLFWwindow* window, double x, double y);
 
 #endif //ENGINE_H

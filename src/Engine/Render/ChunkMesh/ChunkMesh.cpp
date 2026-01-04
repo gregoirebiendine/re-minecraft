@@ -5,10 +5,12 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world)
 {
     const auto [cx, cy, cz] = chunk.getPosition() * Chunk::SIZE;
 
-    std::cout << "Mesh at " << chunk.getPosition() << " is rebuilt" << std::endl;
-
     // Set chunk as not dirty, meaning it will not rebuild next frame
     chunk.setDirty(false);
+
+    // Reset old vertices and uvs
+    this->vertices.clear();
+    this->uvs.clear();
 
     // Iterate over all Materials to construct blocks
     for (int z = 0; z < Chunk::SIZE; z++) {
@@ -19,7 +21,7 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world)
     
                 // Retrieve Material atlas indexes
                 const Material block = chunk.getBlock(x, y, z);
-                const std::array<uint8_t, 6> blockTexFaces = MaterialTexFaces[block];
+                const MaterialAtlasFaces blockTexFaces = MaterialTexFaces[block];
                 std::vector<MaterialFace> renderedFaces;
     
                 // Front face (0)

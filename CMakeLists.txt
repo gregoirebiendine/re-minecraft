@@ -36,6 +36,8 @@ set(
         ${CMAKE_SOURCE_DIR}/lib/imgui
         ${CMAKE_SOURCE_DIR}/src/Engine
         ${CMAKE_SOURCE_DIR}/src/Engine/Camera
+        ${CMAKE_SOURCE_DIR}/src/Engine/Input
+        ${CMAKE_SOURCE_DIR}/src/Engine/Raycast
         ${CMAKE_SOURCE_DIR}/src/Engine/Render/VAO
         ${CMAKE_SOURCE_DIR}/src/Engine/Render/CubeVAO
         ${CMAKE_SOURCE_DIR}/src/Engine/Render/VBO

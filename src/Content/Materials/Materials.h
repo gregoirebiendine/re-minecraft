@@ -7,6 +7,8 @@
 #include <map>
 #include <iostream>
 
+using MaterialAtlasFaces = std::array<uint8_t, 6>;
+
 enum Material : uint8_t
 {
     AIR,
@@ -25,7 +27,7 @@ enum MaterialFace : char
     BOTTOM
 };
 
-inline std::map<Material, std::array<uint8_t, 6>> MaterialTexFaces = {
+inline std::map<Material, MaterialAtlasFaces> MaterialTexFaces = {
     {Material::AIR, {0, 0, 0, 0, 0, 0}},
     {Material::DIRT, {0, 0, 0, 0, 0, 0}},
     {Material::GRASS, {1, 1, 1, 1, 2, 0}},
