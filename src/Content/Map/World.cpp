@@ -68,7 +68,9 @@ void World::setBlock(const int wx, const int wy, const int wz, const Material id
     const int lz = World::mod(wz, Chunk::SIZE);
 
     chunk.setBlock(lx, ly, lz, id);
-    this->markNeighborsDirty(cp);
+
+    if (lx == 0 || lx == Chunk::SIZE - 1 || ly == 0 || ly == Chunk::SIZE - 1 || lz == 0 || lz == Chunk::SIZE - 1)
+        this->markNeighborsDirty(cp);
 }
 
 void World::fill(const glm::ivec3 from, const glm::ivec3 to, const Material id)

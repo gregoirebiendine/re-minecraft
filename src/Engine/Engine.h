@@ -23,6 +23,8 @@
 #include "Camera.h"
 #include "InputState.h"
 
+#define UNUSED(expr) (void)(expr)
+
 class Engine {
     const glm::ivec2 WindowSize{1280, 720};
     glm::ivec2 ScreenSize{};
@@ -43,6 +45,8 @@ class Engine {
         void handleInputs() const;
         void clearInputs();
         void render() const;
+        void setViewMatrix() const;
+
 };
 
 void keyInputCallback(GLFWwindow* window, int key, int scancode, int action, int mods);

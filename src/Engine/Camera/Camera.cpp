@@ -10,15 +10,6 @@ Camera::Camera(const glm::vec3 position)
     this->_position = position;
 }
 
-void Camera::applyMatrix(const float FOV, const std::unique_ptr<Shader> &shaders, const float ratio) const
-{
-    const glm::vec3 forward = this->getForwardVector();
-    const glm::mat4 view = glm::lookAt(this->_position, this->_position + forward, {0,1,0});
-    const glm::mat4 projection = glm::perspective(glm::radians(FOV), ratio, 0.1f, 100.f);
-
-    shaders->setUniformMat4("ViewMatrix", projection * view);
-}
-
 Raycast::Hit Camera::raycast(const World& world) const
 {
     const glm::vec3 origin = this->getPosition();

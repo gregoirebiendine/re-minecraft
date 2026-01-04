@@ -156,7 +156,7 @@ void Engine::render() const
     ImGui::NewFrame();
 
     // Apply camera position and rotation
-    this->camera->applyMatrix(90.0f, this->shaders, static_cast<float>(WindowSize.x)/static_cast<float>(WindowSize.y));
+    this->setViewMatrix();
 
     // Render World (chunks)
     this->atlas->bind();
@@ -178,9 +178,22 @@ void Engine::render() const
     glfwSwapBuffers(this->window);
 }
 
+void Engine::setViewMatrix() const
+{
+    const auto forward = this->camera->getForwardVector();
+    const auto cameraPos = this->camera->getPosition();
+    const glm::mat4 view = glm::lookAt(cameraPos, cameraPos + forward, {0,1,0});
+    const glm::mat4 projection = glm::perspective(Camera::FOV, static_cast<float>(WindowSize.x)/static_cast<float>(WindowSize.y), 0.1f, 100.f);
+
+    this->shaders->setUniformMat4("ViewMatrix", projection * view);
+}
+
 // Statics callback
 void keyInputCallback(GLFWwindow* window, const int key, const int scancode, const int action, const int mods)
 {
+    UNUSED(scancode);
+    UNUSED(mods);
+
     const auto glfwPointer = glfwGetWindowUserPointer(window);
 
     if (glfwPointer == nullptr || key < 0 || key > GLFW_KEY_LAST)
@@ -202,6 +215,8 @@ void keyInputCallback(GLFWwindow* window, const int key, const int scancode, con
 
 void mouseButtonInputCallback(GLFWwindow* window, const int button, const int action, const int mods)
 {
+    UNUSED(mods);
+
     const auto glfwPointer = glfwGetWindowUserPointer(window);
 
     if (glfwPointer == nullptr || button < 0 || button > GLFW_MOUSE_BUTTON_LAST)

@@ -22,19 +22,19 @@ class Camera {
     float _yaw   = -90.0f;
     float _pitch = 0.0f;
 
-    float speed = 0.4f;
+    float speed = 0.2f;
     float sensitivity = 0.1f;
 
     bool isMouseCaptured = false;
 
     public:
+        static constexpr float FOV = glm::radians(90.f);
+    
         explicit Camera(glm::vec3 position);
-
-        void applyMatrix(float FOV, const std::unique_ptr<Shader> &shaders, float ratio) const;
 
         void moveCamera(double mouseX, double mouseY);
         void move(glm::vec3 direction);
-        Raycast::Hit raycast(const World& world) const;
+        [[nodiscard]] Raycast::Hit raycast(const World& world) const;
 
         [[nodiscard]] glm::vec3 getForwardVector() const;
         [[nodiscard]] bool getMouseCapture() const;
