@@ -14,12 +14,12 @@
 
 class World {
     std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash> chunks;
+    std::vector<ChunkPos> dirtyChunks;
     ChunkMeshManager meshManager;
     BlockRegistry blockRegistry;
 
-    static int mod(int a, int b);
-    static ChunkPos worldToChunk(int wx, int wy, int wz);
-    static int floorDiv(int a, int b);
+    static ChunkPos blockToChunk(int wx, int wy, int wz);
+    static BlockPos blockToLocal(int wx, int wy, int wz);
 
     public:
         explicit World(BlockRegistry blockRegistry);
@@ -38,8 +38,10 @@ class World {
         // Setters
         void setBlock(int wx, int wy, int wz, Material id);
         void fill(glm::ivec3 from, glm::ivec3 to, Material id);
-        void markNeighborsDirty(const ChunkPos& cp);
+        void markNeighborsDirty(const ChunkPos& cp, const std::optional<BlockPos>& bp = std::nullopt);
+        // void markNeighborsDirty(const ChunkPos& cp);
 
+        void update();
         void render(const Shader& shaders);
 };
 

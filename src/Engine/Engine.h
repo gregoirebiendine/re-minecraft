@@ -44,9 +44,10 @@ class Engine {
         ~Engine();
 
         void loop();
-        void handleInputs() const;
+        void handleInputs(float deltaTime) const;
         void clearInputs();
-        void render() const;
+        void update() const;
+        void render(float deltaTime) const;
         void setViewMatrix() const;
 };
 

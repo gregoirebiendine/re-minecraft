@@ -53,6 +53,8 @@ void Chunk::fill(const glm::ivec3 from, const glm::ivec3 to, const Material id)
 
 void Chunk::setDirty(const bool dirty)
 {
+    if (this->_isDirty == dirty)
+        return;
     this->_isDirty = dirty;
 }
 

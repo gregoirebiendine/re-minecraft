@@ -69,7 +69,7 @@ glm::vec3 Camera::getForwardVector() const
     return glm::normalize(forward);
 }
 
-void Camera::moveCamera(const double mouseX, const double mouseY)
+void Camera::moveCamera(const double mouseX, const double mouseY, const float deltaTime)
 {
     if (!this->isMouseCaptured)
     {
@@ -83,8 +83,8 @@ void Camera::moveCamera(const double mouseX, const double mouseY)
         firstMouse = false;
     }
 
-    this->_yaw   += static_cast<float>(mouseX - lastX) * sensitivity;
-    this->_pitch += static_cast<float>(lastY - mouseY) * sensitivity;
+    this->_yaw   += static_cast<float>(mouseX - lastX) * SENSITIVITY * deltaTime;
+    this->_pitch += static_cast<float>(lastY - mouseY) * SENSITIVITY * deltaTime;
 
     this->_yaw = std::fmod(this->_yaw, 360.0f);
 
@@ -99,17 +99,17 @@ void Camera::moveCamera(const double mouseX, const double mouseY)
     lastY = mouseY;
 }
 
-void Camera::move(const glm::vec3 direction)
+void Camera::move(const glm::vec3 direction, const float deltaTime)
 {
     const glm::vec3 forward = this->getForwardVector();
     const glm::vec3 right = glm::normalize(glm::cross(forward, {0,1,0}));
 
     if (direction.x != 0)
-        this->_position += direction.x * right * speed;
+        this->_position += direction.x * right * SPEED * deltaTime;
     if (direction.y != 0)
-        this->_position += direction.y * glm::vec3{0, 1, 0} * speed;
+        this->_position += direction.y * glm::vec3{0, 1, 0} * SPEED * deltaTime;
     if (direction.z != 0)
-        this->_position += direction.z * forward * speed;
+        this->_position += direction.z * forward * SPEED * deltaTime;
 }
 
 void Camera::setPosition(const glm::vec3 newPos)

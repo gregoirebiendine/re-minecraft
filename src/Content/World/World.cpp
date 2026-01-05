@@ -11,7 +11,7 @@ World::World(BlockRegistry blockRegistry) : blockRegistry(std::move(blockRegistr
 
     for (int cx = -1; cx <= 1; cx++) {
         for (int cz = -1; cz <= 1; cz++) {
-            for (int cy = 0; cy <= 2; cy++) {
+            for (int cy = 0; cy <= 1; cy++) {
                 Chunk& chunk = this->getOrCreateChunk(cx, cy, cz);
                 generateChunkTerrain(chunk, noise);
             }
@@ -34,24 +34,23 @@ Chunk& World::getOrCreateChunk(const int cx, const int cy, const int cz)
     std::unique_ptr<Chunk>& chunk = this->chunks[pos];
 
     if (!chunk)
+    {
         chunk = std::make_unique<Chunk>(pos);
-    this->markNeighborsDirty(pos);
+        this->markNeighborsDirty(pos);
+    }
     return *chunk;
 }
 
 Material World::getBlock(const int wx, const int wy, const int wz) const
 {
-    const ChunkPos cp = worldToChunk(wx, wy, wz);
+    const ChunkPos cp = blockToChunk(wx, wy, wz);
     const auto it = chunks.find(cp);
 
     if (it == chunks.end())
         return blockRegistry.getByName("core:air");
 
-    const int lx = World::mod(wx, Chunk::SIZE);
-    const int ly = World::mod(wy, Chunk::SIZE);
-    const int lz = World::mod(wz, Chunk::SIZE);
-
-    return it->second->getBlock(lx, ly, lz);
+    const auto [x, y, z] = blockToLocal(wx, wy, wz);
+    return it->second->getBlock(x, y, z);
 }
 
 bool World::isAir(const int wx, const int wy, const int wz) const
@@ -67,17 +66,17 @@ bool World::chunkExist(const int cx, const int cy, const int cz) const
 
 void World::setBlock(const int wx, const int wy, const int wz, const Material id)
 {
-    const auto cp = worldToChunk(wx, wy, wz);
+    const auto cp = blockToChunk(wx, wy, wz);
     Chunk& chunk = getOrCreateChunk(cp.x, cp.y, cp.z);
 
-    const int lx = World::mod(wx, Chunk::SIZE);
-    const int ly = World::mod(wy, Chunk::SIZE);
-    const int lz = World::mod(wz, Chunk::SIZE);
+    const auto [x, y, z] = blockToLocal(wx, wy, wz);
+    chunk.setBlock(x, y, z, id);
 
-    chunk.setBlock(lx, ly, lz, id);
+    if (std::ranges::find(this->dirtyChunks, cp) == this->dirtyChunks.end())
+        this->dirtyChunks.emplace_back(cp);
 
-    if (lx == 0 || lx == Chunk::SIZE - 1 || ly == 0 || ly == Chunk::SIZE - 1 || lz == 0 || lz == Chunk::SIZE - 1)
-        this->markNeighborsDirty(cp);
+    if (x == 0 || x == Chunk::SIZE - 1 || y == 0 || y == Chunk::SIZE - 1 || z == 0 || z == Chunk::SIZE - 1)
+        this->markNeighborsDirty(cp, BlockPos({x,y,z}));
 }
 
 void World::fill(const glm::ivec3 from, const glm::ivec3 to, const Material id)
@@ -90,21 +89,41 @@ void World::fill(const glm::ivec3 from, const glm::ivec3 to, const Material id)
             }
 }
 
-void World::markNeighborsDirty(const ChunkPos& cp)
+void World::markNeighborsDirty(const ChunkPos& cp, const std::optional<BlockPos>& bp)
 {
-    static const glm::ivec3 neighbors[6] = {
-        { 1, 0, 0}, {-1, 0, 0},
-        { 0, 1, 0}, { 0,-1, 0},
-        { 0, 0, 1}, { 0, 0,-1},
-    };
+    std::vector<glm::ivec3> neighbors;
+
+    if (bp.has_value())
+    {
+        const auto v = bp.value();
+        if (v.x == 0)                  neighbors.emplace_back(-1, 0, 0);
+        if (v.x == Chunk::SIZE - 1)    neighbors.emplace_back(1, 0, 0);
+        if (v.y == 0)                  neighbors.emplace_back(0, -1, 0);
+        if (v.y == Chunk::SIZE - 1)    neighbors.emplace_back(0, 1, 0);
+        if (v.z == 0)                  neighbors.emplace_back(0, 0, -1);
+        if (v.z == Chunk::SIZE - 1)    neighbors.emplace_back(0, 0, 1);
+    } else
+    {
+        neighbors = {
+            { 1, 0, 0}, {-1, 0, 0},
+            { 0, 1, 0}, { 0,-1, 0},
+            { 0, 0, 1}, { 0, 0,-1},
+        };
+    }
+
 
     for (auto& n : neighbors) {
         const ChunkPos pos{cp.x + n[0], cp.y + n[1], cp.z + n[2]};
 
-        if (const auto neighbor = this->getChunk(pos.x, pos.y, pos.z))
-            neighbor->setDirty(true);
+        if (const auto chunk = this->getChunk(pos.x, pos.y, pos.z))
+        {
+            chunk->setDirty(true);
+            if (std::ranges::find(this->dirtyChunks, pos) == this->dirtyChunks.end())
+                this->dirtyChunks.emplace_back(pos);
+        }
     }
 }
+
 
 int World::getTerrainHeight(const int worldX, const int worldZ, const FastNoiseLite &noise)
 {
@@ -141,6 +160,20 @@ void World::generateChunkTerrain(Chunk& chunk, const FastNoiseLite &noise) const
     }
 }
 
+
+void World::update()
+{
+    for (const auto [x, y, z] : this->dirtyChunks)
+    {
+        Chunk* chunk = this->getChunk(x, y, z);
+
+        ChunkMesh& mesh = meshManager.get(*chunk);
+        mesh.rebuild(*chunk, *this, this->blockRegistry);
+    }
+
+    this->dirtyChunks.clear();
+}
+
 void World::render(const Shader& shaders)
 {
     shaders.use();
@@ -148,9 +181,6 @@ void World::render(const Shader& shaders)
     for (const auto& chunk : this->chunks | std::views::values)
     {
         ChunkMesh& mesh = meshManager.get(*chunk);
-
-        if (chunk->isDirty())
-            mesh.rebuild(*chunk, *this, this->blockRegistry);
 
         const glm::mat4 model = chunk->getChunkModel();
         shaders.setUniformMat4("ViewModel", model);
@@ -160,27 +190,12 @@ void World::render(const Shader& shaders)
 }
 
 // Statics
-int World::mod(const int a, const int b)
+ChunkPos World::blockToChunk(const int wx, const int wy, const int wz)
 {
-    const int r = a % b;
-    return r < 0 ? r + b : r;
+    return {wx >> 4, wy >> 4, wz >> 4};
 }
 
-ChunkPos World::worldToChunk(const int wx, const int wy, const int wz)
+BlockPos World::blockToLocal(const int wx, const int wy, const int wz)
 {
-    return {
-        World::floorDiv(wx, Chunk::SIZE),
-        World::floorDiv(wy, Chunk::SIZE),
-        World::floorDiv(wz, Chunk::SIZE)
-    };
-}
-
-int World::floorDiv(const int a, const int b)
-{
-    int q = a / b;
-    const int r = a % b;
-
-    if (r != 0 && ((r < 0) != (b < 0)))
-        --q;
-    return q;
+    return {wx & 15, wy & 15, wz & 15};
 }

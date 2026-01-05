@@ -12,6 +12,8 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
     this->vertices.clear();
     this->uvs.clear();
 
+    std::cout << "Rebuild mesh " << chunk.getPosition() << std::endl;
+
     // Iterate over all Materials to construct blocks
     for (int z = 0; z < Chunk::SIZE; z++) {
         for (int y = 0; y < Chunk::SIZE; y++) {

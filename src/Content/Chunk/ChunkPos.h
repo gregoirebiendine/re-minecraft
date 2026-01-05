@@ -4,11 +4,31 @@
 #include <functional>
 #include <iostream>
 
+struct BlockPos
+{
+    int x, y, z;
+
+    bool operator==(const BlockPos& other) const {
+        return x == other.x && y == other.y && z == other.z;
+    }
+};
+
 struct ChunkPos {
     int x, y, z;
 
-    bool operator==(const ChunkPos& other) const {
+    bool operator<(const ChunkPos& other) const
+    {
+        return x < other.x && y < other.y && z < other.z;
+    }
+
+    bool operator==(const ChunkPos& other) const
+    {
         return x == other.x && y == other.y && z == other.z;
+    }
+
+    bool operator!=(const ChunkPos& other) const
+    {
+        return x != other.x || y != other.y || z != other.z;
     }
 };
 

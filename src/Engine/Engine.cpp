@@ -96,17 +96,26 @@ Engine::~Engine() {
 
 void Engine::loop()
 {
+    double lastTime = glfwGetTime();
+
     while (!glfwWindowShouldClose(this->window)) {
+        const double currentTime = glfwGetTime();
+        auto deltaTime = static_cast<float>(currentTime - lastTime);
+        lastTime = currentTime;
+
+        deltaTime = std::min(deltaTime, 0.05f); // clamp (important)
+
         glfwPollEvents();
-        this->handleInputs();
-        this->render();
+        this->handleInputs(deltaTime);
+        this->update();
+        this->render(deltaTime);
         this->clearInputs();
     }
 }
 
-void Engine::handleInputs() const
+void Engine::handleInputs(float deltaTime) const
 {
-    this->camera->moveCamera(this->inputs.mouseX, this->inputs.mouseY);
+    this->camera->moveCamera(this->inputs.mouseX, this->inputs.mouseY, deltaTime);
 
     if (this->inputs.mousePressed[GLFW_MOUSE_BUTTON_LEFT])
     {
@@ -138,17 +147,17 @@ void Engine::handleInputs() const
     }
 
     if (this->inputs.keyDown[GLFW_KEY_W])
-        this->camera->move({0,0,1});
+        this->camera->move({0,0,1}, deltaTime);
     if (this->inputs.keyDown[GLFW_KEY_S])
-        this->camera->move({0,0,-1});
+        this->camera->move({0,0,-1}, deltaTime);
     if (this->inputs.keyDown[GLFW_KEY_A])
-        this->camera->move({-1,0,0});
+        this->camera->move({-1,0,0}, deltaTime);
     if (this->inputs.keyDown[GLFW_KEY_D])
-        this->camera->move({1,0,0});
+        this->camera->move({1,0,0}, deltaTime);
     if (this->inputs.keyDown[GLFW_KEY_Q])
-        this->camera->move({0,1,0});
+        this->camera->move({0,1,0}, deltaTime);
     if (this->inputs.keyDown[GLFW_KEY_E])
-        this->camera->move({0,-1,0});
+        this->camera->move({0,-1,0}, deltaTime);
 }
 
 void Engine::clearInputs()
@@ -159,7 +168,16 @@ void Engine::clearInputs()
     std::fill_n(this->inputs.mouseReleased, sizeof(this->inputs.mouseReleased), false);
 }
 
-void Engine::render() const
+void Engine::update() const
+{
+    // Apply camera position and rotation
+    this->setViewMatrix();
+
+    // Update world
+    this->world->update();
+}
+
+void Engine::render(float deltaTime) const
 {
     // Clear window and buffer (sky : 130,200,229)
     glClearColor(0.509f, 0.784f, 0.898f, 1.0f);
@@ -169,9 +187,6 @@ void Engine::render() const
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-
-    // Apply camera position and rotation
-    this->setViewMatrix();
 
     // Render World (chunks)
     this->atlas->bind();
@@ -187,6 +202,7 @@ void Engine::render() const
     ImGui::Text("X: %.2f, Y: %.2f, Z: %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
     ImGui::Text("Yaw: %.2f, Pitch: %.2f", cameraRotation.x, cameraRotation.y);
     ImGui::Text("Selected block : %s", this->blockRegistry.get(selectedBlock).getName().c_str());
+    ImGui::Text("Delta time : %.4f", deltaTime * 1000.0f);
     ImGui::End();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
