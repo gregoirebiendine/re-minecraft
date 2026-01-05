@@ -117,7 +117,18 @@ void Engine::handleInputs() const
     if (this->inputs.mousePressed[GLFW_MOUSE_BUTTON_RIGHT])
     {
         if (const Raycast::Hit raycast = this->camera->raycast(*this->world); raycast.hit)
-            this->world->setBlock(raycast.previousPos.x, raycast.previousPos.y, raycast.previousPos.z, Material::GRASS);
+            this->world->setBlock(raycast.previousPos.x, raycast.previousPos.y, raycast.previousPos.z, this->camera->getSelectedMaterial());
+    }
+
+    if (this->inputs.mousePressed[GLFW_MOUSE_BUTTON_MIDDLE])
+    {
+        if (const Raycast::Hit raycast = this->camera->raycast(*this->world); raycast.hit)
+        {
+            const Material block = this->world->getBlock(raycast.pos.x, raycast.pos.y, raycast.pos.z);
+
+            if (block != Material::AIR)
+                this->camera->setSelectedMaterial(block);
+        }
     }
 
     if (this->inputs.keyPressed[GLFW_KEY_SPACE])
@@ -174,6 +185,7 @@ void Engine::render() const
     ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
     ImGui::Text("X: %.2f, Y: %.2f, Z: %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
     ImGui::Text("Yaw: %.2f, Pitch: %.2f", cameraRotation.x, cameraRotation.y);
+    ImGui::Text("Selected block : %s", MaterialToString(this->camera->getSelectedMaterial()).c_str());
     ImGui::End();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

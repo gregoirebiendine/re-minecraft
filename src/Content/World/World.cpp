@@ -126,7 +126,9 @@ void World::generateChunkTerrain(Chunk& chunk, const FastNoiseLite &noise)
             for (int y = 0; y < Chunk::SIZE; y++) {
                 int wy = cy * Chunk::SIZE + y;
 
-                if (wy < height)
+                if (wy == 0)
+                    chunk.setBlock(x, y, z, Material::COBBLE);
+                else if (wy < height)
                     chunk.setBlock(x, y, z, Material::DIRT);
                 else if (wy == height)
                     chunk.setBlock(x, y, z, Material::GRASS);

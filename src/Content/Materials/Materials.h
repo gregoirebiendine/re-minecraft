@@ -15,6 +15,8 @@ enum Material : uint8_t
     DIRT,
     GRASS,
     MOSS,
+    COBBLE,
+    OAK_PLANK
 };
 
 enum MaterialFace : char
@@ -32,18 +34,27 @@ inline std::map<Material, MaterialAtlasFaces> MaterialTexFaces = {
     {Material::DIRT, {0, 0, 0, 0, 0, 0}},
     {Material::GRASS, {1, 1, 1, 1, 2, 0}},
     {Material::MOSS, {2, 2, 2, 2, 2, 2}},
+    {Material::COBBLE, {3, 3, 3, 3, 3, 3}},
+    {Material::OAK_PLANK, {4, 4, 4, 4, 4, 4}},
 };
+
+inline std::string MaterialToString(const Material material)
+{
+    switch(material)
+    {
+        default:
+        case Material::AIR:    return "Air";
+        case Material::DIRT:   return "Dirt";
+        case Material::GRASS:  return "Grass";
+        case Material::MOSS:   return "Moss";
+        case Material::COBBLE:   return "Cobblestone";
+        case Material::OAK_PLANK:   return "Oak Plank";
+    }
+}
 
 inline std::ostream& operator<<(std::ostream& os, const Material block)
 {
-    switch(block)
-    {
-        default:
-        case Material::AIR:    return os << "Air";
-        case Material::DIRT:   return os << "Dirt";
-        case Material::GRASS:  return os << "Grass";
-        case Material::MOSS:   return os << "Moss";
-    }
+    return os << MaterialToString(block);
 }
 
 #endif //RE_MINECRAFT_MATERIALS_H

@@ -2,6 +2,7 @@
 #define ENGINE_H
 
 #define GLM_ENABLE_EXPERIMENTAL
+#define UNUSED(expr) (void)(expr)
 
 #include <iostream>
 #include <memory>
@@ -22,8 +23,6 @@
 #include "World.h"
 #include "Camera.h"
 #include "InputState.h"
-
-#define UNUSED(expr) (void)(expr)
 
 class Engine {
     const glm::ivec2 WindowSize{1280, 720};
@@ -46,7 +45,6 @@ class Engine {
         void clearInputs();
         void render() const;
         void setViewMatrix() const;
-
 };
 
 void keyInputCallback(GLFWwindow* window, int key, int scancode, int action, int mods);

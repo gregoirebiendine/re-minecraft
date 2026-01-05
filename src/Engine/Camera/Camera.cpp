@@ -111,6 +111,16 @@ void Camera::setPosition(const glm::vec3 newPos)
     this->_position = newPos;
 }
 
+void Camera::setSelectedMaterial(const Material newMaterial)
+{
+    this->selectedMaterial = newMaterial;
+}
+
+Material Camera::getSelectedMaterial() const
+{
+    return this->selectedMaterial;
+}
+
 glm::vec3 Camera::getPosition() const
 {
     return this->_position;

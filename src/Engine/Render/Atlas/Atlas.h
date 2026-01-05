@@ -9,7 +9,7 @@
 
 class Atlas {
     public:
-        GLuint ID;
+        GLuint ID{};
 
         Atlas();
         ~Atlas();

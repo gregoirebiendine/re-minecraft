@@ -27,6 +27,8 @@ class Camera {
 
     bool isMouseCaptured = false;
 
+    Material selectedMaterial = Material::OAK_PLANK;
+
     public:
         static constexpr float FOV = glm::radians(90.f);
     
@@ -43,6 +45,8 @@ class Camera {
 
         void setPosition(glm::vec3 newPos);
         void toggleMouseCapture();
+        void setSelectedMaterial(const Material newMaterial);
+        Material getSelectedMaterial() const;
 };
 
 
