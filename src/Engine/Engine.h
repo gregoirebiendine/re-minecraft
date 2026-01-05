@@ -23,6 +23,7 @@
 #include "World.h"
 #include "Camera.h"
 #include "InputState.h"
+#include "BlockRegistry.h"
 
 class Engine {
     const glm::ivec2 WindowSize{1280, 720};
@@ -30,11 +31,13 @@ class Engine {
 
     GLFWwindow *window = nullptr;
 
-    std::unique_ptr<Atlas> atlas;
+    BlockRegistry blockRegistry;
+    InputState inputs;
+
     std::unique_ptr<Shader> shaders;
+    std::unique_ptr<Atlas> atlas;
     std::unique_ptr<World> world;
     std::unique_ptr<Camera> camera;
-    InputState inputs;
 
     public:
         Engine();

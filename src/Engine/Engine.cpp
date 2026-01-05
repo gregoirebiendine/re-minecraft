@@ -78,8 +78,8 @@ Engine::Engine()
     // Create all members
     this->shaders = std::make_unique<Shader>();
     this->atlas = std::make_unique<Atlas>();
-    this->camera = std::make_unique<Camera>(glm::vec3{16.0f, 26.0f, 35.0f});
-    this->world = std::make_unique<World>();
+    this->camera = std::make_unique<Camera>(glm::vec3{16.0f, 26.0f, 35.0f}, this->blockRegistry);
+    this->world = std::make_unique<World>(this->blockRegistry);
 
     if (!this->shaders || !this->world || !this->camera || !this->atlas)
         throw std::runtime_error("Failed to initialize pointers");
@@ -111,7 +111,7 @@ void Engine::handleInputs() const
     if (this->inputs.mousePressed[GLFW_MOUSE_BUTTON_LEFT])
     {
         if (const Raycast::Hit raycast = this->camera->raycast(*this->world); raycast.hit)
-            this->world->setBlock(raycast.pos.x, raycast.pos.y, raycast.pos.z, Material::AIR);
+            this->world->setBlock(raycast.pos.x, raycast.pos.y, raycast.pos.z, this->blockRegistry.getByName("core:air"));
     }
 
     if (this->inputs.mousePressed[GLFW_MOUSE_BUTTON_RIGHT])
@@ -126,7 +126,7 @@ void Engine::handleInputs() const
         {
             const Material block = this->world->getBlock(raycast.pos.x, raycast.pos.y, raycast.pos.z);
 
-            if (block != Material::AIR)
+            if (!this->blockRegistry.isEqual(block, "core:air"))
                 this->camera->setSelectedMaterial(block);
         }
     }
@@ -180,12 +180,13 @@ void Engine::render() const
     // Get Camera state for GUI
     const auto cameraPos = this->camera->getPosition();
     const auto cameraRotation = this->camera->getRotation();
+    const auto selectedBlock = this->camera->getSelectedMaterial();
 
     ImGui::Begin("Debug");
     ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
     ImGui::Text("X: %.2f, Y: %.2f, Z: %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
     ImGui::Text("Yaw: %.2f, Pitch: %.2f", cameraRotation.x, cameraRotation.y);
-    ImGui::Text("Selected block : %s", MaterialToString(this->camera->getSelectedMaterial()).c_str());
+    ImGui::Text("Selected block : %s", this->blockRegistry.get(selectedBlock).getName().c_str());
     ImGui::End();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

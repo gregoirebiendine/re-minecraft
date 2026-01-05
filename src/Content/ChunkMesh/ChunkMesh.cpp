@@ -1,7 +1,7 @@
 #include "ChunkMesh.h"
 #include "World.h"
 
-void ChunkMesh::rebuild(Chunk& chunk, const World& world)
+void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& blockRegistry)
 {
     const auto [cx, cy, cz] = chunk.getPosition() * Chunk::SIZE;
 
@@ -21,7 +21,7 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world)
     
                 // Retrieve Material atlas indexes
                 const Material block = chunk.getBlock(x, y, z);
-                const MaterialAtlasFaces blockTexFaces = MaterialTexFaces[block];
+                const BlockMeta& meta = blockRegistry.get(block);
                 std::vector<MaterialFace> renderedFaces;
     
                 // Front face (0)
@@ -104,9 +104,14 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world)
     
                 // Add tex offset based on rendered faces
                 for (const auto &face : renderedFaces) {
-                    const auto t = glm::vec2(0.25f * static_cast<float>(blockTexFaces[face] % 4), floor(static_cast<double>(blockTexFaces[face]) / 4) / 4);
+                    const auto t = glm::vec2(0.25f * static_cast<float>(meta.atlasFaces[face] % 4), std::floor(static_cast<float>(meta.atlasFaces[face]) / 4) / 4);
                     this->uvs.insert(this->uvs.end(), {
-                        t.x, t.y,     0.25f + t.x, t.y,    0.25f + t.x, 0.25f + t.y,   t.x, t.y,     0.25f + t.x, 0.25f + t.y,   t.x, 0.25f + t.y,
+                        t.x, t.y,
+                        0.25f + t.x, t.y,
+                        0.25f + t.x, 0.25f + t.y,
+                        t.x, t.y,
+                        0.25f + t.x, 0.25f + t.y,
+                        t.x, 0.25f + t.y,
                     });
                 }
             }

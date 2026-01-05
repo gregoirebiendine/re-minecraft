@@ -10,7 +10,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
-#include "Materials.h"
+#include "BlockRegistry.h"
 #include "ChunkPos.h"
 
 class Chunk {

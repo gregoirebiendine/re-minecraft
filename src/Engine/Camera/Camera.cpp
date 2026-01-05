@@ -5,9 +5,10 @@ static double lastX = 450.0;
 static double lastY = 450.0;
 static bool firstMouse = true;
 
-Camera::Camera(const glm::vec3 position)
+Camera::Camera(const glm::vec3 position, const BlockRegistry& blockRegistry)
 {
     this->_position = position;
+    this->selectedMaterial = blockRegistry.getByName("core:oak_plank");
 }
 
 Raycast::Hit Camera::raycast(const World& world) const
@@ -18,13 +19,16 @@ Raycast::Hit Camera::raycast(const World& world) const
     glm::vec3 pos = origin;
     glm::ivec3 lastBlock(-1);
 
-    for (float t = 0.0f; t < Raycast::MAX_DISTANCE; t += Raycast::STEP) {
+    float t = 0.f;
+    while (t < Raycast::MAX_DISTANCE) {
         pos = origin + dir * t;
-
         glm::ivec3 blockPos = glm::floor(pos);
 
         if (blockPos == lastBlock)
+        {
+            t += Raycast::STEP;
             continue;
+        }
 
         lastBlock = blockPos;
 
@@ -35,6 +39,8 @@ Raycast::Hit Camera::raycast(const World& world) const
                 glm::floor(origin + dir * (t - Raycast::STEP))
             };
         }
+
+        t += Raycast::STEP;
     }
 
     return {

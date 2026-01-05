@@ -7,6 +7,7 @@
 
 #include <FastNoiseLite.h>
 
+#include "BlockRegistry.h"
 #include "ChunkMeshManager.h"
 #include "Chunk.h"
 #include "Shader.h"
@@ -14,13 +15,14 @@
 class World {
     std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash> chunks;
     ChunkMeshManager meshManager;
+    BlockRegistry blockRegistry;
 
     static int mod(int a, int b);
     static ChunkPos worldToChunk(int wx, int wy, int wz);
     static int floorDiv(int a, int b);
 
     public:
-        World();
+        explicit World(BlockRegistry blockRegistry);
 
         // Getters
         Chunk& getOrCreateChunk(int cx, int cy, int cz);
@@ -31,7 +33,7 @@ class World {
 
         // Terrain
         static int getTerrainHeight(int worldX, int worldZ, const FastNoiseLite &noise);
-        static void generateChunkTerrain(Chunk& chunk, const FastNoiseLite &noise);
+        void generateChunkTerrain(Chunk& chunk, const FastNoiseLite &noise) const;
 
         // Setters
         void setBlock(int wx, int wy, int wz, Material id);

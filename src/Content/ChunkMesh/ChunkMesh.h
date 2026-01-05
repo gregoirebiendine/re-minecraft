@@ -9,6 +9,7 @@ class World; // forward declaration
 #include <vector>
 
 #include "Chunk.h"
+#include "BlockRegistry.h"
 #include "VAO.h"
 
 class ChunkMesh
@@ -17,7 +18,7 @@ class ChunkMesh
         ChunkMesh() = default;
         ~ChunkMesh() = default;
 
-        void rebuild(Chunk& chunk, const World& world);
+        void rebuild(Chunk& chunk, const World& world, const BlockRegistry& blockRegistry);
         void render() const;
 
     private:

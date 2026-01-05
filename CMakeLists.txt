@@ -28,6 +28,7 @@ set(
         src/Content/ChunkMeshManager/ChunkMeshManager.cpp
         src/Content/Chunk/Chunk.cpp
         src/Content/World/World.cpp
+        src/Content/BlockRegistry/BlockRegistry.cpp
 )
 
 set(
@@ -47,7 +48,7 @@ set(
         ${CMAKE_SOURCE_DIR}/src/Content/ChunkMeshManager
         ${CMAKE_SOURCE_DIR}/src/Content/Chunk
         ${CMAKE_SOURCE_DIR}/src/Content/World
-        ${CMAKE_SOURCE_DIR}/src/Content/Materials
+        ${CMAKE_SOURCE_DIR}/src/Content/BlockRegistry
 )
 
 add_executable(

@@ -3,9 +3,6 @@
 Chunk::Chunk(const ChunkPos pos)
 {
     this->_position = pos;
-
-    // Fill the chunk with AIR
-    this->_blocks.fill(Material::AIR);
 }
 
 glm::mat<4, 4, float> Chunk::getChunkModel() const
@@ -30,7 +27,7 @@ Material Chunk::getBlock(const uint8_t x, const uint8_t y, const uint8_t z) cons
 
 bool Chunk::isAir(const uint8_t x, const uint8_t y, const uint8_t z) const
 {
-    return _blocks[index(x, y, z)] == Material::AIR;
+    return _blocks[index(x, y, z)] == 0;
 }
 
 bool Chunk::isDirty() const

@@ -1,6 +1,8 @@
 #include "World.h"
 
-World::World()
+#include <utility>
+
+World::World(BlockRegistry blockRegistry) : blockRegistry(std::move(blockRegistry))
 {
     FastNoiseLite noise;
     noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2S);
@@ -43,7 +45,7 @@ Material World::getBlock(const int wx, const int wy, const int wz) const
     const auto it = chunks.find(cp);
 
     if (it == chunks.end())
-        return Material::AIR;
+        return blockRegistry.getByName("core:air");
 
     const int lx = World::mod(wx, Chunk::SIZE);
     const int ly = World::mod(wy, Chunk::SIZE);
@@ -54,7 +56,7 @@ Material World::getBlock(const int wx, const int wy, const int wz) const
 
 bool World::isAir(const int wx, const int wy, const int wz) const
 {
-    return this->getBlock(wx, wy, wz) == Material::AIR;
+    return this->blockRegistry.isEqual(this->getBlock(wx, wy, wz), "core:air");
 }
 
 bool World::chunkExist(const int cx, const int cy, const int cz) const
@@ -113,7 +115,7 @@ int World::getTerrainHeight(const int worldX, const int worldZ, const FastNoiseL
     return baseHeight + static_cast<int>(n * amplitude);
 }
 
-void World::generateChunkTerrain(Chunk& chunk, const FastNoiseLite &noise)
+void World::generateChunkTerrain(Chunk& chunk, const FastNoiseLite &noise) const
 {
     for (int x = 0; x < Chunk::SIZE; x++) {
         for (int z = 0; z < Chunk::SIZE; z++) {
@@ -127,18 +129,17 @@ void World::generateChunkTerrain(Chunk& chunk, const FastNoiseLite &noise)
                 int wy = cy * Chunk::SIZE + y;
 
                 if (wy == 0)
-                    chunk.setBlock(x, y, z, Material::COBBLE);
+                    chunk.setBlock(x, y, z, this->blockRegistry.getByName("core:cobble"));
                 else if (wy < height)
-                    chunk.setBlock(x, y, z, Material::DIRT);
+                    chunk.setBlock(x, y, z, this->blockRegistry.getByName("core:dirt"));
                 else if (wy == height)
-                    chunk.setBlock(x, y, z, Material::GRASS);
+                    chunk.setBlock(x, y, z, this->blockRegistry.getByName("core:grass"));
                 else
-                    chunk.setBlock(x, y, z, Material::AIR);
+                    chunk.setBlock(x, y, z, this->blockRegistry.getByName("core:air"));
             }
         }
     }
 }
-
 
 void World::render(const Shader& shaders)
 {
@@ -149,7 +150,7 @@ void World::render(const Shader& shaders)
         ChunkMesh& mesh = meshManager.get(*chunk);
 
         if (chunk->isDirty())
-            mesh.rebuild(*chunk, *this);
+            mesh.rebuild(*chunk, *this, this->blockRegistry);
 
         const glm::mat4 model = chunk->getChunkModel();
         shaders.setUniformMat4("ViewModel", model);

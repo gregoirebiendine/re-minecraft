@@ -15,6 +15,7 @@
 
 #include "Shader.h"
 #include "World.h"
+#include "BlockRegistry.h"
 #include "Raycast.h"
 
 class Camera {
@@ -27,12 +28,12 @@ class Camera {
 
     bool isMouseCaptured = false;
 
-    Material selectedMaterial = Material::OAK_PLANK;
+    Material selectedMaterial = 0; //defaults to "core:air" or 0
 
     public:
         static constexpr float FOV = glm::radians(90.f);
     
-        explicit Camera(glm::vec3 position);
+        explicit Camera(glm::vec3 position, const BlockRegistry& blockRegistry);
 
         void moveCamera(double mouseX, double mouseY);
         void move(glm::vec3 direction);
@@ -45,8 +46,8 @@ class Camera {
 
         void setPosition(glm::vec3 newPos);
         void toggleMouseCapture();
-        void setSelectedMaterial(const Material newMaterial);
-        Material getSelectedMaterial() const;
+        void setSelectedMaterial(Material newMaterial);
+        [[nodiscard]] Material getSelectedMaterial() const;
 };
 
 
