@@ -1,8 +1,8 @@
 
 #include "Camera.h"
 
-static double lastX = 450.0;
-static double lastY = 450.0;
+static double lastX{};
+static double lastY{};
 static bool firstMouse = true;
 
 Camera::Camera(const glm::vec3 position, const BlockRegistry& blockRegistry)

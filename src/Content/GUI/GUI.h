@@ -21,6 +21,8 @@ class GUI
     std::unique_ptr<Shader> shader;
     VAO CrosshairVAO;
 
+    static std::vector<GLfloat> constructCrosshair(float windowRatio);
+
     public:
         explicit GUI(float windowRatio);
 

@@ -2,6 +2,8 @@
 
 GUI::GUI(const float windowRatio)
 {
+    const std::vector<GLfloat> vertices = constructCrosshair(windowRatio);
+
     this->shader = std::make_unique<Shader>(
     "../resources/shaders/UIShader/UIVertexShader.vert",
     "../resources/shaders/UIShader/UIFragShader.frag"
@@ -10,10 +12,19 @@ GUI::GUI(const float windowRatio)
     if (!this->shader)
         throw std::runtime_error("GUI Shader creation failed");
 
+    this->shader->use();
+    this->shader->setUniformVec4("color", {0.0f, 0.0f, 0.0f, 0.7f});
+
+    this->CrosshairVAO.bind();
+    this->CrosshairVAO.addData<GLfloat, GL_FLOAT>(vertices, 0, 2);
+    this->CrosshairVAO.unbind();
+}
+
+std::vector<GLfloat> GUI::constructCrosshair(const float windowRatio) {
     const float VSIZE = (SIZE * windowRatio);
     const float VTHICKNESS = (THICKNESS / windowRatio);
 
-    const std::vector<GLfloat> vertices = {
+    return {
         // Horizontal first triangle
         -SIZE, -THICKNESS,
         -SIZE, THICKNESS,
@@ -32,10 +43,6 @@ GUI::GUI(const float windowRatio)
         VTHICKNESS, -VSIZE,
         -VTHICKNESS, -VSIZE,
     };
-
-    this->CrosshairVAO.bind();
-    this->CrosshairVAO.addData<GLfloat, GL_FLOAT>(vertices, 0, 2);
-    this->CrosshairVAO.unbind();
 }
 
 void GUI::renderCrosshair() const
