@@ -34,7 +34,7 @@ GUI::GUI(const float windowRatio)
     };
 
     this->CrosshairVAO.bind();
-    this->CrosshairVAO.linkVertices(vertices);
+    this->CrosshairVAO.addData<GLfloat, GL_FLOAT>(vertices, 0, 2);
     this->CrosshairVAO.unbind();
 }
 
@@ -43,9 +43,10 @@ void GUI::renderCrosshair() const
     glDisable(GL_DEPTH_TEST);
 
     this->shader->use();
-    this->CrosshairVAO.bind();
 
+    this->CrosshairVAO.bind();
     glDrawArrays(GL_TRIANGLES, 0, 24);
+    this->CrosshairVAO.unbind();
 
     glEnable(GL_DEPTH_TEST);
 }

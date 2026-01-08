@@ -20,7 +20,7 @@
 
 class Camera {
     static constexpr float SPEED = 8.f;
-    static constexpr float SENSITIVITY = 3.f;
+    static constexpr float SENSITIVITY = 5.f;
 
     glm::vec3 _position{};
     float _yaw   = -90.0f;

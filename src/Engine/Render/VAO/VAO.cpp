@@ -11,28 +11,17 @@ VAO::~VAO()
     glDeleteVertexArrays(1, &this->ID);
 }
 
-void VAO::linkVertices(const std::vector<GLint> &vertices) const
-{
-    this->verticesVBO.addData(vertices);
-    glVertexAttribIPointer(0, 3, GL_UNSIGNED_INT, 3 * sizeof(GLint), (void*)0);
-    glEnableVertexAttribArray(0);
-    this->verticesVBO.unbind();
-}
+template<typename T = GLfloat, int K = GL_FLOAT>
+void VAO::addData(const std::vector<T> &vertices, const int index, const int size) {
+    this->VBOs[index].addData<T>(vertices);
 
-void VAO::linkVertices(const std::vector<GLfloat> &vertices) const
-{
-    this->verticesVBO.addData(vertices);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (void*)0);
-    this->verticesVBO.unbind();
-}
+    glEnableVertexAttribArray(index);
+    if (std::is_same_v<T, GLfloat>)
+        glVertexAttribPointer(index, size, K, GL_FALSE, size * sizeof(T), static_cast<void *>(nullptr));
+    else if (std::is_same_v<T, GLint> || std::is_same_v<T, GLuint>)
+        glVertexAttribIPointer(index, size, K, size * sizeof(T), static_cast<void *>(nullptr));
 
-void VAO::linkUvs(const std::vector<GLfloat> &uvs) const
-{
-    this->uvsVBO.addData(uvs);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (void*)0);
-    this->uvsVBO.unbind();
+    this->VBOs[index].unbind();
 }
 
 void VAO::bind() const
@@ -44,3 +33,6 @@ void VAO::unbind() const
 {
     glBindVertexArray(0);
 }
+
+template void VAO::addData<GLfloat, GL_FLOAT>(const std::vector<GLfloat> &vertices, int index, int size);
+template void VAO::addData<GLint, GL_INT>(const std::vector<GLint> &vertices, int index, int size);
