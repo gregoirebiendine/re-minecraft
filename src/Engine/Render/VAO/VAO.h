@@ -2,21 +2,21 @@
 #ifndef RE_MINECRAFT_CUBE_VAO_H
 #define RE_MINECRAFT_CUBE_VAO_H
 
+#include <map>
+
 #include "glad/glad.h"
 #include "VBO.h"
 
 class VAO {
     GLuint ID = -1;
-    VBO verticesVBO;
-    VBO uvsVBO;
+    std::map<int, VBO> VBOs;
 
     public:
         VAO();
         ~VAO();
 
-        void linkVertices(const std::vector<GLint> &vertices) const;
-        void linkVertices(const std::vector<GLfloat> &vertices) const;
-        void linkUvs(const std::vector<GLfloat> &uvs) const;
+        template<typename T, int K>
+        void addData(const std::vector<T> &vertices, int index, int size);
 
         void bind() const;
         void unbind() const;

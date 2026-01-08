@@ -17,8 +17,9 @@ class VBO {
 
         GLuint ID = -1;
 
-        void addData(const std::vector<GLfloat> &data) const;
-        void addData(const std::vector<GLint> &data) const;
+        template<typename T>
+        void addData(const std::vector<T> &v) const;
+
         void bind() const;
         void unbind() const;
 };

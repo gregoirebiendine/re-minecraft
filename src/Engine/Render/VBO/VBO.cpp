@@ -11,14 +11,10 @@ VBO::~VBO()
     glDeleteBuffers(1, &this->ID);
 }
 
-void VBO::addData(const std::vector<GLfloat> &data) const {
+template<typename T = GLfloat>
+void VBO::addData(const std::vector<T> &v) const {
     this->bind();
-    glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(GLfloat), data.data(), GL_STATIC_DRAW);
-}
-
-void VBO::addData(const std::vector<GLint> &data) const {
-    this->bind();
-    glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(GLint), data.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, v.size() * sizeof(T), v.data(), GL_STATIC_DRAW);
 }
 
 void VBO::bind() const
@@ -30,3 +26,6 @@ void VBO::unbind() const
 {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
+
+template void VBO::addData<GLfloat>(const std::vector<GLfloat> &v) const;
+template void VBO::addData<GLint>(const std::vector<GLint> &v) const;

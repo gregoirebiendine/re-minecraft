@@ -122,9 +122,9 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
     this->VAO.bind();
     
     // Link datas to VA0 before rendering
-    this->VAO.linkVertices(this->vertices);
-    this->VAO.linkUvs(this->uvs);
-    
+    this->VAO.addData<GLint, GL_INT>(this->vertices,0, 3);
+    this->VAO.addData<GLfloat, GL_FLOAT>(this->uvs,1, 2);
+
     // Unbind VAO
     this->VAO.unbind();
 }
