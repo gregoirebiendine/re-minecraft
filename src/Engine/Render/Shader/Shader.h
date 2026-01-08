@@ -11,17 +11,16 @@
 #include <glm/gtc/type_ptr.hpp>
 
 class Shader {
-    static std::string loadFile(const char *path);
+    static std::string loadFile(const std::string& path);
 
     public:
         GLuint ID;
 
-        Shader();
+        Shader(const std::string& vertexPath, const std::string& fragPath);
         ~Shader();
 
         void use() const;
         void setUniformMat4(const char *name, glm::mat4 value) const;
-        void setUniformMat4Array(const char *name, glm::mat4 *value) const;
 };
 
 #endif

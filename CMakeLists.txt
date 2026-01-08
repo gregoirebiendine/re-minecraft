@@ -29,6 +29,7 @@ set(
         src/Content/Chunk/Chunk.cpp
         src/Content/World/World.cpp
         src/Content/BlockRegistry/BlockRegistry.cpp
+        src/Content/GUI/GUI.cpp
 )
 
 set(
@@ -49,6 +50,7 @@ set(
         ${CMAKE_SOURCE_DIR}/src/Content/Chunk
         ${CMAKE_SOURCE_DIR}/src/Content/World
         ${CMAKE_SOURCE_DIR}/src/Content/BlockRegistry
+        ${CMAKE_SOURCE_DIR}/src/Content/GUI
 )
 
 add_executable(

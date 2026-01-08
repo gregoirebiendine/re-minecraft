@@ -34,7 +34,8 @@ class Engine {
     BlockRegistry blockRegistry;
     InputState inputs;
 
-    std::unique_ptr<Shader> shaders;
+    std::unique_ptr<Shader> worldShader;
+    std::unique_ptr<Shader> uiShader;
     std::unique_ptr<Atlas> atlas;
     std::unique_ptr<World> world;
     std::unique_ptr<Camera> camera;
@@ -47,7 +48,7 @@ class Engine {
         void handleInputs(float deltaTime) const;
         void clearInputs();
         void update() const;
-        void render(float deltaTime) const;
+        void render() const;
         void setViewMatrix() const;
 };
 

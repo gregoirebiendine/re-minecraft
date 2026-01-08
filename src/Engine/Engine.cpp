@@ -1,5 +1,7 @@
 #include "Engine.h"
 
+#include "../Content/GUI/GUI.h"
+
 Engine::Engine()
 {
     if (!glfwInit())
@@ -76,12 +78,21 @@ Engine::Engine()
     glfwSetMouseButtonCallback(window, mouseButtonInputCallback);
 
     // Create all members
-    this->shaders = std::make_unique<Shader>();
+    this->worldShader = std::make_unique<Shader>(
+        "../resources/shaders/WorldShader/WorldVertexShader.vert",
+        "../resources/shaders/WorldShader/WorldFragShader.frag"
+    );
+
+    this->uiShader = std::make_unique<Shader>(
+        "../resources/shaders/UIShader/UIVertexShader.vert",
+        "../resources/shaders/UIShader/UIFragShader.frag"
+    );
+
     this->atlas = std::make_unique<Atlas>();
     this->camera = std::make_unique<Camera>(glm::vec3{16.0f, 26.0f, 35.0f}, this->blockRegistry);
     this->world = std::make_unique<World>(this->blockRegistry);
 
-    if (!this->shaders || !this->world || !this->camera || !this->atlas)
+    if (!this->worldShader || !this->uiShader || !this->world || !this->camera || !this->atlas)
         throw std::runtime_error("Failed to initialize pointers");
 }
 
@@ -99,16 +110,17 @@ void Engine::loop()
     double lastTime = glfwGetTime();
 
     while (!glfwWindowShouldClose(this->window)) {
+        // Compute deltaTime
         const double currentTime = glfwGetTime();
         auto deltaTime = static_cast<float>(currentTime - lastTime);
         lastTime = currentTime;
-
         deltaTime = std::min(deltaTime, 0.05f); // clamp (important)
 
+        // Update and render
         glfwPollEvents();
         this->handleInputs(deltaTime);
         this->update();
-        this->render(deltaTime);
+        this->render();
         this->clearInputs();
     }
 }
@@ -177,35 +189,20 @@ void Engine::update() const
     this->world->update();
 }
 
-void Engine::render(float deltaTime) const
+void Engine::render() const
 {
     // Clear window and buffer (sky : 130,200,229)
     glClearColor(0.509f, 0.784f, 0.898f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Create ImGui frame
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
     // Render World (chunks)
     this->atlas->bind();
-    this->world->render(*this->shaders);
+    this->worldShader->use();
+    this->world->render(*this->worldShader);
 
-    // Get Camera state for GUI
-    const auto cameraPos = this->camera->getPosition();
-    const auto cameraRotation = this->camera->getRotation();
-    const auto selectedBlock = this->camera->getSelectedMaterial();
-
-    ImGui::Begin("Debug");
-    ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
-    ImGui::Text("X: %.2f, Y: %.2f, Z: %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
-    ImGui::Text("Yaw: %.2f, Pitch: %.2f", cameraRotation.x, cameraRotation.y);
-    ImGui::Text("Selected block : %s", this->blockRegistry.get(selectedBlock).getName().c_str());
-    ImGui::Text("Delta time : %.4f", deltaTime * 1000.0f);
-    ImGui::End();
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    // Render ImGui Frame
+    GUI::createImGuiFrame();
+    GUI::renderImGuiFrame(*this->camera, this->blockRegistry);
 
     // Update buffer
     glfwSwapBuffers(this->window);
@@ -218,7 +215,7 @@ void Engine::setViewMatrix() const
     const glm::mat4 view = glm::lookAt(cameraPos, cameraPos + forward, {0,1,0});
     const glm::mat4 projection = glm::perspective(Camera::FOV, static_cast<float>(WindowSize.x)/static_cast<float>(WindowSize.y), 0.1f, 100.f);
 
-    this->shaders->setUniformMat4("ViewMatrix", projection * view);
+    this->worldShader->setUniformMat4("ViewMatrix", projection * view);
 }
 
 // Statics callback
