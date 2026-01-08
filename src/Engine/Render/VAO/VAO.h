@@ -15,6 +15,7 @@ class VAO {
         ~VAO();
 
         void linkVertices(const std::vector<GLint> &vertices) const;
+        void linkVertices(const std::vector<GLfloat> &vertices) const;
         void linkUvs(const std::vector<GLfloat> &uvs) const;
 
         void bind() const;

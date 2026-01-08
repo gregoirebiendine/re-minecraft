@@ -1,5 +1,55 @@
 #include "GUI.h"
 
+GUI::GUI(const float windowRatio)
+{
+    this->shader = std::make_unique<Shader>(
+    "../resources/shaders/UIShader/UIVertexShader.vert",
+    "../resources/shaders/UIShader/UIFragShader.frag"
+    );
+
+    if (!this->shader)
+        throw std::runtime_error("GUI Shader creation failed");
+
+    const float VSIZE = (SIZE * windowRatio);
+    const float VTHICKNESS = (THICKNESS / windowRatio);
+
+    const std::vector<GLfloat> vertices = {
+        // Horizontal first triangle
+        -SIZE, -THICKNESS,
+        -SIZE, THICKNESS,
+        SIZE, -THICKNESS,
+        // Horizontal second triangle
+        SIZE, -THICKNESS,
+        -SIZE, THICKNESS,
+        SIZE, THICKNESS,
+
+        // Vertical first triangle
+        -VTHICKNESS, VSIZE,
+        VTHICKNESS, VSIZE,
+        -VTHICKNESS, -VSIZE,
+        // Vertical second triangle
+        VTHICKNESS, VSIZE,
+        VTHICKNESS, -VSIZE,
+        -VTHICKNESS, -VSIZE,
+    };
+
+    this->CrosshairVAO.bind();
+    this->CrosshairVAO.linkVertices(vertices);
+    this->CrosshairVAO.unbind();
+}
+
+void GUI::renderCrosshair() const
+{
+    glDisable(GL_DEPTH_TEST);
+
+    this->shader->use();
+    this->CrosshairVAO.bind();
+
+    glDrawArrays(GL_TRIANGLES, 0, 24);
+
+    glEnable(GL_DEPTH_TEST);
+}
+
 void GUI::createImGuiFrame()
 {
     ImGui_ImplOpenGL3_NewFrame();
