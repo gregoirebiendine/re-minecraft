@@ -19,11 +19,19 @@ void VAO::linkVertices(const std::vector<GLint> &vertices) const
     this->verticesVBO.unbind();
 }
 
+void VAO::linkVertices(const std::vector<GLfloat> &vertices) const
+{
+    this->verticesVBO.addData(vertices);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (void*)0);
+    this->verticesVBO.unbind();
+}
+
 void VAO::linkUvs(const std::vector<GLfloat> &uvs) const
 {
     this->uvsVBO.addData(uvs);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (void*)0);
     this->uvsVBO.unbind();
 }
 

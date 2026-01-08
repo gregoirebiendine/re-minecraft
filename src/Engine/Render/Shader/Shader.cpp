@@ -1,8 +1,6 @@
 
 #include "Shader.h"
 
-#include <filesystem>
-
 std::string Shader::loadFile(const std::string& path)
 {
     std::ifstream file(path);
@@ -24,8 +22,8 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragPath)
     const std::string vertexContent = loadFile(vertexPath);
     const std::string fragContent = loadFile(fragPath);
 
-    const char *vertexShaderSource = vertexPath.c_str();
-    const char *fragmentShaderSource = fragPath.c_str();
+    const char *vertexShaderSource = vertexContent.c_str();
+    const char *fragmentShaderSource = fragContent.c_str();
 
     if (vertexShaderSource == nullptr || fragmentShaderSource == nullptr)
         throw std::runtime_error("Failed to load vertex shader and/or fragment shaders!");
@@ -51,7 +49,7 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragPath)
     glDeleteShader(fragmentShader);
 
     // Use the shader program
-    glUseProgram(this->ID);
+    // glUseProgram(this->ID);
 }
 
 Shader::~Shader() {

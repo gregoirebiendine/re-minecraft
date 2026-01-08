@@ -6,6 +6,9 @@
 
 #include <iostream>
 #include <memory>
+#include <filesystem>
+#include <thread>
+#include <chrono>
 
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
@@ -24,10 +27,12 @@
 #include "Camera.h"
 #include "InputState.h"
 #include "BlockRegistry.h"
+#include "GUI.h"
 
 class Engine {
-    const glm::ivec2 WindowSize{1280, 720};
+    const glm::ivec2 WindowSize{1920, 1080};
     glm::ivec2 ScreenSize{};
+    float aspectRatio{};
 
     GLFWwindow *window = nullptr;
 
@@ -35,17 +40,17 @@ class Engine {
     InputState inputs;
 
     std::unique_ptr<Shader> worldShader;
-    std::unique_ptr<Shader> uiShader;
     std::unique_ptr<Atlas> atlas;
     std::unique_ptr<World> world;
     std::unique_ptr<Camera> camera;
+    std::unique_ptr<GUI> playerGUI;
 
     public:
         Engine();
         ~Engine();
 
         void loop();
-        void handleInputs(float deltaTime) const;
+        void handleInputs(double deltaTime) const;
         void clearInputs();
         void update() const;
         void render() const;

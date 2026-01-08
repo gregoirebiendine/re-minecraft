@@ -174,16 +174,16 @@ void World::update()
     this->dirtyChunks.clear();
 }
 
-void World::render(const Shader& shaders)
+void World::render(const Shader& worldShader)
 {
-    shaders.use();
+    worldShader.use();
 
     for (const auto& chunk : this->chunks | std::views::values)
     {
         ChunkMesh& mesh = meshManager.get(*chunk);
 
         const glm::mat4 model = chunk->getChunkModel();
-        shaders.setUniformMat4("ViewModel", model);
+        worldShader.setUniformMat4("ViewModel", model);
 
         mesh.render();
     }

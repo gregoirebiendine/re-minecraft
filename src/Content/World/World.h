@@ -27,9 +27,9 @@ class World {
         // Getters
         Chunk& getOrCreateChunk(int cx, int cy, int cz);
         [[nodiscard]] Chunk* getChunk(int cx, int cy, int cz);
+        [[nodiscard]] bool chunkExist(int cx, int cy, int cz) const;
         [[nodiscard]] Material getBlock(int wx, int wy, int wz) const;
         [[nodiscard]] bool isAir(int wx, int wy, int wz) const;
-        [[nodiscard]] bool chunkExist(int cx, int cy, int cz) const;
 
         // Terrain
         static int getTerrainHeight(int worldX, int worldZ, const FastNoiseLite &noise);
@@ -39,10 +39,9 @@ class World {
         void setBlock(int wx, int wy, int wz, Material id);
         void fill(glm::ivec3 from, glm::ivec3 to, Material id);
         void markNeighborsDirty(const ChunkPos& cp, const std::optional<BlockPos>& bp = std::nullopt);
-        // void markNeighborsDirty(const ChunkPos& cp);
 
         void update();
-        void render(const Shader& shaders);
+        void render(const Shader& worldShader);
 };
 
 #endif //WORLD_H

@@ -1,7 +1,5 @@
 #include "Engine.h"
 
-#include "../Content/GUI/GUI.h"
-
 Engine::Engine()
 {
     if (!glfwInit())
@@ -36,12 +34,14 @@ Engine::Engine()
     }
 
     this->ScreenSize = glm::ivec2(videoMode->width, videoMode->height);
+    this->aspectRatio = static_cast<float>(WindowSize.x) / static_cast<float>(WindowSize.y);
 
     // Center window
     glfwSetWindowPos(window, (videoMode->width / 2) - (WindowSize.x / 2),  (videoMode->height / 2) - (WindowSize.y / 2));
 
     // Make window current context for GLFW
     glfwMakeContextCurrent(this->window);
+    glfwSwapInterval(1);
 
     // Initialize GLAD Manager
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
@@ -51,8 +51,11 @@ Engine::Engine()
     glViewport(0, 0, WindowSize.x, WindowSize.y);
 
     // Enable 3D depth
+    glFrontFace(GL_CW);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 
     // Setup STBI image load
     stbi_set_flip_vertically_on_load(true);
@@ -60,7 +63,6 @@ Engine::Engine()
     // Setup ImGui implementation
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    // ImGuiIO& io = ImGui::GetIO();
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(this->window, true);
     ImGui_ImplOpenGL3_Init("#version 460");
@@ -83,16 +85,12 @@ Engine::Engine()
         "../resources/shaders/WorldShader/WorldFragShader.frag"
     );
 
-    this->uiShader = std::make_unique<Shader>(
-        "../resources/shaders/UIShader/UIVertexShader.vert",
-        "../resources/shaders/UIShader/UIFragShader.frag"
-    );
-
     this->atlas = std::make_unique<Atlas>();
     this->camera = std::make_unique<Camera>(glm::vec3{16.0f, 26.0f, 35.0f}, this->blockRegistry);
     this->world = std::make_unique<World>(this->blockRegistry);
+    this->playerGUI = std::make_unique<GUI>(this->aspectRatio);
 
-    if (!this->worldShader || !this->uiShader || !this->world || !this->camera || !this->atlas)
+    if (!this->worldShader || !this->world || !this->camera || !this->atlas || !this->playerGUI)
         throw std::runtime_error("Failed to initialize pointers");
 }
 
@@ -111,10 +109,9 @@ void Engine::loop()
 
     while (!glfwWindowShouldClose(this->window)) {
         // Compute deltaTime
-        const double currentTime = glfwGetTime();
-        auto deltaTime = static_cast<float>(currentTime - lastTime);
-        lastTime = currentTime;
-        deltaTime = std::min(deltaTime, 0.05f); // clamp (important)
+        const double now = glfwGetTime();
+        const double deltaTime = now - lastTime;
+        lastTime = now;
 
         // Update and render
         glfwPollEvents();
@@ -125,7 +122,7 @@ void Engine::loop()
     }
 }
 
-void Engine::handleInputs(float deltaTime) const
+void Engine::handleInputs(const double deltaTime) const
 {
     this->camera->moveCamera(this->inputs.mouseX, this->inputs.mouseY, deltaTime);
 
@@ -159,17 +156,17 @@ void Engine::handleInputs(float deltaTime) const
     }
 
     if (this->inputs.keyDown[GLFW_KEY_W])
-        this->camera->move({0,0,1}, deltaTime);
+        this->camera->move({0,0,1}, static_cast<float>(deltaTime));
     if (this->inputs.keyDown[GLFW_KEY_S])
-        this->camera->move({0,0,-1}, deltaTime);
+        this->camera->move({0,0,-1}, static_cast<float>(deltaTime));
     if (this->inputs.keyDown[GLFW_KEY_A])
-        this->camera->move({-1,0,0}, deltaTime);
+        this->camera->move({-1,0,0}, static_cast<float>(deltaTime));
     if (this->inputs.keyDown[GLFW_KEY_D])
-        this->camera->move({1,0,0}, deltaTime);
+        this->camera->move({1,0,0}, static_cast<float>(deltaTime));
     if (this->inputs.keyDown[GLFW_KEY_Q])
-        this->camera->move({0,1,0}, deltaTime);
+        this->camera->move({0,1,0}, static_cast<float>(deltaTime));
     if (this->inputs.keyDown[GLFW_KEY_E])
-        this->camera->move({0,-1,0}, deltaTime);
+        this->camera->move({0,-1,0}, static_cast<float>(deltaTime));
 }
 
 void Engine::clearInputs()
@@ -182,6 +179,8 @@ void Engine::clearInputs()
 
 void Engine::update() const
 {
+    this->worldShader->use();
+
     // Apply camera position and rotation
     this->setViewMatrix();
 
@@ -191,18 +190,22 @@ void Engine::update() const
 
 void Engine::render() const
 {
+    this->worldShader->use();
+
     // Clear window and buffer (sky : 130,200,229)
     glClearColor(0.509f, 0.784f, 0.898f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Render World (chunks)
     this->atlas->bind();
-    this->worldShader->use();
     this->world->render(*this->worldShader);
 
     // Render ImGui Frame
     GUI::createImGuiFrame();
     GUI::renderImGuiFrame(*this->camera, this->blockRegistry);
+
+    // Render Crosshair
+    this->playerGUI->renderCrosshair();
 
     // Update buffer
     glfwSwapBuffers(this->window);
@@ -213,7 +216,7 @@ void Engine::setViewMatrix() const
     const auto forward = this->camera->getForwardVector();
     const auto cameraPos = this->camera->getPosition();
     const glm::mat4 view = glm::lookAt(cameraPos, cameraPos + forward, {0,1,0});
-    const glm::mat4 projection = glm::perspective(Camera::FOV, static_cast<float>(WindowSize.x)/static_cast<float>(WindowSize.y), 0.1f, 100.f);
+    const glm::mat4 projection = glm::perspective(Camera::FOV, this->aspectRatio, 0.1f, 100.f);
 
     this->worldShader->setUniformMat4("ViewMatrix", projection * view);
 }
