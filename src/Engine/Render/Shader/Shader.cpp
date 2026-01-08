@@ -1,12 +1,14 @@
 
 #include "Shader.h"
 
-std::string Shader::loadFile(const char* path)
+#include <filesystem>
+
+std::string Shader::loadFile(const std::string& path)
 {
     std::ifstream file(path);
 
     if (!file.is_open())
-        throw std::runtime_error("Failed to load vertex shader and/or fragment shaders!");
+        throw std::runtime_error("Failed to load file " + path);
 
     std::string content;
     file.seekg(0, std::ios::end);
@@ -17,12 +19,13 @@ std::string Shader::loadFile(const char* path)
     return content;
 }
 
-Shader::Shader()
+Shader::Shader(const std::string& vertexPath, const std::string& fragPath)
 {
-    const std::string vertexContent = Shader::loadFile("../resources/shaders/VertexShader.vert");
-    const std::string fragContent = Shader::loadFile("../resources/shaders/FragmentShader.frag");
-    const char *vertexShaderSource = vertexContent.c_str();
-    const char *fragmentShaderSource = fragContent.c_str();
+    const std::string vertexContent = loadFile(vertexPath);
+    const std::string fragContent = loadFile(fragPath);
+
+    const char *vertexShaderSource = vertexPath.c_str();
+    const char *fragmentShaderSource = fragPath.c_str();
 
     if (vertexShaderSource == nullptr || fragmentShaderSource == nullptr)
         throw std::runtime_error("Failed to load vertex shader and/or fragment shaders!");
@@ -47,6 +50,7 @@ Shader::Shader()
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
+    // Use the shader program
     glUseProgram(this->ID);
 }
 
@@ -63,10 +67,4 @@ void Shader::setUniformMat4(const char *name, glm::mat4 value) const
 {
     const int loc = glGetUniformLocation(this->ID, name);
     glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(value));
-}
-
-void Shader::setUniformMat4Array(const char *name, glm::mat4 *value) const
-{
-    const int loc = glGetUniformLocation(this->ID, name);
-    glUniformMatrix4fv(loc, 6, GL_FALSE, glm::value_ptr(value[0]));
 }
