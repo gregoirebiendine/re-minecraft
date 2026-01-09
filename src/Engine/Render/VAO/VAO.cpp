@@ -13,6 +13,7 @@ VAO::~VAO()
 
 template<typename T = GLfloat, int K = GL_FLOAT>
 void VAO::addData(const std::vector<T> &vertices, const int index, const int size) {
+    this->bind();
     this->VBOs[index].addData<T>(vertices);
 
     glEnableVertexAttribArray(index);
@@ -34,5 +35,7 @@ void VAO::unbind() const
     glBindVertexArray(0);
 }
 
+
+// Templates
 template void VAO::addData<GLfloat, GL_FLOAT>(const std::vector<GLfloat> &vertices, int index, int size);
 template void VAO::addData<GLint, GL_INT>(const std::vector<GLint> &vertices, int index, int size);

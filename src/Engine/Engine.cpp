@@ -50,13 +50,15 @@ Engine::Engine()
     // Create viewport
     glViewport(0, 0, WindowSize.x, WindowSize.y);
 
-    // Enable 3D depth
+    // Enable transparency
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable( GL_BLEND );
 
+    // Enable 3D depth
     glDepthFunc(GL_LEQUAL);
     glEnable(GL_DEPTH_TEST);
 
+    // Enable culling
     glFrontFace(GL_CW);
     glCullFace(GL_BACK);
     glEnable(GL_CULL_FACE);
@@ -85,14 +87,14 @@ Engine::Engine()
 
     // Create all members
     this->worldShader = std::make_unique<Shader>(
-        "../resources/shaders/WorldShader/WorldVertexShader.vert",
-        "../resources/shaders/WorldShader/WorldFragShader.frag"
+        "../resources/shaders/WorldShader/world.vert",
+        "../resources/shaders/WorldShader/world.frag"
     );
 
     this->atlas = std::make_unique<Atlas>();
     this->camera = std::make_unique<Camera>(glm::vec3{16.0f, 26.0f, 35.0f}, this->blockRegistry);
     this->world = std::make_unique<World>(this->blockRegistry);
-    this->playerGUI = std::make_unique<GUI>(this->aspectRatio);
+    this->playerGUI = std::make_unique<GUI>();
 
     if (!this->worldShader || !this->world || !this->camera || !this->atlas || !this->playerGUI)
         throw std::runtime_error("Failed to initialize pointers");
@@ -107,8 +109,7 @@ Engine::~Engine() {
     glfwTerminate();
 }
 
-void Engine::loop()
-{
+void Engine::loop() {
     double lastTime = glfwGetTime();
 
     while (!glfwWindowShouldClose(this->window)) {
@@ -125,6 +126,7 @@ void Engine::loop()
         this->clearInputs();
     }
 }
+
 
 void Engine::handleInputs(const double deltaTime) const
 {
@@ -205,8 +207,8 @@ void Engine::render() const
     this->world->render(*this->worldShader);
 
     // Render ImGui Frame
-    // GUI::createImGuiFrame();
-    // GUI::renderImGuiFrame(*this->camera, this->blockRegistry);
+    GUI::createImGuiFrame();
+    GUI::renderImGuiFrame(*this->camera, this->blockRegistry);
 
     // Render Crosshair
     // this->playerGUI->renderCrosshair();

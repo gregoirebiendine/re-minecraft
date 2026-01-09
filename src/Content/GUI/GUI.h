@@ -26,6 +26,19 @@ struct DigitalColor
     float b;
     float a;
 
+    DigitalColor(const uint8_t r, const uint8_t g, const uint8_t b, const float a)
+    {
+        this->r = static_cast<float>(r) / 255.f;
+        this->g = static_cast<float>(g) / 255.f;
+        this->b = static_cast<float>(b) / 255.f;
+        this->a = a;
+    }
+
+    operator glm::vec4() const
+    {
+        return {this->r, this->g, this->b, this->a};
+    }
+
     bool operator==(const DigitalColor& other) const
     {
         return r == other.r && g == other.g && b == other.b && a == other.a;
@@ -40,24 +53,22 @@ class GUI
     std::unique_ptr<Shader> shader;
 
     std::vector<GLfloat> vertices{};
+    std::vector<GLfloat> colors{};
     VAO VAO;
 
     static float toScreenSpace(float v, float minIn, float maxIn);
     static float percent(float baseValue, float percentage);
-    static DigitalColor color(uint8_t r, uint8_t g, uint8_t b, float a);
 
     void createCrosshair();
     void createRectangle(float x, float y, float width, float height, DigitalColor color);
 
     public:
-        explicit GUI(float windowRatio);
+        explicit GUI();
 
         void render() const;
 
         static void createImGuiFrame();
         static void renderImGuiFrame(const Camera& camera, const BlockRegistry& blockRegistry);
 };
-
-std::vector<GLfloat> test(float x, float y);
 
 #endif //RE_MINECRAFT_GUI_H
