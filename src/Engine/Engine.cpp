@@ -54,13 +54,12 @@ Engine::Engine()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable( GL_BLEND );
 
-    glFrontFace(GL_CW);
-
-    glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
+    glEnable(GL_DEPTH_TEST);
 
-    glEnable(GL_CULL_FACE);
+    glFrontFace(GL_CW);
     glCullFace(GL_BACK);
+    glEnable(GL_CULL_FACE);
 
     // Setup STBI image load
     stbi_set_flip_vertically_on_load(true);
@@ -206,11 +205,12 @@ void Engine::render() const
     this->world->render(*this->worldShader);
 
     // Render ImGui Frame
-    GUI::createImGuiFrame();
-    GUI::renderImGuiFrame(*this->camera, this->blockRegistry);
+    // GUI::createImGuiFrame();
+    // GUI::renderImGuiFrame(*this->camera, this->blockRegistry);
 
     // Render Crosshair
-    this->playerGUI->renderCrosshair();
+    // this->playerGUI->renderCrosshair();
+    this->playerGUI->render();
 
     // Update buffer
     glfwSwapBuffers(this->window);
@@ -227,11 +227,8 @@ void Engine::setViewMatrix() const
 }
 
 // Statics callback
-void keyInputCallback(GLFWwindow* window, const int key, const int scancode, const int action, const int mods)
+void keyInputCallback(GLFWwindow* window, const int key, UNUSED const int scancode, const int action, UNUSED const int mods)
 {
-    UNUSED(scancode);
-    UNUSED(mods);
-
     const auto glfwPointer = glfwGetWindowUserPointer(window);
 
     if (glfwPointer == nullptr || key < 0 || key > GLFW_KEY_LAST)
@@ -251,10 +248,8 @@ void keyInputCallback(GLFWwindow* window, const int key, const int scancode, con
     }
 }
 
-void mouseButtonInputCallback(GLFWwindow* window, const int button, const int action, const int mods)
+void mouseButtonInputCallback(GLFWwindow* window, const int button, const int action, UNUSED const int mods)
 {
-    UNUSED(mods);
-
     const auto glfwPointer = glfwGetWindowUserPointer(window);
 
     if (glfwPointer == nullptr || button < 0 || button > GLFW_MOUSE_BUTTON_LAST)
