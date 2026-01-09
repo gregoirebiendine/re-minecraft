@@ -2,7 +2,8 @@
 #define ENGINE_H
 
 #define GLM_ENABLE_EXPERIMENTAL
-#define UNUSED(expr) (void)(expr)
+// #define UNUSED(expr) (void)(expr)
+#define UNUSED __attribute__ ((unused))
 
 #include <iostream>
 #include <memory>
@@ -30,7 +31,6 @@
 #include "GUI.h"
 
 class Engine {
-    const glm::ivec2 WindowSize{1920, 1080};
     glm::ivec2 ScreenSize{};
     float aspectRatio{};
 
@@ -46,6 +46,8 @@ class Engine {
     std::unique_ptr<GUI> playerGUI;
 
     public:
+        static constexpr glm::ivec2 WindowSize{1920, 1080};
+
         Engine();
         ~Engine();
 
@@ -57,8 +59,8 @@ class Engine {
         void setViewMatrix() const;
 };
 
-void keyInputCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-void mouseButtonInputCallback(GLFWwindow* window, int button, int action, int mods);
+void keyInputCallback(GLFWwindow* window, int key, UNUSED int scancode, int action, UNUSED int mods);
+void mouseButtonInputCallback(GLFWwindow* window, int button, int action, UNUSED int mods);
 void mouseInputCallback(GLFWwindow* window, double x, double y);
 
 #endif //ENGINE_H

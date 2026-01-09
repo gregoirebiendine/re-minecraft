@@ -47,9 +47,6 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragPath)
     // Delete Vertex/Fragment shaders because they are combined into a Program
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
-
-    // Use the shader program
-    // glUseProgram(this->ID);
 }
 
 Shader::~Shader() {
