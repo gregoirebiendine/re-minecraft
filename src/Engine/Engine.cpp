@@ -51,8 +51,8 @@ Engine::Engine()
     glViewport(0, 0, WindowSize.x, WindowSize.y);
 
     // Enable transparency
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable( GL_BLEND );
+    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // glEnable( GL_BLEND );
 
     // Enable 3D depth
     glDepthFunc(GL_LEQUAL);
@@ -92,7 +92,7 @@ Engine::Engine()
     );
 
     this->atlas = std::make_unique<Atlas>();
-    this->camera = std::make_unique<Camera>(glm::vec3{16.0f, 26.0f, 35.0f}, this->blockRegistry);
+    this->camera = std::make_unique<Camera>(glm::vec3{8.5f, 17.5f, 20.0f}, this->blockRegistry);
     this->world = std::make_unique<World>(this->blockRegistry);
     this->playerGUI = std::make_unique<GUI>();
 

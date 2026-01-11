@@ -13,8 +13,6 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
     this->uvs.clear();
     this->normals.clear();
 
-    std::cout << "ChunkMesh::rebuild() at " << chunk.getPosition() << std::endl;
-
     // Iterate over all Materials to construct blocks
     for (int z = 0; z < Chunk::SIZE; z++) {
         for (int y = 0; y < Chunk::SIZE; y++) {
@@ -27,28 +25,7 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
                 const BlockMeta& meta = blockRegistry.get(block);
                 std::vector<MaterialFace> renderedFaces;
     
-                // Front face (0)
-                if (world.isAir(cx + x, cy + y, cz + z + 1)) {
-                    this->vertices.insert(this->vertices.end(), {
-                        1 + x, y, 1 + z,
-                        x, y, 1 + z,
-                        x, 1 + y, 1 + z,
-                        1 + x, y, 1 + z,
-                        x, 1 + y, 1 + z,
-                        1 + x, 1 + y, 1 + z,
-                    });
-                    this->normals.insert(this->normals.end(), {
-                        0.0f, 0.0f, 1.0f,
-                        0.0f, 0.0f, 1.0f,
-                        0.0f, 0.0f, 1.0f,
-                        0.0f, 0.0f, 1.0f,
-                        0.0f, 0.0f, 1.0f,
-                        0.0f, 0.0f, 1.0f,
-                    });
-                    renderedFaces.push_back(MaterialFace::FRONT);
-                }
-    
-                // Back face (1)
+                // NORTH face
                 if (world.isAir(cx + x, cy + y, cz + z - 1)) {
                     this->vertices.insert(this->vertices.end(), {
                         x, y, z,
@@ -66,10 +43,31 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
                         0.0f, 0.0f, -1.0f,
                         0.0f, 0.0f, -1.0f,
                     });
-                    renderedFaces.push_back(MaterialFace::BACK);
+                    renderedFaces.push_back(MaterialFace::NORTH);
                 }
     
-                // Left face (2)
+                // SOUTH face
+                if (world.isAir(cx + x, cy + y, cz + z + 1)) {
+                    this->vertices.insert(this->vertices.end(), {
+                        1 + x, y, 1 + z,
+                        x, y, 1 + z,
+                        x, 1 + y, 1 + z,
+                        1 + x, y, 1 + z,
+                        x, 1 + y, 1 + z,
+                        1 + x, 1 + y, 1 + z,
+                    });
+                    this->normals.insert(this->normals.end(), {
+                        0.0f, 0.0f, 1.0f,
+                        0.0f, 0.0f, 1.0f,
+                        0.0f, 0.0f, 1.0f,
+                        0.0f, 0.0f, 1.0f,
+                        0.0f, 0.0f, 1.0f,
+                        0.0f, 0.0f, 1.0f,
+                    });
+                    renderedFaces.push_back(MaterialFace::SOUTH);
+                }
+    
+                // WEST face
                 if (world.isAir(cx + x - 1, cy + y, cz + z)) {
                     this->vertices.insert(this->vertices.end(), {
                         x, y, 1 + z,
@@ -87,10 +85,10 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
                         -1.0f, 0.0f, 0.0f,
                         -1.0f, 0.0f, 0.0f,
                     });
-                    renderedFaces.push_back(MaterialFace::LEFT);
+                    renderedFaces.push_back(MaterialFace::WEST);
                 }
     
-                // Right face (3)
+                // EAST face
                 if (world.isAir(cx + x + 1, cy + y, cz + z)) {
                     this->vertices.insert(this->vertices.end(), {
                         1 + x, y, z,
@@ -108,10 +106,10 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
                         1.0f, 0.0f, 0.0f,
                         1.0f, 0.0f, 0.0f,
                     });
-                    renderedFaces.push_back(MaterialFace::RIGHT);
+                    renderedFaces.push_back(MaterialFace::EAST);
                 }
     
-                // Top face (4)
+                // UP face
                 if (world.isAir(cx + x, cy + y + 1, cz + z)) {
                     this->vertices.insert(this->vertices.end(), {
                         x, 1 + y, z,
@@ -129,10 +127,10 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
                         0.0f, 1.0f, 0.0f,
                         0.0f, 1.0f, 0.0f,
                     });
-                    renderedFaces.push_back(MaterialFace::TOP);
+                    renderedFaces.push_back(MaterialFace::UP);
                 }
     
-                // Bottom face (5)
+                // DOWN face
                 if (world.isAir(cx + x, cy + y - 1, cz + z)) {
                     this->vertices.insert(this->vertices.end(), {
                         x, y, z,
@@ -150,12 +148,13 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
                         0.0f, -1.0f, 0.0f,
                         0.0f, -1.0f, 0.0f,
                     });
-                    renderedFaces.push_back(MaterialFace::BOTTOM);
+                    renderedFaces.push_back(MaterialFace::DOWN);
                 }
     
                 // Add tex offset based on rendered faces
                 for (const auto &face : renderedFaces) {
-                    const auto t = glm::vec2(0.25f * static_cast<float>(meta.atlasFaces[face] % 4), std::floor(static_cast<float>(meta.atlasFaces[face]) / 4) / 4);
+                    const auto faceAtlasTexture = meta.blockFaces.at(face);
+                    const auto t = glm::vec2(0.25f * static_cast<float>(faceAtlasTexture % 4), std::floor(static_cast<float>(faceAtlasTexture) / 4.f) / 4.f);
                     this->uvs.insert(this->uvs.end(), {
                         t.x, t.y,
                         0.25f + t.x, t.y,
@@ -187,11 +186,3 @@ void ChunkMesh::render() const
     glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(this->vertices.size()));
     this->VAO.unbind();
 }
-
-// FACE     NORMAL          LOOKING TOWARD
-// North	( 0, 0, -1 )	+Z
-// South	( 0, 0, +1 )	−Z
-// West	    ( -1, 0, 0 )	+X
-// East	    ( +1, 0, 0 )	−X
-// Down	    ( 0, -1, 0 )	+Y
-// Up	    ( 0, +1, 0 )	−Y
