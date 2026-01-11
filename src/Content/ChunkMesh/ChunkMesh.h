@@ -25,6 +25,7 @@ class ChunkMesh
         VAO VAO;
         std::vector<GLint> vertices;
         std::vector<GLfloat> uvs;
+        std::vector<GLfloat> normals;
 };
 
 

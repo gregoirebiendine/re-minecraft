@@ -4,19 +4,22 @@
 
 World::World(BlockRegistry blockRegistry) : blockRegistry(std::move(blockRegistry))
 {
-    FastNoiseLite noise;
-    noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2S);
-    noise.SetFrequency(0.030);
-    noise.SetSeed(3120);
+    // FastNoiseLite noise;
+    // noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2S);
+    // noise.SetFrequency(0.030);
+    // noise.SetSeed(3120);
+    //
+    // for (int cx = -1; cx <= 1; cx++) {
+    //     for (int cz = -1; cz <= 1; cz++) {
+    //         for (int cy = 0; cy <= 1; cy++) {
+    //             Chunk& chunk = this->getOrCreateChunk(cx, cy, cz);
+    //             generateChunkTerrain(chunk, noise);
+    //         }
+    //     }
+    // }
 
-    for (int cx = -1; cx <= 1; cx++) {
-        for (int cz = -1; cz <= 1; cz++) {
-            for (int cy = 0; cy <= 1; cy++) {
-                Chunk& chunk = this->getOrCreateChunk(cx, cy, cz);
-                generateChunkTerrain(chunk, noise);
-            }
-        }
-    }
+    const auto chunk = this->getOrCreateChunk(0, 0, 0);
+    dirtyChunks.emplace_back(chunk.getPosition());
 }
 
 Chunk* World::getChunk(const int cx, const int cy, const int cz)

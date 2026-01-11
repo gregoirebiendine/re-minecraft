@@ -96,12 +96,14 @@ void GUI::renderImGuiFrame(const Camera& camera, const BlockRegistry& blockRegis
 {
     const auto cameraPos = camera.getPosition();
     const auto cameraRotation = camera.getRotation();
+    const auto cameraForward = camera.getForwardVector();
     const auto selectedBlock = camera.getSelectedMaterial();
 
     ImGui::Begin("Debug");
     ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
     ImGui::Text("X: %.2f, Y: %.2f, Z: %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
     ImGui::Text("Yaw: %.2f, Pitch: %.2f", cameraRotation.x, cameraRotation.y);
+    ImGui::Text("Forward vector : %.2f, %.2f, %.2f", cameraForward.x, cameraForward.y, cameraForward.z);
     ImGui::Text("Selected block : %s", blockRegistry.get(selectedBlock).getName().c_str());
     ImGui::End();
     ImGui::Render();

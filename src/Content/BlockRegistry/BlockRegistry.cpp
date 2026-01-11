@@ -23,7 +23,7 @@ BlockRegistry::BlockRegistry()
         "grass",
         false,
         1.f,
-        {1, 1, 1, 1, 2, 0}
+        {2, 5, 3, 4, 0, 0}
     });
 
     this->registerBlock({

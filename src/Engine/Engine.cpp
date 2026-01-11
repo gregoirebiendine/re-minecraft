@@ -226,6 +226,7 @@ void Engine::setViewMatrix() const
     const glm::mat4 projection = glm::perspective(Camera::FOV, this->aspectRatio, 0.1f, 100.f);
 
     this->worldShader->setUniformMat4("ViewMatrix", projection * view);
+    this->worldShader->setUniformVec3("CameraPosition", {cameraPos.x, cameraPos.y, cameraPos.z});
 }
 
 // Statics callback

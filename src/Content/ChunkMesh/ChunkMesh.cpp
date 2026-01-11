@@ -11,6 +11,9 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
     // Reset old vertices and uvs
     this->vertices.clear();
     this->uvs.clear();
+    this->normals.clear();
+
+    std::cout << "ChunkMesh::rebuild() at " << chunk.getPosition() << std::endl;
 
     // Iterate over all Materials to construct blocks
     for (int z = 0; z < Chunk::SIZE; z++) {
@@ -34,6 +37,14 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
                         x, 1 + y, 1 + z,
                         1 + x, 1 + y, 1 + z,
                     });
+                    this->normals.insert(this->normals.end(), {
+                        0.0f, 0.0f, 1.0f,
+                        0.0f, 0.0f, 1.0f,
+                        0.0f, 0.0f, 1.0f,
+                        0.0f, 0.0f, 1.0f,
+                        0.0f, 0.0f, 1.0f,
+                        0.0f, 0.0f, 1.0f,
+                    });
                     renderedFaces.push_back(MaterialFace::FRONT);
                 }
     
@@ -46,6 +57,14 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
                         x, y, z,
                         1 + x, 1 + y, z,
                         x, 1 + y, z,
+                    });
+                    this->normals.insert(this->normals.end(), {
+                        0.0f, 0.0f, -1.0f,
+                        0.0f, 0.0f, -1.0f,
+                        0.0f, 0.0f, -1.0f,
+                        0.0f, 0.0f, -1.0f,
+                        0.0f, 0.0f, -1.0f,
+                        0.0f, 0.0f, -1.0f,
                     });
                     renderedFaces.push_back(MaterialFace::BACK);
                 }
@@ -60,6 +79,14 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
                         x, 1 + y, z,
                         x, 1 + y, 1 + z,
                     });
+                    this->normals.insert(this->normals.end(), {
+                        -1.0f, 0.0f, 0.0f,
+                        -1.0f, 0.0f, 0.0f,
+                        -1.0f, 0.0f, 0.0f,
+                        -1.0f, 0.0f, 0.0f,
+                        -1.0f, 0.0f, 0.0f,
+                        -1.0f, 0.0f, 0.0f,
+                    });
                     renderedFaces.push_back(MaterialFace::LEFT);
                 }
     
@@ -72,6 +99,14 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
                         1 + x, y, z,
                         1 + x, 1 + y, 1 + z,
                         1 + x, 1 + y, z,
+                    });
+                    this->normals.insert(this->normals.end(), {
+                        1.0f, 0.0f, 0.0f,
+                        1.0f, 0.0f, 0.0f,
+                        1.0f, 0.0f, 0.0f,
+                        1.0f, 0.0f, 0.0f,
+                        1.0f, 0.0f, 0.0f,
+                        1.0f, 0.0f, 0.0f,
                     });
                     renderedFaces.push_back(MaterialFace::RIGHT);
                 }
@@ -86,6 +121,14 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
                         1 + x, 1 + y, 1 + z,
                         x, 1 + y, 1 + z,
                     });
+                    this->normals.insert(this->normals.end(), {
+                        0.0f, 1.0f, 0.0f,
+                        0.0f, 1.0f, 0.0f,
+                        0.0f, 1.0f, 0.0f,
+                        0.0f, 1.0f, 0.0f,
+                        0.0f, 1.0f, 0.0f,
+                        0.0f, 1.0f, 0.0f,
+                    });
                     renderedFaces.push_back(MaterialFace::TOP);
                 }
     
@@ -98,6 +141,14 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
                         x, y, z,
                         1 + x, y, 1 + z,
                         1 + x, y, z,
+                    });
+                    this->normals.insert(this->normals.end(), {
+                        0.0f, -1.0f, 0.0f,
+                        0.0f, -1.0f, 0.0f,
+                        0.0f, -1.0f, 0.0f,
+                        0.0f, -1.0f, 0.0f,
+                        0.0f, -1.0f, 0.0f,
+                        0.0f, -1.0f, 0.0f,
                     });
                     renderedFaces.push_back(MaterialFace::BOTTOM);
                 }
@@ -124,6 +175,7 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
     // Link datas to VA0 before rendering
     this->VAO.addData<GLint, GL_INT>(this->vertices,0, 3);
     this->VAO.addData<GLfloat, GL_FLOAT>(this->uvs,1, 2);
+    this->VAO.addData<GLfloat, GL_FLOAT>(this->normals,2, 3);
 
     // Unbind VAO
     this->VAO.unbind();
@@ -135,3 +187,11 @@ void ChunkMesh::render() const
     glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(this->vertices.size()));
     this->VAO.unbind();
 }
+
+// FACE     NORMAL          LOOKING TOWARD
+// North	( 0, 0, -1 )	+Z
+// South	( 0, 0, +1 )	−Z
+// West	    ( -1, 0, 0 )	+X
+// East	    ( +1, 0, 0 )	−X
+// Down	    ( 0, -1, 0 )	+Y
+// Up	    ( 0, +1, 0 )	−Y
