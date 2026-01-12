@@ -22,19 +22,37 @@ GUI::GUI()
 void GUI::createCrosshair() {
     constexpr glm::vec2 mid = {Engine::WindowSize.x / 2 , Engine::WindowSize.y / 2};
 
+    // Hor 1
     this->createRectangle(
-        mid.x - (SIZE / 2),
+        mid.x - (SIZE / 2) - OFFSET,
         mid.y - (THICKNESS / 2),
-        SIZE,
+        (SIZE / 2),
+        THICKNESS,
+        {200, 200, 200, 0.7f}
+    );
+    // Hor 2
+    this->createRectangle(
+        mid.x + OFFSET,
+        mid.y - (THICKNESS / 2),
+        (SIZE / 2),
         THICKNESS,
         {200, 200, 200, 0.7f}
     );
 
+    // Vert 1
     this->createRectangle(
         mid.x - (THICKNESS / 2),
-        mid.y - (SIZE / 2),
+        mid.y - (SIZE / 2) - OFFSET,
         THICKNESS,
-        SIZE,
+        (SIZE / 2),
+        {200, 200, 200, 0.7f}
+    );
+    // Vert 2
+    this->createRectangle(
+        mid.x - (THICKNESS / 2),
+        mid.y + OFFSET,
+        THICKNESS,
+        (SIZE / 2),
         {200, 200, 200, 0.7f}
     );
 }
@@ -46,13 +64,14 @@ void GUI::createRectangle(const float x, const float y, const float width, const
 
     this->vertices.insert(this->vertices.end(), {
         // First triangle
-        x, y,
-        x1, y,
+        x,  y,
+        x,  y1,
         x1, y1,
+
         // Second triangle
-        x, y,
+        x,  y,
         x1, y1,
-        x, y1,
+        x1, y,
     });
 
     this->colors.insert(this->colors.end(), {
@@ -74,6 +93,7 @@ void GUI::render() const
     );
 
     glDisable(GL_DEPTH_TEST);
+    glEnable( GL_BLEND);
 
     this->shader->use();
     this->shader->setUniformMat4("ProjectionMatrix", ProjectionMatrix);
@@ -83,6 +103,7 @@ void GUI::render() const
     this->VAO.unbind();
 
     glEnable(GL_DEPTH_TEST);
+    glDisable( GL_BLEND);
 }
 
 void GUI::createImGuiFrame()
@@ -95,13 +116,15 @@ void GUI::createImGuiFrame()
 void GUI::renderImGuiFrame(const Camera& camera, const BlockRegistry& blockRegistry)
 {
     const auto cameraPos = camera.getPosition();
-    const auto cameraRotation = camera.getRotation();
+    const auto cameraForward = camera.getForwardVector();
     const auto selectedBlock = camera.getSelectedMaterial();
+    const auto facing = GUI::forwardToCardinal(cameraForward);
 
     ImGui::Begin("Debug");
     ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
     ImGui::Text("X: %.2f, Y: %.2f, Z: %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
-    ImGui::Text("Yaw: %.2f, Pitch: %.2f", cameraRotation.x, cameraRotation.y);
+    ImGui::Text("Forward vector : %.2f, %.2f, %.2f", cameraForward.x, cameraForward.y, cameraForward.z);
+    ImGui::Text("Facing : %s", facing.c_str());
     ImGui::Text("Selected block : %s", blockRegistry.get(selectedBlock).getName().c_str());
     ImGui::End();
     ImGui::Render();
@@ -118,4 +141,18 @@ float GUI::toScreenSpace(const float v, const float minIn, const float maxIn)
 float GUI::percent(const float baseValue, float percentage)
 {
     return baseValue * (percentage/100.0f);
+}
+
+std::string GUI::forwardToCardinal(const glm::vec3& forwardVector)
+{
+    const glm::vec3 f = glm::normalize(forwardVector);
+    const float ax = abs(f.x);
+    const float ay = abs(f.y);
+    const float az = abs(f.z);
+
+    if (ax > ay && ax > az)
+        return (f.x > 0) ? "EAST" : "WEST";
+    if (ay > az)
+        return (f.y > 0) ? "UP" : "DOWN";
+    return (f.z > 0) ? "SOUTH" : "NORTH";
 }

@@ -11,6 +11,7 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
     // Reset old vertices and uvs
     this->vertices.clear();
     this->uvs.clear();
+    this->normals.clear();
 
     // Iterate over all Materials to construct blocks
     for (int z = 0; z < Chunk::SIZE; z++) {
@@ -24,94 +25,149 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
                 const BlockMeta& meta = blockRegistry.get(block);
                 std::vector<MaterialFace> renderedFaces;
     
-                // Front face (0)
-                if (world.isAir(cx + x, cy + y, cz + z + 1)) {
-                    this->vertices.insert(this->vertices.end(), {
-                        1 + x, y, 1 + z,
-                        x, y, 1 + z,
-                        x, 1 + y, 1 + z,
-                        1 + x, y, 1 + z,
-                        x, 1 + y, 1 + z,
-                        1 + x, 1 + y, 1 + z,
-                    });
-                    renderedFaces.push_back(MaterialFace::FRONT);
-                }
-    
-                // Back face (1)
+                // NORTH face
                 if (world.isAir(cx + x, cy + y, cz + z - 1)) {
                     this->vertices.insert(this->vertices.end(), {
-                        x, y, z,
-                        1 + x, y, z,
-                        1 + x, 1 + y, z,
-                        x, y, z,
-                        1 + x, 1 + y, z,
-                        x, 1 + y, z,
+                        x,       y,       z,
+                        x,       1 + y,   z,
+                        1 + x,   1 + y,   z,
+
+                        x,       y,       z,
+                        1 + x,   1 + y,   z,
+                        1 + x,   y,       z,
                     });
-                    renderedFaces.push_back(MaterialFace::BACK);
+                    this->normals.insert(this->normals.end(), {
+                        0.0f, 0.0f, -1.0f,
+                        0.0f, 0.0f, -1.0f,
+                        0.0f, 0.0f, -1.0f,
+                        0.0f, 0.0f, -1.0f,
+                        0.0f, 0.0f, -1.0f,
+                        0.0f, 0.0f, -1.0f,
+                    });
+                    renderedFaces.push_back(MaterialFace::NORTH);
                 }
     
-                // Left face (2)
+                // SOUTH face
+                if (world.isAir(cx + x, cy + y, cz + z + 1)) {
+                    this->vertices.insert(this->vertices.end(), {
+                        1 + x,   y,       1 + z,
+                        1 + x,   1 + y,   1 + z,
+                        x,       1 + y,   1 + z,
+
+                        1 + x,   y,       1 + z,
+                        x,       1 + y,   1 + z,
+                        x,       y,       1 + z,
+                    });
+                    this->normals.insert(this->normals.end(), {
+                        0.0f, 0.0f, 1.0f,
+                        0.0f, 0.0f, 1.0f,
+                        0.0f, 0.0f, 1.0f,
+                        0.0f, 0.0f, 1.0f,
+                        0.0f, 0.0f, 1.0f,
+                        0.0f, 0.0f, 1.0f,
+                    });
+                    renderedFaces.push_back(MaterialFace::SOUTH);
+                }
+    
+                // WEST face
                 if (world.isAir(cx + x - 1, cy + y, cz + z)) {
                     this->vertices.insert(this->vertices.end(), {
-                        x, y, 1 + z,
-                        x, y, z,
-                        x, 1 + y, z,
-                        x, y, 1 + z,
-                        x, 1 + y, z,
-                        x, 1 + y, 1 + z,
+                        x,       y,       1 + z,
+                        x,       1 + y,   1 + z,
+                        x,       1 + y,   z,
+
+                        x,       y,       1 + z,
+                        x,       1 + y,   z,
+                        x,       y,       z,
                     });
-                    renderedFaces.push_back(MaterialFace::LEFT);
+                    this->normals.insert(this->normals.end(), {
+                        -1.0f, 0.0f, 0.0f,
+                        -1.0f, 0.0f, 0.0f,
+                        -1.0f, 0.0f, 0.0f,
+                        -1.0f, 0.0f, 0.0f,
+                        -1.0f, 0.0f, 0.0f,
+                        -1.0f, 0.0f, 0.0f,
+                    });
+                    renderedFaces.push_back(MaterialFace::WEST);
                 }
     
-                // Right face (3)
+                // EAST face
                 if (world.isAir(cx + x + 1, cy + y, cz + z)) {
                     this->vertices.insert(this->vertices.end(), {
-                        1 + x, y, z,
-                        1 + x, y, 1 + z,
-                        1 + x, 1 + y, 1 + z,
-                        1 + x, y, z,
-                        1 + x, 1 + y, 1 + z,
-                        1 + x, 1 + y, z,
+                        1 + x,   y,       z,
+                        1 + x,   1 + y,   z,
+                        1 + x,   1 + y,   1 + z,
+
+                        1 + x,   y,       z,
+                        1 + x,   1 + y,   1 + z,
+                        1 + x,   y,       1 + z,
                     });
-                    renderedFaces.push_back(MaterialFace::RIGHT);
+                    this->normals.insert(this->normals.end(), {
+                        1.0f, 0.0f, 0.0f,
+                        1.0f, 0.0f, 0.0f,
+                        1.0f, 0.0f, 0.0f,
+                        1.0f, 0.0f, 0.0f,
+                        1.0f, 0.0f, 0.0f,
+                        1.0f, 0.0f, 0.0f,
+                    });
+                    renderedFaces.push_back(MaterialFace::EAST);
                 }
     
-                // Top face (4)
+                // UP face
                 if (world.isAir(cx + x, cy + y + 1, cz + z)) {
                     this->vertices.insert(this->vertices.end(), {
-                        x, 1 + y, z,
-                        1 + x, 1 + y, z,
-                        1 + x, 1 + y, 1 + z,
-                        x, 1 + y, z,
-                        1 + x, 1 + y, 1 + z,
-                        x, 1 + y, 1 + z,
+                        x,       1 + y,   z,
+                        x,       1 + y,   1 + z,
+                        1 + x,   1 + y,   1 + z,
+
+                        x,       1 + y,   z,
+                        1 + x,   1 + y,   1 + z,
+                        1 + x,   1 + y,   z,
                     });
-                    renderedFaces.push_back(MaterialFace::TOP);
+                    this->normals.insert(this->normals.end(), {
+                        0.0f, 1.0f, 0.0f,
+                        0.0f, 1.0f, 0.0f,
+                        0.0f, 1.0f, 0.0f,
+                        0.0f, 1.0f, 0.0f,
+                        0.0f, 1.0f, 0.0f,
+                        0.0f, 1.0f, 0.0f,
+                    });
+                    renderedFaces.push_back(MaterialFace::UP);
                 }
     
-                // Bottom face (5)
+                // DOWN face
                 if (world.isAir(cx + x, cy + y - 1, cz + z)) {
                     this->vertices.insert(this->vertices.end(), {
-                        x, y, z,
-                        x, y, 1 + z,
-                        1 + x, y, 1 + z,
-                        x, y, z,
-                        1 + x, y, 1 + z,
-                        1 + x, y, z,
+                        x,       y,       z,
+                        1 + x,   y,       z,
+                        1 + x,   y,       1 + z,
+
+                        x,       y,       z,
+                        1 + x,   y,       1 + z,
+                        x,       y,       1 + z,
                     });
-                    renderedFaces.push_back(MaterialFace::BOTTOM);
+                    this->normals.insert(this->normals.end(), {
+                        0.0f, -1.0f, 0.0f,
+                        0.0f, -1.0f, 0.0f,
+                        0.0f, -1.0f, 0.0f,
+                        0.0f, -1.0f, 0.0f,
+                        0.0f, -1.0f, 0.0f,
+                        0.0f, -1.0f, 0.0f,
+                    });
+                    renderedFaces.push_back(MaterialFace::DOWN);
                 }
     
                 // Add tex offset based on rendered faces
                 for (const auto &face : renderedFaces) {
-                    const auto t = glm::vec2(0.25f * static_cast<float>(meta.atlasFaces[face] % 4), std::floor(static_cast<float>(meta.atlasFaces[face]) / 4) / 4);
+                    const auto faceAtlasTexture = meta.blockFaces.at(face);
+                    const auto t = glm::vec2(0.25f * static_cast<float>(faceAtlasTexture % 4), std::floor(static_cast<float>(faceAtlasTexture) / 4.f) / 4.f);
                     this->uvs.insert(this->uvs.end(), {
-                        t.x, t.y,
-                        0.25f + t.x, t.y,
-                        0.25f + t.x, 0.25f + t.y,
-                        t.x, t.y,
-                        0.25f + t.x, 0.25f + t.y,
-                        t.x, 0.25f + t.y,
+                        t.x,              t.y,
+                        t.x,              0.25f + t.y,
+                        0.25f + t.x,      0.25f + t.y,
+                        t.x,              t.y,
+                        0.25f + t.x,      0.25f + t.y,
+                        0.25f + t.x,      t.y,
                     });
                 }
             }
@@ -124,6 +180,7 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
     // Link datas to VA0 before rendering
     this->VAO.addData<GLint, GL_INT>(this->vertices,0, 3);
     this->VAO.addData<GLfloat, GL_FLOAT>(this->uvs,1, 2);
+    this->VAO.addData<GLfloat, GL_FLOAT>(this->normals,2, 3);
 
     // Unbind VAO
     this->VAO.unbind();

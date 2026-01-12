@@ -7,7 +7,14 @@ BlockRegistry::BlockRegistry()
         "air",
         true,
         0.f,
-        {0,0,0,0,0,0}
+        {
+            {MaterialFace::NORTH, 0},
+            {MaterialFace::SOUTH, 0},
+            {MaterialFace::WEST, 0},
+            {MaterialFace::EAST, 0},
+            {MaterialFace::UP, 0},
+            {MaterialFace::DOWN, 0},
+        }
     });
 
     this->registerBlock({
@@ -15,7 +22,14 @@ BlockRegistry::BlockRegistry()
         "dirt",
         false,
         1.f,
-        {0,0,0,0,0,0}
+        {
+            {MaterialFace::NORTH, 0},
+            {MaterialFace::SOUTH, 0},
+            {MaterialFace::WEST, 0},
+            {MaterialFace::EAST, 0},
+            {MaterialFace::UP, 0},
+            {MaterialFace::DOWN, 0}
+        }
     });
 
     this->registerBlock({
@@ -23,7 +37,14 @@ BlockRegistry::BlockRegistry()
         "grass",
         false,
         1.f,
-        {1, 1, 1, 1, 2, 0}
+        {
+            {MaterialFace::NORTH, 1},
+            {MaterialFace::SOUTH, 1},
+            {MaterialFace::WEST, 1},
+            {MaterialFace::EAST, 1},
+            {MaterialFace::UP, 2},
+            {MaterialFace::DOWN, 0}
+        }
     });
 
     this->registerBlock({
@@ -31,7 +52,14 @@ BlockRegistry::BlockRegistry()
         "moss",
         false,
         1.f,
-        {2, 2, 2, 2, 2, 2}
+        {
+            {MaterialFace::NORTH, 2},
+            {MaterialFace::SOUTH, 2},
+            {MaterialFace::WEST, 2},
+            {MaterialFace::EAST, 2},
+            {MaterialFace::UP, 2},
+            {MaterialFace::DOWN, 2}
+        }
     });
 
     this->registerBlock({
@@ -39,7 +67,14 @@ BlockRegistry::BlockRegistry()
         "cobble",
         false,
         2.f,
-        {3, 3, 3, 3, 3, 3}
+        {
+            {MaterialFace::NORTH, 3},
+            {MaterialFace::SOUTH, 3},
+            {MaterialFace::WEST, 3},
+            {MaterialFace::EAST, 3},
+            {MaterialFace::UP, 3},
+            {MaterialFace::DOWN, 3}
+        }
     });
 
     this->registerBlock({
@@ -47,7 +82,14 @@ BlockRegistry::BlockRegistry()
         "oak_plank",
         false,
         1.5f,
-        {4, 4, 4, 4, 4, 4}
+        {
+            {MaterialFace::NORTH, 4},
+            {MaterialFace::SOUTH, 4},
+            {MaterialFace::WEST, 4},
+            {MaterialFace::EAST, 4},
+            {MaterialFace::UP, 4},
+            {MaterialFace::DOWN, 4}
+        }
     });
 }
 

@@ -50,16 +50,14 @@ Engine::Engine()
     // Create viewport
     glViewport(0, 0, WindowSize.x, WindowSize.y);
 
-    // Enable transparency
+    // Change transparency function
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable( GL_BLEND );
 
     // Enable 3D depth
     glDepthFunc(GL_LEQUAL);
     glEnable(GL_DEPTH_TEST);
 
     // Enable culling
-    glFrontFace(GL_CW);
     glCullFace(GL_BACK);
     glEnable(GL_CULL_FACE);
 
@@ -92,7 +90,7 @@ Engine::Engine()
     );
 
     this->atlas = std::make_unique<Atlas>();
-    this->camera = std::make_unique<Camera>(glm::vec3{16.0f, 26.0f, 35.0f}, this->blockRegistry);
+    this->camera = std::make_unique<Camera>(glm::vec3{8.5f, 17.5f, 20.0f}, this->blockRegistry);
     this->world = std::make_unique<World>(this->blockRegistry);
     this->playerGUI = std::make_unique<GUI>();
 
@@ -196,13 +194,12 @@ void Engine::update() const
 
 void Engine::render() const
 {
-    this->worldShader->use();
-
     // Clear window and buffer (sky : 130,200,229)
     glClearColor(0.509f, 0.784f, 0.898f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Render World (chunks)
+    this->worldShader->use();
     this->atlas->bind();
     this->world->render(*this->worldShader);
 
@@ -210,8 +207,7 @@ void Engine::render() const
     GUI::createImGuiFrame();
     GUI::renderImGuiFrame(*this->camera, this->blockRegistry);
 
-    // Render Crosshair
-    // this->playerGUI->renderCrosshair();
+    // Render GUI
     this->playerGUI->render();
 
     // Update buffer
@@ -225,7 +221,9 @@ void Engine::setViewMatrix() const
     const glm::mat4 view = glm::lookAt(cameraPos, cameraPos + forward, {0,1,0});
     const glm::mat4 projection = glm::perspective(Camera::FOV, this->aspectRatio, 0.1f, 100.f);
 
-    this->worldShader->setUniformMat4("ViewMatrix", projection * view);
+    this->worldShader->setUniformMat4("ProjectionMatrix", projection);
+    this->worldShader->setUniformMat4("ViewMatrix", view);
+    this->worldShader->setUniformVec3("CameraPosition", cameraPos);
 }
 
 // Statics callback

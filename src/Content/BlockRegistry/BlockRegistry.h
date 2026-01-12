@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <unordered_map>
+#include <map>
 #include <limits>
 
 using BlockAtlasFaces = std::array<uint8_t, 6>;
@@ -12,21 +13,23 @@ using Material = uint16_t;
 
 enum MaterialFace : char
 {
-    FRONT = 0,
-    BACK,
-    LEFT,
-    RIGHT,
-    TOP,
-    BOTTOM
+    NORTH = 0,
+    SOUTH,
+    WEST,
+    EAST,
+    UP,
+    DOWN
 };
+
+using BlockFaces = std::map<MaterialFace, uint8_t>;
 
 struct BlockMeta
 {
-    std::string registerNamespace; // core, mod_name, etc
-    std::string blockName; // air, dirt, cobble, etc
+    std::string registerNamespace; // "core", "mod_name", etc
+    std::string blockName; // "air", "dirt", "cobble", etc
     bool transparent;
     float hardness;
-    BlockAtlasFaces atlasFaces;
+    BlockFaces blockFaces;
 
     [[nodiscard]] std::string getFullName() const
     {

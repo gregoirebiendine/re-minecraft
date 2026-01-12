@@ -183,7 +183,7 @@ void World::render(const Shader& worldShader)
         ChunkMesh& mesh = meshManager.get(*chunk);
 
         const glm::mat4 model = chunk->getChunkModel();
-        worldShader.setUniformMat4("ViewModel", model);
+        worldShader.setUniformMat4("ModelMatrix", model);
 
         mesh.render();
     }
