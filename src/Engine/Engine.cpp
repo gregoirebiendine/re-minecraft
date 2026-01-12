@@ -89,12 +89,13 @@ Engine::Engine()
         "../resources/shaders/WorldShader/world.frag"
     );
 
+    this->textureManager = std::make_unique<TextureManager>();
     this->atlas = std::make_unique<Atlas>();
-    this->camera = std::make_unique<Camera>(glm::vec3{8.5f, 17.5f, 20.0f}, this->blockRegistry);
+    this->camera = std::make_unique<Camera>(glm::vec3{8.5f, 17.5f, 8.5f}, this->blockRegistry);
     this->world = std::make_unique<World>(this->blockRegistry);
     this->playerGUI = std::make_unique<GUI>();
 
-    if (!this->worldShader || !this->world || !this->camera || !this->atlas || !this->playerGUI)
+    if (!this->worldShader || !this->world || !this->camera || !this->atlas || !this->playerGUI || !this->textureManager)
         throw std::runtime_error("Failed to initialize pointers");
 }
 

@@ -24,6 +24,7 @@ set(
         src/Engine/Render/VBO/VBO.cpp
         src/Engine/Render/Shader/Shader.cpp
         src/Engine/Render/Atlas/Atlas.cpp
+        src/Engine/Render/TextureManager/TextureManager.cpp
         src/Content/ChunkMesh/ChunkMesh.cpp
         src/Content/ChunkMeshManager/ChunkMeshManager.cpp
         src/Content/Chunk/Chunk.cpp
@@ -45,6 +46,7 @@ set(
         ${CMAKE_SOURCE_DIR}/src/Engine/Render/VBO
         ${CMAKE_SOURCE_DIR}/src/Engine/Render/Shader
         ${CMAKE_SOURCE_DIR}/src/Engine/Render/Atlas
+        ${CMAKE_SOURCE_DIR}/src/Engine/Render/TextureManager
         ${CMAKE_SOURCE_DIR}/src/Content/ChunkMesh
         ${CMAKE_SOURCE_DIR}/src/Content/ChunkMeshManager
         ${CMAKE_SOURCE_DIR}/src/Content/Chunk

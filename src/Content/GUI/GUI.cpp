@@ -28,7 +28,7 @@ void GUI::createCrosshair() {
         mid.y - (THICKNESS / 2),
         (SIZE / 2),
         THICKNESS,
-        {200, 200, 200, 0.7f}
+        {200, 200, 200, 0.8f}
     );
     // Hor 2
     this->createRectangle(
@@ -36,7 +36,7 @@ void GUI::createCrosshair() {
         mid.y - (THICKNESS / 2),
         (SIZE / 2),
         THICKNESS,
-        {200, 200, 200, 0.7f}
+        {200, 200, 200, 0.8f}
     );
 
     // Vert 1
@@ -116,14 +116,12 @@ void GUI::createImGuiFrame()
 void GUI::renderImGuiFrame(const Camera& camera, const BlockRegistry& blockRegistry)
 {
     const auto cameraPos = camera.getPosition();
-    const auto cameraForward = camera.getForwardVector();
     const auto selectedBlock = camera.getSelectedMaterial();
-    const auto facing = GUI::forwardToCardinal(cameraForward);
+    const auto facing = GUI::forwardToCardinal(camera.getForwardVector());
 
     ImGui::Begin("Debug");
     ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
     ImGui::Text("X: %.2f, Y: %.2f, Z: %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
-    ImGui::Text("Forward vector : %.2f, %.2f, %.2f", cameraForward.x, cameraForward.y, cameraForward.z);
     ImGui::Text("Facing : %s", facing.c_str());
     ImGui::Text("Selected block : %s", blockRegistry.get(selectedBlock).getName().c_str());
     ImGui::End();

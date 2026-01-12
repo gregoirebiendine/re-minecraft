@@ -22,6 +22,7 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
+#include "TextureManager.h"
 #include "Atlas.h"
 #include "Shader.h"
 #include "World.h"
@@ -39,6 +40,7 @@ class Engine {
     BlockRegistry blockRegistry;
     InputState inputs;
 
+    std::unique_ptr<TextureManager> textureManager;
     std::unique_ptr<Shader> worldShader;
     std::unique_ptr<Atlas> atlas;
     std::unique_ptr<World> world;
