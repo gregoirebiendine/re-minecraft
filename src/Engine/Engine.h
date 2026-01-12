@@ -46,7 +46,7 @@ class Engine {
     std::unique_ptr<GUI> playerGUI;
 
     public:
-        static constexpr glm::ivec2 WindowSize{1920, 1080};
+        static constexpr glm::ivec2 WindowSize{1600, 900};
 
         Engine();
         ~Engine();

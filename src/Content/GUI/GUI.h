@@ -47,8 +47,9 @@ struct DigitalColor
 
 class GUI
 {
-    static constexpr float SIZE = 26.f;
+    static constexpr float SIZE = 20.f;
     static constexpr float THICKNESS = 4.f;
+    static constexpr float OFFSET = 3.f;
 
     std::unique_ptr<Shader> shader;
 
@@ -58,6 +59,7 @@ class GUI
 
     static float toScreenSpace(float v, float minIn, float maxIn);
     static float percent(float baseValue, float percentage);
+    static std::string forwardToCardinal(const glm::vec3& forwardVector);
 
     void createCrosshair();
     void createRectangle(float x, float y, float width, float height, DigitalColor color);
