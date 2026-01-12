@@ -38,11 +38,11 @@ BlockRegistry::BlockRegistry()
         false,
         1.f,
         {
-            {MaterialFace::NORTH, 2},
-            {MaterialFace::SOUTH, 5},
-            {MaterialFace::WEST, 3},
-            {MaterialFace::EAST, 4},
-            {MaterialFace::UP, 1},
+            {MaterialFace::NORTH, 1},
+            {MaterialFace::SOUTH, 1},
+            {MaterialFace::WEST, 1},
+            {MaterialFace::EAST, 1},
+            {MaterialFace::UP, 2},
             {MaterialFace::DOWN, 0}
         }
     });

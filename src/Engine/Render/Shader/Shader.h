@@ -3,6 +3,8 @@
 
 #include <filesystem>
 #include <fstream>
+#include <iostream>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -11,6 +13,7 @@
 
 class Shader {
     static std::string loadFile(const std::string& path);
+    static void checkCompileErrors(GLuint shader, const char* name);
 
     public:
         GLuint ID;

@@ -28,12 +28,13 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
                 // NORTH face
                 if (world.isAir(cx + x, cy + y, cz + z - 1)) {
                     this->vertices.insert(this->vertices.end(), {
-                        x, y, z,
-                        1 + x, y, z,
-                        1 + x, 1 + y, z,
-                        x, y, z,
-                        1 + x, 1 + y, z,
-                        x, 1 + y, z,
+                        x,       y,       z,
+                        x,       1 + y,   z,
+                        1 + x,   1 + y,   z,
+
+                        x,       y,       z,
+                        1 + x,   1 + y,   z,
+                        1 + x,   y,       z,
                     });
                     this->normals.insert(this->normals.end(), {
                         0.0f, 0.0f, -1.0f,
@@ -49,12 +50,13 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
                 // SOUTH face
                 if (world.isAir(cx + x, cy + y, cz + z + 1)) {
                     this->vertices.insert(this->vertices.end(), {
-                        1 + x, y, 1 + z,
-                        x, y, 1 + z,
-                        x, 1 + y, 1 + z,
-                        1 + x, y, 1 + z,
-                        x, 1 + y, 1 + z,
-                        1 + x, 1 + y, 1 + z,
+                        1 + x,   y,       1 + z,
+                        1 + x,   1 + y,   1 + z,
+                        x,       1 + y,   1 + z,
+
+                        1 + x,   y,       1 + z,
+                        x,       1 + y,   1 + z,
+                        x,       y,       1 + z,
                     });
                     this->normals.insert(this->normals.end(), {
                         0.0f, 0.0f, 1.0f,
@@ -70,12 +72,13 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
                 // WEST face
                 if (world.isAir(cx + x - 1, cy + y, cz + z)) {
                     this->vertices.insert(this->vertices.end(), {
-                        x, y, 1 + z,
-                        x, y, z,
-                        x, 1 + y, z,
-                        x, y, 1 + z,
-                        x, 1 + y, z,
-                        x, 1 + y, 1 + z,
+                        x,       y,       1 + z,
+                        x,       1 + y,   1 + z,
+                        x,       1 + y,   z,
+
+                        x,       y,       1 + z,
+                        x,       1 + y,   z,
+                        x,       y,       z,
                     });
                     this->normals.insert(this->normals.end(), {
                         -1.0f, 0.0f, 0.0f,
@@ -91,12 +94,13 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
                 // EAST face
                 if (world.isAir(cx + x + 1, cy + y, cz + z)) {
                     this->vertices.insert(this->vertices.end(), {
-                        1 + x, y, z,
-                        1 + x, y, 1 + z,
-                        1 + x, 1 + y, 1 + z,
-                        1 + x, y, z,
-                        1 + x, 1 + y, 1 + z,
-                        1 + x, 1 + y, z,
+                        1 + x,   y,       z,
+                        1 + x,   1 + y,   z,
+                        1 + x,   1 + y,   1 + z,
+
+                        1 + x,   y,       z,
+                        1 + x,   1 + y,   1 + z,
+                        1 + x,   y,       1 + z,
                     });
                     this->normals.insert(this->normals.end(), {
                         1.0f, 0.0f, 0.0f,
@@ -112,12 +116,13 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
                 // UP face
                 if (world.isAir(cx + x, cy + y + 1, cz + z)) {
                     this->vertices.insert(this->vertices.end(), {
-                        x, 1 + y, z,
-                        1 + x, 1 + y, z,
-                        1 + x, 1 + y, 1 + z,
-                        x, 1 + y, z,
-                        1 + x, 1 + y, 1 + z,
-                        x, 1 + y, 1 + z,
+                        x,       1 + y,   z,
+                        x,       1 + y,   1 + z,
+                        1 + x,   1 + y,   1 + z,
+
+                        x,       1 + y,   z,
+                        1 + x,   1 + y,   1 + z,
+                        1 + x,   1 + y,   z,
                     });
                     this->normals.insert(this->normals.end(), {
                         0.0f, 1.0f, 0.0f,
@@ -133,12 +138,13 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
                 // DOWN face
                 if (world.isAir(cx + x, cy + y - 1, cz + z)) {
                     this->vertices.insert(this->vertices.end(), {
-                        x, y, z,
-                        x, y, 1 + z,
-                        1 + x, y, 1 + z,
-                        x, y, z,
-                        1 + x, y, 1 + z,
-                        1 + x, y, z,
+                        x,       y,       z,
+                        1 + x,   y,       z,
+                        1 + x,   y,       1 + z,
+
+                        x,       y,       z,
+                        1 + x,   y,       1 + z,
+                        x,       y,       1 + z,
                     });
                     this->normals.insert(this->normals.end(), {
                         0.0f, -1.0f, 0.0f,
@@ -156,12 +162,12 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
                     const auto faceAtlasTexture = meta.blockFaces.at(face);
                     const auto t = glm::vec2(0.25f * static_cast<float>(faceAtlasTexture % 4), std::floor(static_cast<float>(faceAtlasTexture) / 4.f) / 4.f);
                     this->uvs.insert(this->uvs.end(), {
-                        t.x, t.y,
-                        0.25f + t.x, t.y,
-                        0.25f + t.x, 0.25f + t.y,
-                        t.x, t.y,
-                        0.25f + t.x, 0.25f + t.y,
-                        t.x, 0.25f + t.y,
+                        t.x,              t.y,
+                        t.x,              0.25f + t.y,
+                        0.25f + t.x,      0.25f + t.y,
+                        t.x,              t.y,
+                        0.25f + t.x,      0.25f + t.y,
+                        0.25f + t.x,      t.y,
                     });
                 }
             }

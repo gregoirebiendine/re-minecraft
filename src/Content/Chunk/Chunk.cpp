@@ -3,7 +3,6 @@
 Chunk::Chunk(const ChunkPos pos)
 {
     this->_position = pos;
-    this->_blocks.fill(2);
 }
 
 glm::mat<4, 4, float> Chunk::getChunkModel() const
