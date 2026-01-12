@@ -2,7 +2,6 @@
 #define ENGINE_H
 
 #define GLM_ENABLE_EXPERIMENTAL
-// #define UNUSED(expr) (void)(expr)
 #define UNUSED __attribute__ ((unused))
 
 #include <iostream>

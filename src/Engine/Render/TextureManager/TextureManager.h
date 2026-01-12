@@ -18,6 +18,7 @@ class TextureManager
         TextureManager();
         ~TextureManager();
 
+        static void activate() ;
         void bind() const;
 };
 

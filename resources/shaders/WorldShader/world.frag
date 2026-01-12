@@ -1,18 +1,20 @@
 #version 460 core
 
-in vec2 texCoord;
 in vec3 currentPos;
+in vec2 currentUvs;
 in vec3 currentNormal;
+flat in uint currentTexIndex;
 
 out vec4 FragColor;
 
 uniform sampler2D tex0;
+uniform sampler2DArray Textures;
 uniform vec3 CameraPosition;
 
 void main()
 {
     // ambient lighting
-    float ambient = 0.4f;
+    float ambient = 0.5f;
     vec3 lightPos = vec3(0.f, 256.f, 64.f);
 
     // diffuse lighting
@@ -20,5 +22,6 @@ void main()
     vec3 lightDirection = normalize(lightPos - currentPos);
     float diffuse = max(dot(normal, lightDirection), 0.0f);
 
-    FragColor = texture(tex0, texCoord) * vec4(1.0f, 1.0f, 1.0f, 1.0f) * (diffuse + ambient);
+//    FragColor = texture(tex0, currentUvs) * vec4(1.0f, 1.0f, 1.0f, 1.0f) * (diffuse + ambient);
+    FragColor = texture(Textures, vec3(currentUvs, currentTexIndex)) * vec4(1.0f, 1.0f, 1.0f, 1.0f) * (diffuse + ambient);
 }

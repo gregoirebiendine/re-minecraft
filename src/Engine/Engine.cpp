@@ -201,7 +201,11 @@ void Engine::render() const
 
     // Render World (chunks)
     this->worldShader->use();
-    this->atlas->bind();
+
+    TextureManager::activate();
+    this->textureManager->bind();
+    this->worldShader->setUniformInt("Textures", 0);
+    // this->atlas->bind();
     this->world->render(*this->worldShader);
 
     // Render ImGui Frame
