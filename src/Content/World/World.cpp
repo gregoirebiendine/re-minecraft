@@ -1,11 +1,14 @@
 #include "World.h"
 
-#include <utility>
-
-World::World(BlockRegistry  _blockRegistry, const TextureRegistry& _textureRegistry) :
+World::World(BlockRegistry _blockRegistry, const TextureRegistry& _textureRegistry) :
     blockRegistry(std::move(_blockRegistry)),
     textureRegistry(_textureRegistry)
 {
+    this->chunkManager = std::make_unique<ChunkManager>();
+
+    if (!this->chunkManager)
+        throw std::runtime_error("ChunkManager failed to load");
+
     this->noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2S);
     this->noise.SetFrequency(0.030);
     this->noise.SetSeed(3120);
@@ -13,7 +16,7 @@ World::World(BlockRegistry  _blockRegistry, const TextureRegistry& _textureRegis
     for (int cx = -1; cx <= 1; cx++) {
         for (int cz = -1; cz <= 1; cz++) {
             for (int cy = 0; cy <= 1; cy++) {
-                Chunk& chunk = this->getOrCreateChunk(cx, cy, cz);
+                Chunk& chunk = this->chunkManager->getOrCreateChunk(cx, cy, cz);
                 this->generateChunkTerrain(chunk);
             }
         }
@@ -21,38 +24,16 @@ World::World(BlockRegistry  _blockRegistry, const TextureRegistry& _textureRegis
 }
 
 // World lifecycle
-Chunk* World::getChunk(const int cx, const int cy, const int cz)
-{
-    const ChunkPos pos{cx, cy, cz};
-
-    const auto it = chunks.find(pos);
-    return it != chunks.end() ? it->second.get() : nullptr;
-}
-
-Chunk& World::getOrCreateChunk(const int cx, const int cy, const int cz)
-{
-    const ChunkPos pos{cx, cy, cz};
-
-    std::unique_ptr<Chunk>& chunk = this->chunks[pos];
-
-    if (!chunk)
-    {
-        chunk = std::make_unique<Chunk>(pos);
-        this->markNeighborsDirty(pos);
-    }
-    return *chunk;
-}
-
 Material World::getBlock(const int wx, const int wy, const int wz) const
 {
     const ChunkPos cp = blockToChunk(wx, wy, wz);
-    const auto it = chunks.find(cp);
+    const Chunk* chunk = this->chunkManager->getChunk(cp.x, cp.y, cp.z);
 
-    if (it == chunks.end())
+    if (!chunk)
         return this->blockRegistry.getByName("core:air");
 
     const auto [x, y, z] = blockToLocal(wx, wy, wz);
-    return it->second->getBlock(x, y, z);
+    return chunk->getBlock(x, y, z);
 }
 
 bool World::isAir(const int wx, const int wy, const int wz) const
@@ -60,63 +41,25 @@ bool World::isAir(const int wx, const int wy, const int wz) const
     return this->blockRegistry.isEqual(this->getBlock(wx, wy, wz), "core:air");
 }
 
-bool World::chunkExist(const int cx, const int cy, const int cz) const
-{
-    const ChunkPos pos{cx, cy, cz};
-    return this->chunks.contains(pos);
-}
-
-void World::setBlock(const int wx, const int wy, const int wz, const Material id)
+void World::setBlock(const int wx, const int wy, const int wz, const Material id) const
 {
     const auto cp = blockToChunk(wx, wy, wz);
-    Chunk& chunk = getOrCreateChunk(cp.x, cp.y, cp.z);
+    Chunk& chunk = this->chunkManager->getOrCreateChunk(cp.x, cp.y, cp.z);
 
     const auto [x, y, z] = blockToLocal(wx, wy, wz);
     chunk.setBlock(x, y, z, id);
 
     if (x == 0 || x == Chunk::SIZE - 1 || y == 0 || y == Chunk::SIZE - 1 || z == 0 || z == Chunk::SIZE - 1)
-        this->markNeighborsDirty(cp, BlockPos({x,y,z}));
+        this->chunkManager->markNeighborsDirty(cp, BlockPos({x,y,z}));
 }
 
-void World::fill(const glm::ivec3 from, const glm::ivec3 to, const Material id)
-{
+void World::fill(const glm::ivec3 from, const glm::ivec3 to, const Material id) const {
     for (int z = from.z; z <= to.z; ++z)
         for (int y = from.y; y <= to.y; ++y)
             for (int x = from.x; x <= to.x; ++x)
             {
                 this->setBlock(x, y, z, id);
             }
-}
-
-void World::markNeighborsDirty(const ChunkPos& cp, const std::optional<BlockPos>& bp)
-{
-    std::vector<glm::ivec3> neighbors;
-
-    if (bp.has_value())
-    {
-        const auto v = bp.value();
-        if (v.x == 0)                  neighbors.emplace_back(-1, 0, 0);
-        if (v.x == Chunk::SIZE - 1)    neighbors.emplace_back(1, 0, 0);
-        if (v.y == 0)                  neighbors.emplace_back(0, -1, 0);
-        if (v.y == Chunk::SIZE - 1)    neighbors.emplace_back(0, 1, 0);
-        if (v.z == 0)                  neighbors.emplace_back(0, 0, -1);
-        if (v.z == Chunk::SIZE - 1)    neighbors.emplace_back(0, 0, 1);
-    } else
-    {
-        neighbors = {
-            { 1, 0, 0}, {-1, 0, 0},
-            { 0, 1, 0}, { 0,-1, 0},
-            { 0, 0, 1}, { 0, 0,-1},
-        };
-    }
-
-
-    for (auto& n : neighbors) {
-        const ChunkPos pos{cp.x + n[0], cp.y + n[1], cp.z + n[2]};
-
-        if (const auto chunk = this->getChunk(pos.x, pos.y, pos.z))
-            chunk->setDirty(true);
-    }
 }
 
 
@@ -160,9 +103,11 @@ void World::generateChunkTerrain(Chunk& chunk) const
 // Updates
 void World::update()
 {
-    for (const auto& chunk : this->chunks | std::views::values)
+    const auto chunks = this->chunkManager->getChunks();
+
+    for (const auto& chunk : chunks | std::views::values)
     {
-        ChunkMesh& mesh = meshManager.get(*chunk);
+        ChunkMesh& mesh = this->meshManager.get(*chunk);
 
         if (chunk->isDirty())
             mesh.rebuild(*chunk, *this);
@@ -171,9 +116,11 @@ void World::update()
 
 void World::render(const Shader& worldShader)
 {
+    const auto chunks = this->chunkManager->getChunks();
+
     worldShader.use();
 
-    for (const auto& chunk : this->chunks | std::views::values)
+    for (const auto& chunk : chunks | std::views::values)
     {
         ChunkMesh& mesh = meshManager.get(*chunk);
 

@@ -4,17 +4,19 @@
 #include <unordered_map>
 #include <memory>
 #include <ranges>
+#include <utility>
 
 #include <FastNoiseLite.h>
 
 #include "BlockRegistry.h"
 #include "TextureRegistry.h"
+#include "ChunkManager.h"
 #include "ChunkMeshManager.h"
 #include "Chunk.h"
 #include "Shader.h"
 
 class World {
-    std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash> chunks;
+    std::unique_ptr<ChunkManager> chunkManager;
     ChunkMeshManager meshManager;
 
     BlockRegistry blockRegistry;
@@ -30,10 +32,9 @@ class World {
         const BlockRegistry& getBlockRegistry() const;
         const TextureRegistry& getTextureRegistry() const;
 
-        // Getters
-        Chunk& getOrCreateChunk(int cx, int cy, int cz);
-        [[nodiscard]] Chunk* getChunk(int cx, int cy, int cz);
-        [[nodiscard]] bool chunkExist(int cx, int cy, int cz) const;
+        // Lifecycle
+        void fill(glm::ivec3 from, glm::ivec3 to, Material id) const;
+        void setBlock(int wx, int wy, int wz, Material id) const;
         [[nodiscard]] Material getBlock(int wx, int wy, int wz) const;
         [[nodiscard]] bool isAir(int wx, int wy, int wz) const;
 
@@ -41,11 +42,7 @@ class World {
         int getTerrainHeight(int worldX, int worldZ) const;
         void generateChunkTerrain(Chunk& chunk) const;
 
-        // Setters
-        void setBlock(int wx, int wy, int wz, Material id);
-        void fill(glm::ivec3 from, glm::ivec3 to, Material id);
-        void markNeighborsDirty(const ChunkPos& cp, const std::optional<BlockPos>& bp = std::nullopt);
-
+        // Updates
         void update();
         void render(const Shader& worldShader);
 };

@@ -25,6 +25,7 @@ set(
         src/Engine/Render/Shader/Shader.cpp
         src/Content/ChunkMesh/ChunkMesh.cpp
         src/Content/ChunkMeshManager/ChunkMeshManager.cpp
+        src/Content/ChunkManager/ChunkManager.cpp
         src/Content/Chunk/Chunk.cpp
         src/Content/World/World.cpp
         src/Content/BlockRegistry/BlockRegistry.cpp
@@ -47,6 +48,7 @@ set(
         ${CMAKE_SOURCE_DIR}/src/Content/ChunkMesh
         ${CMAKE_SOURCE_DIR}/src/Content/ChunkMeshManager
         ${CMAKE_SOURCE_DIR}/src/Content/Chunk
+        ${CMAKE_SOURCE_DIR}/src/Content/ChunkManager/
         ${CMAKE_SOURCE_DIR}/src/Content/World
         ${CMAKE_SOURCE_DIR}/src/Content/BlockRegistry
         ${CMAKE_SOURCE_DIR}/src/Content/TextureRegistry
