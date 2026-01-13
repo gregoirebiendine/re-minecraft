@@ -7,21 +7,20 @@ flat in uint currentTexIndex;
 
 out vec4 FragColor;
 
-uniform sampler2D tex0;
 uniform sampler2DArray Textures;
-uniform vec3 CameraPosition;
+//uniform vec3 CameraPosition;
 
 void main()
 {
     // ambient lighting
-    float ambient = 0.5f;
-    vec3 lightPos = vec3(0.f, 256.f, 64.f);
+    float ambient = 0.4f;
+    vec3 lightPos = vec3(8.f, 256.f, 64.f);
 
     // diffuse lighting
     vec3 normal = normalize(currentNormal);
     vec3 lightDirection = normalize(lightPos - currentPos);
     float diffuse = max(dot(normal, lightDirection), 0.0f);
 
-//    FragColor = texture(tex0, currentUvs) * vec4(1.0f, 1.0f, 1.0f, 1.0f) * (diffuse + ambient);
-    FragColor = texture(Textures, vec3(currentUvs, currentTexIndex)) * vec4(1.0f, 1.0f, 1.0f, 1.0f) * (diffuse + ambient);
+    FragColor = texture(Textures, vec3(currentUvs, currentTexIndex)) * vec4(1.f, 1.f, 1.f, 1.f) * (diffuse + ambient);
+//    FragColor = texture(Textures, vec3(currentUvs, currentTexIndex)) * (diffuse + ambient);
 }

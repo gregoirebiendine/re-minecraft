@@ -22,7 +22,6 @@
 #include <glm/gtx/vector_angle.hpp>
 
 #include "TextureManager.h"
-#include "Atlas.h"
 #include "Shader.h"
 #include "World.h"
 #include "Camera.h"
@@ -41,13 +40,14 @@ class Engine {
 
     std::unique_ptr<TextureManager> textureManager;
     std::unique_ptr<Shader> worldShader;
-    std::unique_ptr<Atlas> atlas;
+
     std::unique_ptr<World> world;
     std::unique_ptr<Camera> camera;
+
     std::unique_ptr<GUI> playerGUI;
 
     public:
-        static constexpr glm::ivec2 WindowSize{1600, 900};
+        static constexpr glm::ivec2 WindowSize{1920, 1080};
 
         Engine();
         ~Engine();

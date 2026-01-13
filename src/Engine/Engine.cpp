@@ -90,13 +90,14 @@ Engine::Engine()
     );
 
     this->textureManager = std::make_unique<TextureManager>();
-    this->atlas = std::make_unique<Atlas>();
     this->camera = std::make_unique<Camera>(glm::vec3{8.5f, 17.5f, 8.5f}, this->blockRegistry);
     this->world = std::make_unique<World>(this->blockRegistry);
     this->playerGUI = std::make_unique<GUI>();
 
-    if (!this->worldShader || !this->world || !this->camera || !this->atlas || !this->playerGUI || !this->textureManager)
+    if (!this->worldShader || !this->world || !this->camera || !this->playerGUI || !this->textureManager)
         throw std::runtime_error("Failed to initialize pointers");
+
+    this->worldShader->setUniformInt("Textures", 0);
 }
 
 Engine::~Engine() {
@@ -201,11 +202,8 @@ void Engine::render() const
 
     // Render World (chunks)
     this->worldShader->use();
-
-    TextureManager::activate();
     this->textureManager->bind();
-    this->worldShader->setUniformInt("Textures", 0);
-    // this->atlas->bind();
+    // this->worldShader->setUniformInt("Textures", 0);
     this->world->render(*this->worldShader);
 
     // Render ImGui Frame
@@ -228,7 +226,7 @@ void Engine::setViewMatrix() const
 
     this->worldShader->setUniformMat4("ProjectionMatrix", projection);
     this->worldShader->setUniformMat4("ViewMatrix", view);
-    this->worldShader->setUniformVec3("CameraPosition", cameraPos);
+    // this->worldShader->setUniformVec3("CameraPosition", cameraPos);
 }
 
 // Statics callback

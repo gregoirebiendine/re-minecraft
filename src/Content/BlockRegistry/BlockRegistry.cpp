@@ -79,7 +79,7 @@ BlockRegistry::BlockRegistry()
 
     this->registerBlock({
         "core",
-        "oak_plank",
+        "stone",
         false,
         1.5f,
         {
@@ -89,6 +89,21 @@ BlockRegistry::BlockRegistry()
             {MaterialFace::EAST, 4},
             {MaterialFace::UP, 4},
             {MaterialFace::DOWN, 4}
+        }
+    });
+
+    this->registerBlock({
+        "core",
+        "oak_plank",
+        false,
+        1.5f,
+        {
+            {MaterialFace::NORTH, 5},
+            {MaterialFace::SOUTH, 5},
+            {MaterialFace::WEST, 5},
+            {MaterialFace::EAST, 5},
+            {MaterialFace::UP, 5},
+            {MaterialFace::DOWN, 5}
         }
     });
 }

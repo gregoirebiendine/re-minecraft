@@ -8,7 +8,6 @@
 #include <map>
 #include <limits>
 
-using BlockAtlasFaces = std::array<uint8_t, 6>;
 using Material = uint16_t;
 
 enum MaterialFace : char
@@ -21,7 +20,7 @@ enum MaterialFace : char
     DOWN
 };
 
-using BlockFaces = std::map<MaterialFace, uint8_t>;
+using BlockFaces = std::map<MaterialFace, uint16_t>;
 
 struct BlockMeta
 {
@@ -44,6 +43,15 @@ struct BlockMeta
     [[nodiscard]] std::string getName() const
     {
         return blockName;
+    }
+
+    [[nodiscard]] uint16_t getFaceTexture(const MaterialFace& face) const
+    {
+        const auto it = blockFaces.find(face);
+
+        if (it == blockFaces.end())
+            return 0;
+        return it->second;
     }
 };
 

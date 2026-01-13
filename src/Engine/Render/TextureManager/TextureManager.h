@@ -10,6 +10,8 @@
 #include <GLFW/glfw3.h>
 #include <stbi/stb_image.h>
 
+namespace fs = std::filesystem;
+
 class TextureManager
 {
     GLuint ID{};

@@ -18,7 +18,7 @@ class ChunkMesh
         ChunkMesh() = default;
         ~ChunkMesh() = default;
 
-        void rebuild(Chunk& chunk, const World& world, const BlockRegistry& blockRegistry);
+        void rebuild(Chunk& chunk, const World& world);
         void render() const;
 
     private:
@@ -26,6 +26,7 @@ class ChunkMesh
         std::vector<GLint> vertices;
         std::vector<GLfloat> uvs;
         std::vector<GLfloat> normals;
+        std::vector<GLint> textureIndexes;
 };
 
 

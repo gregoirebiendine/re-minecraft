@@ -4,21 +4,21 @@
 
 World::World(BlockRegistry blockRegistry) : blockRegistry(std::move(blockRegistry))
 {
-    FastNoiseLite noise;
-    noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2S);
-    noise.SetFrequency(0.030);
-    noise.SetSeed(3120);
+    this->noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2S);
+    this->noise.SetFrequency(0.030);
+    this->noise.SetSeed(3120);
 
     for (int cx = -1; cx <= 1; cx++) {
         for (int cz = -1; cz <= 1; cz++) {
             for (int cy = 0; cy <= 1; cy++) {
                 Chunk& chunk = this->getOrCreateChunk(cx, cy, cz);
-                generateChunkTerrain(chunk, noise);
+                this->generateChunkTerrain(chunk);
             }
         }
     }
 }
 
+// World lifecycle
 Chunk* World::getChunk(const int cx, const int cy, const int cz)
 {
     const ChunkPos pos{cx, cy, cz};
@@ -125,16 +125,17 @@ void World::markNeighborsDirty(const ChunkPos& cp, const std::optional<BlockPos>
 }
 
 
-int World::getTerrainHeight(const int worldX, const int worldZ, const FastNoiseLite &noise)
+// Terrain
+int World::getTerrainHeight(const int worldX, const int worldZ) const
 {
-    const float n = noise.GetNoise(static_cast<float>(worldX), static_cast<float>(worldZ));
+    const float n = this->noise.GetNoise(static_cast<float>(worldX), static_cast<float>(worldZ));
     constexpr int baseHeight = 10;
     constexpr int amplitude = 8;
 
     return baseHeight + static_cast<int>(n * amplitude);
 }
 
-void World::generateChunkTerrain(Chunk& chunk, const FastNoiseLite &noise) const
+void World::generateChunkTerrain(Chunk& chunk) const
 {
     for (int x = 0; x < Chunk::SIZE; x++) {
         for (int z = 0; z < Chunk::SIZE; z++) {
@@ -142,7 +143,7 @@ void World::generateChunkTerrain(Chunk& chunk, const FastNoiseLite &noise) const
 
             const int wx = cx * Chunk::SIZE + x;
             const int wz = cz * Chunk::SIZE + z;
-            const int height = getTerrainHeight(wx, wz, noise);
+            const int height = this->getTerrainHeight(wx, wz);
 
             for (int y = 0; y < Chunk::SIZE; y++) {
                 int wy = cy * Chunk::SIZE + y;
@@ -161,6 +162,7 @@ void World::generateChunkTerrain(Chunk& chunk, const FastNoiseLite &noise) const
 }
 
 
+// Updates
 void World::update()
 {
     for (const auto [x, y, z] : this->dirtyChunks)
@@ -168,7 +170,7 @@ void World::update()
         Chunk* chunk = this->getChunk(x, y, z);
 
         ChunkMesh& mesh = meshManager.get(*chunk);
-        mesh.rebuild(*chunk, *this, this->blockRegistry);
+        mesh.rebuild(*chunk, *this);
     }
 
     this->dirtyChunks.clear();
@@ -188,6 +190,14 @@ void World::render(const Shader& worldShader)
         mesh.render();
     }
 }
+
+
+// Others
+const BlockRegistry& World::getBlockRegistry() const
+{
+    return this->blockRegistry;
+}
+
 
 // Statics
 ChunkPos World::blockToChunk(const int wx, const int wy, const int wz)

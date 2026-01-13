@@ -17,12 +17,15 @@ class World {
     std::vector<ChunkPos> dirtyChunks;
     ChunkMeshManager meshManager;
     BlockRegistry blockRegistry;
+    FastNoiseLite noise;
 
     static ChunkPos blockToChunk(int wx, int wy, int wz);
     static BlockPos blockToLocal(int wx, int wy, int wz);
 
     public:
         explicit World(BlockRegistry blockRegistry);
+
+        const BlockRegistry& getBlockRegistry() const;
 
         // Getters
         Chunk& getOrCreateChunk(int cx, int cy, int cz);
@@ -32,8 +35,8 @@ class World {
         [[nodiscard]] bool isAir(int wx, int wy, int wz) const;
 
         // Terrain
-        static int getTerrainHeight(int worldX, int worldZ, const FastNoiseLite &noise);
-        void generateChunkTerrain(Chunk& chunk, const FastNoiseLite &noise) const;
+        int getTerrainHeight(int worldX, int worldZ) const;
+        void generateChunkTerrain(Chunk& chunk) const;
 
         // Setters
         void setBlock(int wx, int wy, int wz, Material id);
