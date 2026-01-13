@@ -160,15 +160,16 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world)
 
                 for (const auto& face : renderedFaces)
                 {
-                    const auto texIndex = meta.getFaceTexture(face);
+                    const std::string texName = meta.getFaceTexture(face);
+                    TextureId texId = world.getTextureRegistry().getByName(texName);
 
                     this->textureIndexes.insert(this->textureIndexes.end(), {
-                        texIndex,
-                        texIndex,
-                        texIndex,
-                        texIndex,
-                        texIndex,
-                        texIndex,
+                        texId,
+                        texId,
+                        texId,
+                        texId,
+                        texId,
+                        texId
                     });
                     this->uvs.insert(this->uvs.end(), {
                         // Triangle 1

@@ -1,26 +1,15 @@
 #ifndef RE_MINECRAFT_BLOCKREGISTRY_H
 #define RE_MINECRAFT_BLOCKREGISTRY_H
 
-#include <array>
 #include <memory>
 #include <vector>
 #include <unordered_map>
 #include <map>
 #include <limits>
 
-using Material = uint16_t;
+#include "Material.h"
 
-enum MaterialFace : char
-{
-    NORTH = 0,
-    SOUTH,
-    WEST,
-    EAST,
-    UP,
-    DOWN
-};
-
-using BlockFaces = std::map<MaterialFace, uint16_t>;
+using BlockFaces = std::map<MaterialFace, std::string>;
 
 struct BlockMeta
 {
@@ -45,12 +34,12 @@ struct BlockMeta
         return blockName;
     }
 
-    [[nodiscard]] uint16_t getFaceTexture(const MaterialFace& face) const
+    [[nodiscard]] std::string getFaceTexture(const MaterialFace& face) const
     {
         const auto it = blockFaces.find(face);
 
         if (it == blockFaces.end())
-            return 0;
+            return "missing";
         return it->second;
     }
 };

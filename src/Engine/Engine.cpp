@@ -83,21 +83,23 @@ Engine::Engine()
     glfwSetCursorPosCallback(window, mouseInputCallback);
     glfwSetMouseButtonCallback(window, mouseButtonInputCallback);
 
-    // Create all members
+    // Create world shader
     this->worldShader = std::make_unique<Shader>(
         "../resources/shaders/WorldShader/world.vert",
         "../resources/shaders/WorldShader/world.frag"
     );
 
-    this->textureManager = std::make_unique<TextureManager>();
+    // Create textures array and register it in the world shader
+    this->textureRegistry.createTextures();
+    this->worldShader->use();
+    this->worldShader->setUniformInt("Textures", 0);
+
     this->camera = std::make_unique<Camera>(glm::vec3{8.5f, 17.5f, 8.5f}, this->blockRegistry);
-    this->world = std::make_unique<World>(this->blockRegistry);
+    this->world = std::make_unique<World>(this->blockRegistry, this->textureRegistry);
     this->playerGUI = std::make_unique<GUI>();
 
-    if (!this->worldShader || !this->world || !this->camera || !this->playerGUI || !this->textureManager)
+    if (!this->worldShader || !this->world || !this->camera || !this->playerGUI)
         throw std::runtime_error("Failed to initialize pointers");
-
-    this->worldShader->setUniformInt("Textures", 0);
 }
 
 Engine::~Engine() {
@@ -126,7 +128,6 @@ void Engine::loop() {
         this->clearInputs();
     }
 }
-
 
 void Engine::handleInputs(const double deltaTime) const
 {
@@ -202,8 +203,7 @@ void Engine::render() const
 
     // Render World (chunks)
     this->worldShader->use();
-    this->textureManager->bind();
-    // this->worldShader->setUniformInt("Textures", 0);
+    this->textureRegistry.bind();
     this->world->render(*this->worldShader);
 
     // Render ImGui Frame

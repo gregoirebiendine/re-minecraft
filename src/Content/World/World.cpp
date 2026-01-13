@@ -2,7 +2,9 @@
 
 #include <utility>
 
-World::World(BlockRegistry blockRegistry) : blockRegistry(std::move(blockRegistry))
+World::World(BlockRegistry  _blockRegistry, const TextureRegistry& _textureRegistry) :
+    blockRegistry(std::move(_blockRegistry)),
+    textureRegistry(_textureRegistry)
 {
     this->noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2S);
     this->noise.SetFrequency(0.030);
@@ -47,7 +49,7 @@ Material World::getBlock(const int wx, const int wy, const int wz) const
     const auto it = chunks.find(cp);
 
     if (it == chunks.end())
-        return blockRegistry.getByName("core:air");
+        return this->blockRegistry.getByName("core:air");
 
     const auto [x, y, z] = blockToLocal(wx, wy, wz);
     return it->second->getBlock(x, y, z);
@@ -196,6 +198,11 @@ void World::render(const Shader& worldShader)
 const BlockRegistry& World::getBlockRegistry() const
 {
     return this->blockRegistry;
+}
+
+const TextureRegistry& World::getTextureRegistry() const
+{
+    return this->textureRegistry;
 }
 
 

@@ -7,13 +7,13 @@ BlockRegistry::BlockRegistry()
         "air",
         true,
         0.f,
-        {
-            {MaterialFace::NORTH, 0},
-            {MaterialFace::SOUTH, 0},
-            {MaterialFace::WEST, 0},
-            {MaterialFace::EAST, 0},
-            {MaterialFace::UP, 0},
-            {MaterialFace::DOWN, 0},
+        { // Should be empty because it's air
+            {MaterialFace::NORTH, "dirt"},
+            {MaterialFace::SOUTH, "dirt"},
+            {MaterialFace::WEST, "dirt"},
+            {MaterialFace::EAST, "dirt"},
+            {MaterialFace::UP, "dirt"},
+            {MaterialFace::DOWN, "dirt"},
         }
     });
 
@@ -23,12 +23,12 @@ BlockRegistry::BlockRegistry()
         false,
         1.f,
         {
-            {MaterialFace::NORTH, 0},
-            {MaterialFace::SOUTH, 0},
-            {MaterialFace::WEST, 0},
-            {MaterialFace::EAST, 0},
-            {MaterialFace::UP, 0},
-            {MaterialFace::DOWN, 0}
+            {MaterialFace::NORTH, "dirt"},
+            {MaterialFace::SOUTH, "dirt"},
+            {MaterialFace::WEST, "dirt"},
+            {MaterialFace::EAST, "dirt"},
+            {MaterialFace::UP, "dirt"},
+            {MaterialFace::DOWN, "dirt"}
         }
     });
 
@@ -38,12 +38,12 @@ BlockRegistry::BlockRegistry()
         false,
         1.f,
         {
-            {MaterialFace::NORTH, 1},
-            {MaterialFace::SOUTH, 1},
-            {MaterialFace::WEST, 1},
-            {MaterialFace::EAST, 1},
-            {MaterialFace::UP, 2},
-            {MaterialFace::DOWN, 0}
+            {MaterialFace::NORTH, "grass_block_side"},
+            {MaterialFace::SOUTH, "grass_block_side"},
+            {MaterialFace::WEST, "grass_block_side"},
+            {MaterialFace::EAST, "grass_block_side"},
+            {MaterialFace::UP, "grass_block_top"},
+            {MaterialFace::DOWN, "dirt"}
         }
     });
 
@@ -53,12 +53,12 @@ BlockRegistry::BlockRegistry()
         false,
         1.f,
         {
-            {MaterialFace::NORTH, 2},
-            {MaterialFace::SOUTH, 2},
-            {MaterialFace::WEST, 2},
-            {MaterialFace::EAST, 2},
-            {MaterialFace::UP, 2},
-            {MaterialFace::DOWN, 2}
+            {MaterialFace::NORTH, "grass_block_top"},
+            {MaterialFace::SOUTH, "grass_block_top"},
+            {MaterialFace::WEST, "grass_block_top"},
+            {MaterialFace::EAST, "grass_block_top"},
+            {MaterialFace::UP, "grass_block_top"},
+            {MaterialFace::DOWN, "grass_block_top"}
         }
     });
 
@@ -68,12 +68,12 @@ BlockRegistry::BlockRegistry()
         false,
         2.f,
         {
-            {MaterialFace::NORTH, 3},
-            {MaterialFace::SOUTH, 3},
-            {MaterialFace::WEST, 3},
-            {MaterialFace::EAST, 3},
-            {MaterialFace::UP, 3},
-            {MaterialFace::DOWN, 3}
+            {MaterialFace::NORTH, "cobble"},
+            {MaterialFace::SOUTH, "cobble"},
+            {MaterialFace::WEST, "cobble"},
+            {MaterialFace::EAST, "cobble"},
+            {MaterialFace::UP, "cobble"},
+            {MaterialFace::DOWN, "cobble"}
         }
     });
 
@@ -83,12 +83,12 @@ BlockRegistry::BlockRegistry()
         false,
         1.5f,
         {
-            {MaterialFace::NORTH, 4},
-            {MaterialFace::SOUTH, 4},
-            {MaterialFace::WEST, 4},
-            {MaterialFace::EAST, 4},
-            {MaterialFace::UP, 4},
-            {MaterialFace::DOWN, 4}
+            {MaterialFace::NORTH, "stone"},
+            {MaterialFace::SOUTH, "stone"},
+            {MaterialFace::WEST, "stone"},
+            {MaterialFace::EAST, "stone"},
+            {MaterialFace::UP, "stone"},
+            {MaterialFace::DOWN, "stone"}
         }
     });
 
@@ -98,12 +98,12 @@ BlockRegistry::BlockRegistry()
         false,
         1.5f,
         {
-            {MaterialFace::NORTH, 5},
-            {MaterialFace::SOUTH, 5},
-            {MaterialFace::WEST, 5},
-            {MaterialFace::EAST, 5},
-            {MaterialFace::UP, 5},
-            {MaterialFace::DOWN, 5}
+            {MaterialFace::NORTH, "oak_plank"},
+            {MaterialFace::SOUTH, "oak_plank"},
+            {MaterialFace::WEST, "oak_plank"},
+            {MaterialFace::EAST, "oak_plank"},
+            {MaterialFace::UP, "oak_plank"},
+            {MaterialFace::DOWN, "oak_plank"}
         }
     });
 }

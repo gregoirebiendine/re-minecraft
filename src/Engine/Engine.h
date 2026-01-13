@@ -21,12 +21,12 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
-#include "TextureManager.h"
 #include "Shader.h"
 #include "World.h"
 #include "Camera.h"
 #include "InputState.h"
 #include "BlockRegistry.h"
+#include "TextureRegistry.h"
 #include "GUI.h"
 
 class Engine {
@@ -34,16 +34,14 @@ class Engine {
     float aspectRatio{};
 
     GLFWwindow *window = nullptr;
-
-    BlockRegistry blockRegistry;
     InputState inputs;
 
-    std::unique_ptr<TextureManager> textureManager;
-    std::unique_ptr<Shader> worldShader;
+    BlockRegistry blockRegistry;
+    TextureRegistry textureRegistry;
 
+    std::unique_ptr<Shader> worldShader;
     std::unique_ptr<World> world;
     std::unique_ptr<Camera> camera;
-
     std::unique_ptr<GUI> playerGUI;
 
     public:
