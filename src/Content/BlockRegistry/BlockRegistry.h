@@ -8,6 +8,7 @@
 #include <limits>
 
 #include "Material.h"
+#include "TextureRegistry.h"
 
 using BlockFaces = std::map<MaterialFace, std::string>;
 
@@ -39,7 +40,7 @@ struct BlockMeta
         const auto it = blockFaces.find(face);
 
         if (it == blockFaces.end())
-            return "missing";
+            return TextureRegistry::MISSING;
         return it->second;
     }
 };

@@ -2,6 +2,7 @@
 
 TextureRegistry::TextureRegistry()
 {
+    this->registerTexture(MISSING, "missing.png");
     this->registerTexture("dirt", "dirt.png");
     this->registerTexture("grass_block_side", "grass_block_side.png");
     this->registerTexture("grass_block_top", "grass_block_top.png");
@@ -80,7 +81,7 @@ const std::string& TextureRegistry::get(const TextureId id) const
 TextureId TextureRegistry::getByName(const std::string& name) const
 {
     if (!this->nameToTextureId.contains(name))
-        return 0;
+        return this->nameToTextureId.at(MISSING);
     return this->nameToTextureId.at(name);
 }
 

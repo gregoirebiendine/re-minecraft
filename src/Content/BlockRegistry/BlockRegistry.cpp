@@ -7,14 +7,7 @@ BlockRegistry::BlockRegistry()
         "air",
         true,
         0.f,
-        { // Should be empty because it's air
-            {MaterialFace::NORTH, "dirt"},
-            {MaterialFace::SOUTH, "dirt"},
-            {MaterialFace::WEST, "dirt"},
-            {MaterialFace::EAST, "dirt"},
-            {MaterialFace::UP, "dirt"},
-            {MaterialFace::DOWN, "dirt"},
-        }
+        {}
     });
 
     this->registerBlock({
@@ -131,10 +124,8 @@ Material BlockRegistry::registerBlock(const BlockMeta& meta)
 
 const BlockMeta& BlockRegistry::get(const Material id) const
 {
-    if (id >= this->blocks.size()) {
+    if (id >= this->blocks.size())
         throw std::out_of_range("Invalid Material");
-    }
-
     return this->blocks[id];
 }
 

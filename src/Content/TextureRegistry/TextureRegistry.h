@@ -22,6 +22,8 @@ class TextureRegistry
     std::unordered_map<std::string, TextureId> nameToTextureId;
 
     public:
+        static constexpr std::string MISSING = "MISSING";
+
         TextureRegistry();
         ~TextureRegistry();
 
