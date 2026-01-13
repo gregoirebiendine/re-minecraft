@@ -17,6 +17,11 @@ void VBO::addData(const std::vector<T> &v) const {
     glBufferData(GL_ARRAY_BUFFER, v.size() * sizeof(T), v.data(), GL_STATIC_DRAW);
 }
 
+void VBO::storeBlockData(const std::vector<Vertex> &v) const {
+    this->bind();
+    glBufferData(GL_ARRAY_BUFFER, v.size() * sizeof(Vertex), v.data(), GL_STATIC_DRAW);
+}
+
 void VBO::bind() const
 {
     glBindBuffer(GL_ARRAY_BUFFER, this->ID);

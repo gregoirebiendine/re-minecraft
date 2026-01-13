@@ -5,203 +5,144 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world)
 {
     const auto [cx, cy, cz] = chunk.getPosition() * Chunk::SIZE;
 
-    // Set chunk as not dirty, meaning it will not rebuild next frame
-    chunk.setDirty(false);
-
-    // Reset old vertices and uvs
-    this->vertices.clear();
-    this->uvs.clear();
-    this->normals.clear();
-    this->textureIndexes.clear();
+    // Reset meshes data
+    this->meshData.clear();
+    this->meshData.reserve(36 * Chunk::VOLUME);
 
     // Iterate over all Materials to construct blocks
-    for (int z = 0; z < Chunk::SIZE; z++) {
-        for (int y = 0; y < Chunk::SIZE; y++) {
-            for (int x = 0; x < Chunk::SIZE; x++) {
-                // Skip AIR
-                if (chunk.isAir(x, y, z)) continue;
-    
-                // Retrieve Block Meta
-                const Material block = chunk.getBlock(x, y, z);
-                const BlockMeta& meta = world.getBlockRegistry().get(block);
-                std::vector<MaterialFace> renderedFaces;
-    
-                // NORTH face
-                if (world.isAir(cx + x, cy + y, cz + z - 1)) {
-                    this->vertices.insert(this->vertices.end(), {
-                        x,       y,       z,
-                        x,       1 + y,   z,
-                        1 + x,   1 + y,   z,
+    for (int i = 0; i < Chunk::VOLUME; i++) {
+        auto [x, y, z] = coords(i);
 
-                        x,       y,       z,
-                        1 + x,   1 + y,   z,
-                        1 + x,   y,       z,
-                    });
-                    this->normals.insert(this->normals.end(), {
-                        0.0f, 0.0f, -1.0f,
-                        0.0f, 0.0f, -1.0f,
-                        0.0f, 0.0f, -1.0f,
-                        0.0f, 0.0f, -1.0f,
-                        0.0f, 0.0f, -1.0f,
-                        0.0f, 0.0f, -1.0f,
-                    });
-                    renderedFaces.push_back(MaterialFace::NORTH);
-                }
-    
-                // SOUTH face
-                if (world.isAir(cx + x, cy + y, cz + z + 1)) {
-                    this->vertices.insert(this->vertices.end(), {
-                        1 + x,   y,       1 + z,
-                        1 + x,   1 + y,   1 + z,
-                        x,       1 + y,   1 + z,
+        // Skip AIR
+        if (chunk.isAir(x, y, z)) continue;
 
-                        1 + x,   y,       1 + z,
-                        x,       1 + y,   1 + z,
-                        x,       y,       1 + z,
-                    });
-                    this->normals.insert(this->normals.end(), {
-                        0.0f, 0.0f, 1.0f,
-                        0.0f, 0.0f, 1.0f,
-                        0.0f, 0.0f, 1.0f,
-                        0.0f, 0.0f, 1.0f,
-                        0.0f, 0.0f, 1.0f,
-                        0.0f, 0.0f, 1.0f,
-                    });
-                    renderedFaces.push_back(MaterialFace::SOUTH);
-                }
-    
-                // WEST face
-                if (world.isAir(cx + x - 1, cy + y, cz + z)) {
-                    this->vertices.insert(this->vertices.end(), {
-                        x,       y,       1 + z,
-                        x,       1 + y,   1 + z,
-                        x,       1 + y,   z,
+        // Retrieve Block Meta
+        const BlockMeta& meta = world.getBlockRegistry().get(chunk.getBlock(x, y, z));
 
-                        x,       y,       1 + z,
-                        x,       1 + y,   z,
-                        x,       y,       z,
-                    });
-                    this->normals.insert(this->normals.end(), {
-                        -1.0f, 0.0f, 0.0f,
-                        -1.0f, 0.0f, 0.0f,
-                        -1.0f, 0.0f, 0.0f,
-                        -1.0f, 0.0f, 0.0f,
-                        -1.0f, 0.0f, 0.0f,
-                        -1.0f, 0.0f, 0.0f,
-                    });
-                    renderedFaces.push_back(MaterialFace::WEST);
-                }
-    
-                // EAST face
-                if (world.isAir(cx + x + 1, cy + y, cz + z)) {
-                    this->vertices.insert(this->vertices.end(), {
-                        1 + x,   y,       z,
-                        1 + x,   1 + y,   z,
-                        1 + x,   1 + y,   1 + z,
+        // NORTH face
+        if (world.isAir(cx + x, cy + y, cz + z - 1)) {
+            const TextureId texId = world.getTextureRegistry().getByName(meta.getFaceTexture(NORTH));
 
-                        1 + x,   y,       z,
-                        1 + x,   1 + y,   1 + z,
-                        1 + x,   y,       1 + z,
-                    });
-                    this->normals.insert(this->normals.end(), {
-                        1.0f, 0.0f, 0.0f,
-                        1.0f, 0.0f, 0.0f,
-                        1.0f, 0.0f, 0.0f,
-                        1.0f, 0.0f, 0.0f,
-                        1.0f, 0.0f, 0.0f,
-                        1.0f, 0.0f, 0.0f,
-                    });
-                    renderedFaces.push_back(MaterialFace::EAST);
-                }
-    
-                // UP face
-                if (world.isAir(cx + x, cy + y + 1, cz + z)) {
-                    this->vertices.insert(this->vertices.end(), {
-                        x,       1 + y,   z,
-                        x,       1 + y,   1 + z,
-                        1 + x,   1 + y,   1 + z,
+            createFace(
+                this->meshData,
+                {x,       y,       z},
+                {x,       1 + y,   z},
+                {1 + x,   1 + y,   z},
+                {1 + x,   y,       z},
+                {0, 0, -1},
+                texId
+            );
+        }
 
-                        x,       1 + y,   z,
-                        1 + x,   1 + y,   1 + z,
-                        1 + x,   1 + y,   z,
-                    });
-                    this->normals.insert(this->normals.end(), {
-                        0.0f, 1.0f, 0.0f,
-                        0.0f, 1.0f, 0.0f,
-                        0.0f, 1.0f, 0.0f,
-                        0.0f, 1.0f, 0.0f,
-                        0.0f, 1.0f, 0.0f,
-                        0.0f, 1.0f, 0.0f,
-                    });
-                    renderedFaces.push_back(MaterialFace::UP);
-                }
-    
-                // DOWN face
-                if (world.isAir(cx + x, cy + y - 1, cz + z)) {
-                    this->vertices.insert(this->vertices.end(), {
-                        x,       y,       z,
-                        1 + x,   y,       z,
-                        1 + x,   y,       1 + z,
+        // SOUTH face
+        if (world.isAir(cx + x, cy + y, cz + z + 1)) {
+            const TextureId texId = world.getTextureRegistry().getByName(meta.getFaceTexture(SOUTH));
 
-                        x,       y,       z,
-                        1 + x,   y,       1 + z,
-                        x,       y,       1 + z,
-                    });
-                    this->normals.insert(this->normals.end(), {
-                        0.0f, -1.0f, 0.0f,
-                        0.0f, -1.0f, 0.0f,
-                        0.0f, -1.0f, 0.0f,
-                        0.0f, -1.0f, 0.0f,
-                        0.0f, -1.0f, 0.0f,
-                        0.0f, -1.0f, 0.0f,
-                    });
-                    renderedFaces.push_back(MaterialFace::DOWN);
-                }
+            createFace(
+                this->meshData,
+                {1 + x,   y,       1 + z},
+                {1 + x,   1 + y,   1 + z},
+                {x,       1 + y,   1 + z},
+                {x,       y,       1 + z},
+                {0, 0, 1},
+                texId
+            );
+        }
 
-                for (const auto& face : renderedFaces)
-                {
-                    const std::string texName = meta.getFaceTexture(face);
-                    TextureId texId = world.getTextureRegistry().getByName(texName);
+        // WEST face
+        if (world.isAir(cx + x - 1, cy + y, cz + z)) {
+            const TextureId texId = world.getTextureRegistry().getByName(meta.getFaceTexture(WEST));
 
-                    this->textureIndexes.insert(this->textureIndexes.end(), {
-                        texId,
-                        texId,
-                        texId,
-                        texId,
-                        texId,
-                        texId
-                    });
-                    this->uvs.insert(this->uvs.end(), {
-                        // Triangle 1
-                        1.0f, 0.0f,
-                        1.0f, 1.0f,
-                        0.0f, 1.0f,
-                        // Triangle 2
-                        1.0f, 0.0f,
-                        0.0f, 1.0f,
-                        0.0f, 0.0f
-                    });
-                }
-            }
+            createFace(
+                this->meshData,
+                {x,       y,       1 + z},
+                {x,       1 + y,   1 + z},
+                {x,       1 + y,   z},
+                {x,       y,       z},
+                {-1, 0, 0},
+                texId
+            );
+        }
+
+        // EAST face
+        if (world.isAir(cx + x + 1, cy + y, cz + z)) {
+            const TextureId texId = world.getTextureRegistry().getByName(meta.getFaceTexture(EAST));
+
+            createFace(
+                this->meshData,
+                {1 + x,   y,       z},
+                {1 + x,   1 + y,   z},
+                {1 + x,   1 + y,   1 + z},
+                {1 + x,   y,       1 + z},
+                {1, 0, 0},
+                texId
+            );
+        }
+
+        // UP face
+        if (world.isAir(cx + x, cy + y + 1, cz + z)) {
+            const TextureId texId = world.getTextureRegistry().getByName(meta.getFaceTexture(UP));
+
+            createFace(
+                this->meshData,
+                {x,       1 + y,   z},
+                {x,       1 + y,   1 + z},
+                {1 + x,   1 + y,   1 + z},
+                {1 + x,   1 + y,   z},
+                {0, 1, 0},
+                texId
+            );
+        }
+
+        // DOWN face
+        if (world.isAir(cx + x, cy + y - 1, cz + z)) {
+            const TextureId texId = world.getTextureRegistry().getByName(meta.getFaceTexture(DOWN));
+
+            createFace(
+                this->meshData,
+                {x,       y,       z},
+                {1 + x,   y,       z},
+                {1 + x,   y,       1 + z},
+                {x,       y,       1 + z},
+                {0, -1, 0},
+                texId
+            );
         }
     }
     
-    // Bind VAO
+    // Link data to VA0 before rendering
     this->VAO.bind();
-    
-    // Link datas to VA0 before rendering
-    this->VAO.addData<GLint, GL_INT>(this->vertices,0, 3);
-    this->VAO.addData<GLfloat, GL_FLOAT>(this->uvs,1, 2);
-    this->VAO.addData<GLfloat, GL_FLOAT>(this->normals,2, 3);
-    this->VAO.addData<GLint, GL_INT>(this->textureIndexes,3, 1);
-
-    // Unbind VAO
+    this->VAO.storeBlockData(this->meshData);
     this->VAO.unbind();
+
+    // Set chunk as not dirty, meaning it will not rebuild next frame
+    chunk.setDirty(false);
 }
 
 void ChunkMesh::render() const
 {
     this->VAO.bind();
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(this->vertices.size()));
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->meshData.size()));
     this->VAO.unbind();
+}
+
+// Statics
+std::tuple<GLint, GLint, GLint> ChunkMesh::coords(const int index) {
+    return {
+        index / (Chunk::SIZE * Chunk::SIZE),
+        (index / Chunk::SIZE) % Chunk::SIZE,
+        index % Chunk::SIZE
+    };
+}
+
+void ChunkMesh::createFace(std::vector<Vertex> &data, const glm::ivec3 &v0, const glm::ivec3 &v1, const glm::ivec3 &v2, const glm::ivec3 &v3, const glm::ivec3 &normals, const uint16_t& texId)
+{
+    data.insert(data.end(), {
+        {v0, normals, {1, 0}, texId},
+        {v1, normals, {1, 1}, texId},
+        {v2, normals, {0, 1}, texId},
+        {v0, normals, {1, 0}, texId},
+        {v2, normals, {0, 1}, texId},
+        {v3, normals, {0, 0}, texId},
+    });
 }

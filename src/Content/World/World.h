@@ -15,8 +15,8 @@
 
 class World {
     std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash> chunks;
-    std::vector<ChunkPos> dirtyChunks;
     ChunkMeshManager meshManager;
+
     BlockRegistry blockRegistry;
     TextureRegistry textureRegistry;
     FastNoiseLite noise;

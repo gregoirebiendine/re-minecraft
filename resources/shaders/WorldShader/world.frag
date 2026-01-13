@@ -1,8 +1,8 @@
 #version 460 core
 
 in vec3 currentPos;
-in vec2 currentUvs;
 in vec3 currentNormal;
+in vec2 currentUvs;
 flat in uint currentTexIndex;
 
 out vec4 FragColor;

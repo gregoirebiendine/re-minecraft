@@ -21,6 +21,7 @@ GUI::GUI()
 
 void GUI::createCrosshair() {
     constexpr glm::vec2 mid = {Engine::WindowSize.x / 2 , Engine::WindowSize.y / 2};
+    const DigitalColor color{200, 200, 200, 0.8f};
 
     // Hor 1
     this->createRectangle(
@@ -28,7 +29,7 @@ void GUI::createCrosshair() {
         mid.y - (THICKNESS / 2),
         (SIZE / 2),
         THICKNESS,
-        {200, 200, 200, 0.8f}
+        color
     );
     // Hor 2
     this->createRectangle(
@@ -36,7 +37,7 @@ void GUI::createCrosshair() {
         mid.y - (THICKNESS / 2),
         (SIZE / 2),
         THICKNESS,
-        {200, 200, 200, 0.8f}
+        color
     );
 
     // Vert 1
@@ -45,7 +46,7 @@ void GUI::createCrosshair() {
         mid.y - (SIZE / 2) - OFFSET,
         THICKNESS,
         (SIZE / 2),
-        {200, 200, 200, 0.7f}
+        color
     );
     // Vert 2
     this->createRectangle(
@@ -53,7 +54,7 @@ void GUI::createCrosshair() {
         mid.y + OFFSET,
         THICKNESS,
         (SIZE / 2),
-        {200, 200, 200, 0.7f}
+        color
     );
 }
 
@@ -117,11 +118,17 @@ void GUI::renderImGuiFrame(const Camera& camera, const BlockRegistry& blockRegis
 {
     const auto cameraPos = camera.getPosition();
     const auto selectedBlock = camera.getSelectedMaterial();
-    const auto facing = GUI::forwardToCardinal(camera.getForwardVector());
+    const auto facing = forwardToCardinal(camera.getForwardVector());
+    const ChunkPos cp{
+        static_cast<int>(cameraPos.x) / 16,
+        static_cast<int>(cameraPos.y) / 16,
+        static_cast<int>(cameraPos.z) / 16
+    };
 
     ImGui::Begin("Debug");
     ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
-    ImGui::Text("X: %.2f, Y: %.2f, Z: %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
+    ImGui::Text("Position : %.2f, %.2f, %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
+    ImGui::Text("Chunk : %d, %d, %d", cp.x, cp.y, cp.z);
     ImGui::Text("Facing : %s", facing.c_str());
     ImGui::Text("Selected block : %s", blockRegistry.get(selectedBlock).getName().c_str());
     ImGui::End();

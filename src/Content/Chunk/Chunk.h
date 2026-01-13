@@ -38,6 +38,7 @@ class Chunk {
         ChunkPos _position{};
         bool _isDirty = true;
 
+        // Statics
         [[nodiscard]] static uint16_t index(uint8_t x, uint8_t y, uint8_t z);
         [[nodiscard]] static uint8_t clamp(uint8_t v);
 };

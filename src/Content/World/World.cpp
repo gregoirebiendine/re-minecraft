@@ -74,9 +74,6 @@ void World::setBlock(const int wx, const int wy, const int wz, const Material id
     const auto [x, y, z] = blockToLocal(wx, wy, wz);
     chunk.setBlock(x, y, z, id);
 
-    if (std::ranges::find(this->dirtyChunks, cp) == this->dirtyChunks.end())
-        this->dirtyChunks.emplace_back(cp);
-
     if (x == 0 || x == Chunk::SIZE - 1 || y == 0 || y == Chunk::SIZE - 1 || z == 0 || z == Chunk::SIZE - 1)
         this->markNeighborsDirty(cp, BlockPos({x,y,z}));
 }
@@ -118,11 +115,7 @@ void World::markNeighborsDirty(const ChunkPos& cp, const std::optional<BlockPos>
         const ChunkPos pos{cp.x + n[0], cp.y + n[1], cp.z + n[2]};
 
         if (const auto chunk = this->getChunk(pos.x, pos.y, pos.z))
-        {
             chunk->setDirty(true);
-            if (std::ranges::find(this->dirtyChunks, pos) == this->dirtyChunks.end())
-                this->dirtyChunks.emplace_back(pos);
-        }
     }
 }
 
@@ -150,8 +143,8 @@ void World::generateChunkTerrain(Chunk& chunk) const
             for (int y = 0; y < Chunk::SIZE; y++) {
                 int wy = cy * Chunk::SIZE + y;
 
-                if (wy == 0)
-                    chunk.setBlock(x, y, z, this->blockRegistry.getByName("core:cobble"));
+                if (wy < 2)
+                    chunk.setBlock(x, y, z, this->blockRegistry.getByName("core:stone"));
                 else if (wy < height)
                     chunk.setBlock(x, y, z, this->blockRegistry.getByName("core:dirt"));
                 else if (wy == height)
@@ -167,15 +160,13 @@ void World::generateChunkTerrain(Chunk& chunk) const
 // Updates
 void World::update()
 {
-    for (const auto [x, y, z] : this->dirtyChunks)
+    for (const auto& chunk : this->chunks | std::views::values)
     {
-        Chunk* chunk = this->getChunk(x, y, z);
-
         ChunkMesh& mesh = meshManager.get(*chunk);
-        mesh.rebuild(*chunk, *this);
-    }
 
-    this->dirtyChunks.clear();
+        if (chunk->isDirty())
+            mesh.rebuild(*chunk, *this);
+    }
 }
 
 void World::render(const Shader& worldShader)
