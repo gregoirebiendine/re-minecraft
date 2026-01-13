@@ -1,7 +1,7 @@
 #include "ChunkMesh.h"
 #include "World.h"
 
-void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& blockRegistry)
+void ChunkMesh::rebuild(Chunk& chunk, const World& world)
 {
     const auto [cx, cy, cz] = chunk.getPosition() * Chunk::SIZE;
 
@@ -12,6 +12,7 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
     this->vertices.clear();
     this->uvs.clear();
     this->normals.clear();
+    this->textureIndexes.clear();
 
     // Iterate over all Materials to construct blocks
     for (int z = 0; z < Chunk::SIZE; z++) {
@@ -20,9 +21,9 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
                 // Skip AIR
                 if (chunk.isAir(x, y, z)) continue;
     
-                // Retrieve Material atlas indexes
+                // Retrieve Block Meta
                 const Material block = chunk.getBlock(x, y, z);
-                const BlockMeta& meta = blockRegistry.get(block);
+                const BlockMeta& meta = world.getBlockRegistry().get(block);
                 std::vector<MaterialFace> renderedFaces;
     
                 // NORTH face
@@ -156,18 +157,29 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
                     });
                     renderedFaces.push_back(MaterialFace::DOWN);
                 }
-    
-                // Add tex offset based on rendered faces
-                for (const auto &face : renderedFaces) {
-                    const auto faceAtlasTexture = meta.blockFaces.at(face);
-                    const auto t = glm::vec2(0.25f * static_cast<float>(faceAtlasTexture % 4), std::floor(static_cast<float>(faceAtlasTexture) / 4.f) / 4.f);
+
+                for (const auto& face : renderedFaces)
+                {
+                    const std::string texName = meta.getFaceTexture(face);
+                    TextureId texId = world.getTextureRegistry().getByName(texName);
+
+                    this->textureIndexes.insert(this->textureIndexes.end(), {
+                        texId,
+                        texId,
+                        texId,
+                        texId,
+                        texId,
+                        texId
+                    });
                     this->uvs.insert(this->uvs.end(), {
-                        t.x,              t.y,
-                        t.x,              0.25f + t.y,
-                        0.25f + t.x,      0.25f + t.y,
-                        t.x,              t.y,
-                        0.25f + t.x,      0.25f + t.y,
-                        0.25f + t.x,      t.y,
+                        // Triangle 1
+                        1.0f, 0.0f,
+                        1.0f, 1.0f,
+                        0.0f, 1.0f,
+                        // Triangle 2
+                        1.0f, 0.0f,
+                        0.0f, 1.0f,
+                        0.0f, 0.0f
                     });
                 }
             }
@@ -181,6 +193,7 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world, const BlockRegistry& b
     this->VAO.addData<GLint, GL_INT>(this->vertices,0, 3);
     this->VAO.addData<GLfloat, GL_FLOAT>(this->uvs,1, 2);
     this->VAO.addData<GLfloat, GL_FLOAT>(this->normals,2, 3);
+    this->VAO.addData<GLint, GL_INT>(this->textureIndexes,3, 1);
 
     // Unbind VAO
     this->VAO.unbind();

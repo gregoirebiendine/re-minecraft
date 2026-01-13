@@ -2,7 +2,6 @@
 #define ENGINE_H
 
 #define GLM_ENABLE_EXPERIMENTAL
-// #define UNUSED(expr) (void)(expr)
 #define UNUSED __attribute__ ((unused))
 
 #include <iostream>
@@ -22,12 +21,12 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
-#include "Atlas.h"
 #include "Shader.h"
 #include "World.h"
 #include "Camera.h"
 #include "InputState.h"
 #include "BlockRegistry.h"
+#include "TextureRegistry.h"
 #include "GUI.h"
 
 class Engine {
@@ -35,18 +34,18 @@ class Engine {
     float aspectRatio{};
 
     GLFWwindow *window = nullptr;
-
-    BlockRegistry blockRegistry;
     InputState inputs;
 
+    BlockRegistry blockRegistry;
+    TextureRegistry textureRegistry;
+
     std::unique_ptr<Shader> worldShader;
-    std::unique_ptr<Atlas> atlas;
     std::unique_ptr<World> world;
     std::unique_ptr<Camera> camera;
     std::unique_ptr<GUI> playerGUI;
 
     public:
-        static constexpr glm::ivec2 WindowSize{1600, 900};
+        static constexpr glm::ivec2 WindowSize{1920, 1080};
 
         Engine();
         ~Engine();

@@ -8,6 +8,7 @@
 #include <FastNoiseLite.h>
 
 #include "BlockRegistry.h"
+#include "TextureRegistry.h"
 #include "ChunkMeshManager.h"
 #include "Chunk.h"
 #include "Shader.h"
@@ -17,12 +18,17 @@ class World {
     std::vector<ChunkPos> dirtyChunks;
     ChunkMeshManager meshManager;
     BlockRegistry blockRegistry;
+    TextureRegistry textureRegistry;
+    FastNoiseLite noise;
 
     static ChunkPos blockToChunk(int wx, int wy, int wz);
     static BlockPos blockToLocal(int wx, int wy, int wz);
 
     public:
-        explicit World(BlockRegistry blockRegistry);
+        explicit World(BlockRegistry _blockRegistry, const TextureRegistry& _textureRegistry);
+
+        const BlockRegistry& getBlockRegistry() const;
+        const TextureRegistry& getTextureRegistry() const;
 
         // Getters
         Chunk& getOrCreateChunk(int cx, int cy, int cz);
@@ -32,8 +38,8 @@ class World {
         [[nodiscard]] bool isAir(int wx, int wy, int wz) const;
 
         // Terrain
-        static int getTerrainHeight(int worldX, int worldZ, const FastNoiseLite &noise);
-        void generateChunkTerrain(Chunk& chunk, const FastNoiseLite &noise) const;
+        int getTerrainHeight(int worldX, int worldZ) const;
+        void generateChunkTerrain(Chunk& chunk) const;
 
         // Setters
         void setBlock(int wx, int wy, int wz, Material id);
