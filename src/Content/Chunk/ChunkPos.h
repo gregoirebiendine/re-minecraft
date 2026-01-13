@@ -4,6 +4,8 @@
 #include <functional>
 #include <iostream>
 
+#include <glm/glm.hpp>
+
 struct BlockPos
 {
     int x, y, z;
@@ -15,6 +17,16 @@ struct BlockPos
 
 struct ChunkPos {
     int x, y, z;
+
+    static ChunkPos fromWorld(const int wx, const int wy, const int wz)
+    {
+        return {wx >> 4, wy >> 4, wz >> 4};
+    }
+
+    static ChunkPos fromWorld(const glm::vec3& pos)
+    {
+        return {static_cast<int>(pos.x) >> 4, static_cast<int>(pos.y) >> 4, static_cast<int>(pos.z) >> 4};
+    }
 
     bool operator<(const ChunkPos& other) const
     {
@@ -33,10 +45,10 @@ struct ChunkPos {
 };
 
 struct ChunkPosHash {
-    size_t operator()(const ChunkPos& p) const {
-        const size_t h1 = std::hash<int>()(p.x);
-        const size_t h2 = std::hash<int>()(p.y);
-        const size_t h3 = std::hash<int>()(p.z);
+    std::size_t operator()(const ChunkPos& p) const noexcept {
+        std::size_t h1 = std::hash<int>{}(p.x);
+        std::size_t h2 = std::hash<int>{}(p.y);
+        std::size_t h3 = std::hash<int>{}(p.z);
         return h1 ^ (h2 << 1) ^ (h3 << 2);
     }
 };

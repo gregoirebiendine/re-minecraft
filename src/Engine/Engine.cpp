@@ -192,7 +192,7 @@ void Engine::update() const
     this->setViewMatrix();
 
     // Update world
-    this->world->update();
+    this->world->update(this->camera->getPosition());
 }
 
 void Engine::render() const
@@ -222,7 +222,7 @@ void Engine::setViewMatrix() const
     const auto forward = this->camera->getForwardVector();
     const auto cameraPos = this->camera->getPosition();
     const glm::mat4 view = glm::lookAt(cameraPos, cameraPos + forward, {0,1,0});
-    const glm::mat4 projection = glm::perspective(Camera::FOV, this->aspectRatio, 0.1f, 100.f);
+    const glm::mat4 projection = glm::perspective(Camera::FOV, this->aspectRatio, 0.1f, 128.f);
 
     this->worldShader->setUniformMat4("ProjectionMatrix", projection);
     this->worldShader->setUniformMat4("ViewMatrix", view);

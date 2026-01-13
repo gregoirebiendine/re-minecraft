@@ -14,6 +14,7 @@
 #include "ChunkMeshManager.h"
 #include "Chunk.h"
 #include "Shader.h"
+#include "Camera.h"
 
 class World {
     std::unique_ptr<ChunkManager> chunkManager;
@@ -23,8 +24,7 @@ class World {
     TextureRegistry textureRegistry;
     FastNoiseLite noise;
 
-    static ChunkPos blockToChunk(int wx, int wy, int wz);
-    static BlockPos blockToLocal(int wx, int wy, int wz);
+    static BlockPos worldPosToLocalPos(int wx, int wy, int wz);
 
     public:
         explicit World(BlockRegistry _blockRegistry, const TextureRegistry& _textureRegistry);
@@ -43,7 +43,7 @@ class World {
         void generateChunkTerrain(Chunk& chunk) const;
 
         // Updates
-        void update();
+        void update(const glm::vec3& cameraPos);
         void render(const Shader& worldShader);
 };
 

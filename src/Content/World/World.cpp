@@ -10,7 +10,7 @@ World::World(BlockRegistry _blockRegistry, const TextureRegistry& _textureRegist
         throw std::runtime_error("ChunkManager failed to load");
 
     this->noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2S);
-    this->noise.SetFrequency(0.030);
+    this->noise.SetFrequency(0.020);
     this->noise.SetSeed(3120);
 
     for (int cx = -1; cx <= 1; cx++) {
@@ -26,13 +26,13 @@ World::World(BlockRegistry _blockRegistry, const TextureRegistry& _textureRegist
 // World lifecycle
 Material World::getBlock(const int wx, const int wy, const int wz) const
 {
-    const ChunkPos cp = blockToChunk(wx, wy, wz);
-    const Chunk* chunk = this->chunkManager->getChunk(cp.x, cp.y, cp.z);
+    const auto [cx, cy, cz] = ChunkPos::fromWorld(wx, wy, wz);
+    const Chunk* chunk = this->chunkManager->getChunk(cx, cy, cz);
 
     if (!chunk)
         return this->blockRegistry.getByName("core:air");
 
-    const auto [x, y, z] = blockToLocal(wx, wy, wz);
+    const auto [x, y, z] = worldPosToLocalPos(wx, wy, wz);
     return chunk->getBlock(x, y, z);
 }
 
@@ -43,10 +43,10 @@ bool World::isAir(const int wx, const int wy, const int wz) const
 
 void World::setBlock(const int wx, const int wy, const int wz, const Material id) const
 {
-    const auto cp = blockToChunk(wx, wy, wz);
+    const auto cp = ChunkPos::fromWorld(wx, wy, wz);
     Chunk& chunk = this->chunkManager->getOrCreateChunk(cp.x, cp.y, cp.z);
 
-    const auto [x, y, z] = blockToLocal(wx, wy, wz);
+    const auto [x, y, z] = worldPosToLocalPos(wx, wy, wz);
     chunk.setBlock(x, y, z, id);
 
     if (x == 0 || x == Chunk::SIZE - 1 || y == 0 || y == Chunk::SIZE - 1 || z == 0 || z == Chunk::SIZE - 1)
@@ -101,33 +101,25 @@ void World::generateChunkTerrain(Chunk& chunk) const
 
 
 // Updates
-void World::update()
+void World::update(const glm::vec3& cameraPos)
 {
-    const auto chunks = this->chunkManager->getChunks();
+    this->chunkManager->update(*this, cameraPos);
 
-    for (const auto& chunk : chunks | std::views::values)
+    for (const auto& chunk : this->chunkManager->getChunks() | std::views::values)
     {
-        ChunkMesh& mesh = this->meshManager.get(*chunk);
-
         if (chunk->isDirty())
-            mesh.rebuild(*chunk, *this);
+            this->meshManager.get(*chunk).rebuild(*chunk, *this);
     }
 }
 
 void World::render(const Shader& worldShader)
 {
-    const auto chunks = this->chunkManager->getChunks();
-
     worldShader.use();
 
-    for (const auto& chunk : chunks | std::views::values)
+    for (const auto& chunk : this->chunkManager->getChunks() | std::views::values)
     {
-        ChunkMesh& mesh = meshManager.get(*chunk);
-
-        const glm::mat4 model = chunk->getChunkModel();
-        worldShader.setUniformMat4("ModelMatrix", model);
-
-        mesh.render();
+        worldShader.setUniformMat4("ModelMatrix", chunk->getChunkModel());
+        meshManager.get(*chunk).render();
     }
 }
 
@@ -145,12 +137,8 @@ const TextureRegistry& World::getTextureRegistry() const
 
 
 // Statics
-ChunkPos World::blockToChunk(const int wx, const int wy, const int wz)
-{
-    return {wx >> 4, wy >> 4, wz >> 4};
-}
 
-BlockPos World::blockToLocal(const int wx, const int wy, const int wz)
+BlockPos World::worldPosToLocalPos(const int wx, const int wy, const int wz)
 {
     return {wx & 15, wy & 15, wz & 15};
 }

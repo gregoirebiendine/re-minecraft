@@ -1,4 +1,5 @@
 #include "ChunkManager.h"
+#include "World.h"
 
 Chunk* ChunkManager::getChunk(const int cx, const int cy, const int cz) const
 {
@@ -56,5 +57,38 @@ void ChunkManager::markNeighborsDirty(const ChunkPos& cp, const std::optional<Bl
 
         if (const auto chunk = this->getChunk(pos.x, pos.y, pos.z))
             chunk->setDirty(true);
+    }
+}
+
+void ChunkManager::update(const World& world, const glm::vec3& cameraWorldPos)
+{
+    const ChunkPos center = ChunkPos::fromWorld(cameraWorldPos);
+    std::unordered_set<ChunkPos, ChunkPosHash> wanted;
+
+    // Compute desired chunks
+    for (int x = -VIEW_DISTANCE; x <= VIEW_DISTANCE; ++x) {
+        for (int z = -VIEW_DISTANCE; z <= VIEW_DISTANCE; ++z) {
+            wanted.insert({
+                center.x + x,
+                0,
+                center.z + z
+            });
+        }
+    }
+
+    // Load missing chunks
+    for (const ChunkPos& pos : wanted) {
+        if (!chunks.contains(pos)) {
+            Chunk& chunk = this->getOrCreateChunk(pos.x, pos.y, pos.z);
+            world.generateChunkTerrain(chunk);
+        }
+    }
+
+    // Unload far chunks
+    for (auto it = chunks.begin(); it != chunks.end(); ) {
+        if (!wanted.contains(it->first))
+            it = chunks.erase(it);
+        else
+            ++it;
     }
 }
