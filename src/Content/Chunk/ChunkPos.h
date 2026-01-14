@@ -13,6 +13,16 @@ struct BlockPos
     bool operator==(const BlockPos& other) const {
         return x == other.x && y == other.y && z == other.z;
     }
+
+    static BlockPos fromWorld(const int wx, const int wy, const int wz)
+    {
+        return {wx & 15, wy & 15, wz & 15};
+    }
+
+    static BlockPos fromWorld(const glm::vec3& pos)
+    {
+        return {static_cast<int>(pos.x) & 15, static_cast<int>(pos.y) & 15, static_cast<int>(pos.z) & 15};
+    }
 };
 
 struct ChunkPos {

@@ -28,6 +28,7 @@ set(
         src/Content/ChunkManager/ChunkManager.cpp
         src/Content/Chunk/Chunk.cpp
         src/Content/World/World.cpp
+        src/Content/TerrainGenerator/TerrainGenerator.cpp
         src/Content/BlockRegistry/BlockRegistry.cpp
         src/Content/TextureRegistry/TextureRegistry.cpp
         src/Content/GUI/GUI.cpp
@@ -50,6 +51,7 @@ set(
         ${CMAKE_SOURCE_DIR}/src/Content/Chunk
         ${CMAKE_SOURCE_DIR}/src/Content/ChunkManager/
         ${CMAKE_SOURCE_DIR}/src/Content/World
+        ${CMAKE_SOURCE_DIR}/src/Content/TerrainGenerator
         ${CMAKE_SOURCE_DIR}/src/Content/BlockRegistry
         ${CMAKE_SOURCE_DIR}/src/Content/TextureRegistry
         ${CMAKE_SOURCE_DIR}/src/Content/GUI

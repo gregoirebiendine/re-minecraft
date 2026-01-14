@@ -6,15 +6,13 @@
 #include <ranges>
 #include <utility>
 
-#include <FastNoiseLite.h>
-
 #include "BlockRegistry.h"
 #include "TextureRegistry.h"
 #include "ChunkManager.h"
 #include "ChunkMeshManager.h"
+#include "TerrainGenerator.h"
 #include "Chunk.h"
 #include "Shader.h"
-#include "Camera.h"
 
 class World {
     std::unique_ptr<ChunkManager> chunkManager;
@@ -22,9 +20,7 @@ class World {
 
     BlockRegistry blockRegistry;
     TextureRegistry textureRegistry;
-    FastNoiseLite noise;
-
-    static BlockPos worldPosToLocalPos(int wx, int wy, int wz);
+    TerrainGenerator terrainGenerator;
 
     public:
         explicit World(BlockRegistry _blockRegistry, const TextureRegistry& _textureRegistry);
@@ -37,10 +33,6 @@ class World {
         void setBlock(int wx, int wy, int wz, Material id) const;
         [[nodiscard]] Material getBlock(int wx, int wy, int wz) const;
         [[nodiscard]] bool isAir(int wx, int wy, int wz) const;
-
-        // Terrain
-        int getTerrainHeight(int worldX, int worldZ) const;
-        void generateChunkTerrain(Chunk& chunk) const;
 
         // Updates
         void update(const glm::vec3& cameraPos);
