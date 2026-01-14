@@ -1,0 +1,12 @@
+#ifndef RE_MINECRAFT_CHUNKSTATE_H
+#define RE_MINECRAFT_CHUNKSTATE_H
+
+enum class ChunkState {
+    EMPTY,
+    GENERATING,
+    MESHING,
+    READY,
+    UNLOADING
+};
+
+#endif //RE_MINECRAFT_CHUNKSTATE_H

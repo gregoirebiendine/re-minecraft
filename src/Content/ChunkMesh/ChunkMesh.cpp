@@ -111,12 +111,20 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world)
     }
     
     // Link data to VA0 before rendering
-    this->VAO.bind();
-    this->VAO.storeBlockData(this->meshData);
-    this->VAO.unbind();
+    // this->VAO.bind();
+    // this->VAO.storeBlockData(this->meshData);
+    // this->VAO.unbind();
 
     // Set chunk as not dirty, meaning it will not rebuild next frame
     chunk.setDirty(false);
+}
+
+void ChunkMesh::upload() const
+{
+    // Link data to VA0 before rendering
+    this->VAO.bind();
+    this->VAO.storeBlockData(this->meshData);
+    this->VAO.unbind();
 }
 
 void ChunkMesh::render() const

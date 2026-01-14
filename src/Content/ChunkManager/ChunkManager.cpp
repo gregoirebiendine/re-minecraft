@@ -84,10 +84,48 @@ void ChunkManager::update(const TerrainGenerator& terrainGenerator, const glm::v
     }
 
     // Unload far chunks
-    for (auto it = chunks.begin(); it != chunks.end(); ) {
+    for (auto it = chunks.begin(); it != chunks.end(); )
+    {
         if (!wanted.contains(it->first))
             it = chunks.erase(it);
         else
             ++it;
     }
+
+    // while (!this->meshQueue.empty()) {
+    //     ChunkPos pos = this->meshQueue.front();
+    //     this->meshQueue.pop();
+    //
+    //     Chunk& chunk = *chunks.at(pos);
+    //     chunk.uploadMeshToGPU();   // OpenGL
+    //
+    //     chunk.state = ChunkState::Ready;
+    // }
+}
+
+void ChunkManager::workerLoop()
+{
+    // while (running) {
+        ChunkPos pos;
+
+        {
+            std::unique_lock lock(this->queueMutex);
+            cv.wait(lock, [&]{ return !this->generationQueue.empty(); });
+
+            pos = this->generationQueue.front();
+            this->generationQueue.pop();
+        }
+
+        Chunk& chunk = *this->chunks.at(pos);
+
+        chunk.setState(ChunkState::GENERATING);
+        chunk.generate();                           // ???
+        chunk.setState(ChunkState::MESHING);
+        chunk.buildMeshCPU();                       //rebuild
+
+        {
+            std::lock_guard lock(this->queueMutex);
+            this->meshQueue.push(pos);
+        }
+    // }
 }

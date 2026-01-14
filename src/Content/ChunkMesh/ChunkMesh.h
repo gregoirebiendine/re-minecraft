@@ -20,6 +20,7 @@ class ChunkMesh
         ~ChunkMesh() = default;
 
         void rebuild(Chunk& chunk, const World& world);
+        void upload() const;
         void render() const;
 
     private:

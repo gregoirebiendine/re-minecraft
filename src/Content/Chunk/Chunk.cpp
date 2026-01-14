@@ -1,16 +1,17 @@
 #include "Chunk.h"
 
-Chunk::Chunk(const ChunkPos pos)
+Chunk::Chunk(const ChunkPos pos) :
+    _position(pos)
 {
-    this->_position = pos;
+    // Empty
 }
 
 glm::mat<4, 4, float> Chunk::getChunkModel() const
 {
     const auto offset = glm::vec3(
-        this->_position.x * Chunk::SIZE,
-        this->_position.y * Chunk::SIZE,
-        this->_position.z * Chunk::SIZE
+        this->_position.x * SIZE,
+        this->_position.y * SIZE,
+        this->_position.z * SIZE
     );
     return glm::translate(glm::mat4(1.0f), offset);
 }
@@ -53,9 +54,17 @@ void Chunk::fill(const glm::ivec3 from, const glm::ivec3 to, const Material id)
 
 void Chunk::setDirty(const bool dirty)
 {
-    if (this->_isDirty == dirty)
-        return;
     this->_isDirty = dirty;
+}
+
+const ChunkState& Chunk::getState() const
+{
+    return this->_state;
+}
+
+void Chunk::setState(const ChunkState state)
+{
+    this->_state = state;
 }
 
 // Statics
