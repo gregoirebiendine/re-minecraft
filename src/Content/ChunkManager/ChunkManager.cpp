@@ -1,5 +1,11 @@
 #include "ChunkManager.h"
 
+ChunkManager::ChunkManager(const TerrainGenerator& _terrainGenerator) :
+    terrainGenerator(_terrainGenerator)
+{
+    this->worker = std::jthread([this] { this->workerLoop(); });
+}
+
 Chunk* ChunkManager::getChunk(const int cx, const int cy, const int cz) const
 {
     const auto it = this->chunks.find({cx, cy, cz});
@@ -59,73 +65,45 @@ void ChunkManager::markNeighborsDirty(const ChunkPos& cp, const std::optional<Bl
     }
 }
 
-void ChunkManager::update(const TerrainGenerator& terrainGenerator, const glm::vec3& cameraPos)
+ChunkNeighbors ChunkManager::getNeighbors(const ChunkPos& cp) const
+{
+    return {
+        this->getChunk(cp.x, cp.y, cp.z - 1),
+        this->getChunk(cp.x, cp.y, cp.z + 1),
+        this->getChunk(cp.x + 1, cp.y, cp.z),
+        this->getChunk(cp.x - 1, cp.y, cp.z),
+        this->getChunk(cp.x, cp.y + 1, cp.z),
+        this->getChunk(cp.x, cp.y - 1, cp.z),
+    };
+}
+
+void ChunkManager::update(const glm::vec3& cameraPos)
 {
     const ChunkPos center = ChunkPos::fromWorld(cameraPos);
-    std::unordered_set<ChunkPos, ChunkPosHash> wanted;
 
-    // Compute desired chunks
-    for (int x = -VIEW_DISTANCE; x <= VIEW_DISTANCE; ++x) {
-        for (int z = -VIEW_DISTANCE; z <= VIEW_DISTANCE; ++z) {
-            wanted.insert({
-                center.x + x,
-                0,
-                center.z + z
-            });
+    for (int x = -VIEW_DISTANCE; x <= VIEW_DISTANCE; x++)
+        for (int z = -VIEW_DISTANCE; z <= VIEW_DISTANCE; z++) {
+            ChunkPos pos{center.x + x, 0, center.z + z};
+
+            if (!this->chunks.contains(pos)) {
+                auto chunk = std::make_unique<Chunk>(pos);
+                chunk->setState(ChunkState::GENERATING);
+
+                this->generationQueue.push(chunk.get());
+                this->chunks.emplace(pos, std::move(chunk));
+            }
         }
-    }
-
-    // Load missing chunks
-    for (const ChunkPos& pos : wanted) {
-        if (!chunks.contains(pos)) {
-            Chunk& chunk = this->getOrCreateChunk(pos.x, pos.y, pos.z);
-            terrainGenerator.generateChunkTerrain(chunk);
-        }
-    }
-
-    // Unload far chunks
-    for (auto it = chunks.begin(); it != chunks.end(); )
-    {
-        if (!wanted.contains(it->first))
-            it = chunks.erase(it);
-        else
-            ++it;
-    }
-
-    // while (!this->meshQueue.empty()) {
-    //     ChunkPos pos = this->meshQueue.front();
-    //     this->meshQueue.pop();
-    //
-    //     Chunk& chunk = *chunks.at(pos);
-    //     chunk.uploadMeshToGPU();   // OpenGL
-    //
-    //     chunk.state = ChunkState::Ready;
-    // }
 }
 
 void ChunkManager::workerLoop()
 {
-    // while (running) {
-        ChunkPos pos;
+    while (true) {
+        Chunk* chunk;
 
-        {
-            std::unique_lock lock(this->queueMutex);
-            cv.wait(lock, [&]{ return !this->generationQueue.empty(); });
+        if (!this->generationQueue.tryPop(chunk))
+            continue;
 
-            pos = this->generationQueue.front();
-            this->generationQueue.pop();
-        }
-
-        Chunk& chunk = *this->chunks.at(pos);
-
-        chunk.setState(ChunkState::GENERATING);
-        chunk.generate();                           // ???
-        chunk.setState(ChunkState::MESHING);
-        chunk.buildMeshCPU();                       //rebuild
-
-        {
-            std::lock_guard lock(this->queueMutex);
-            this->meshQueue.push(pos);
-        }
-    // }
+        this->terrainGenerator.generateChunkTerrain(*chunk);
+        chunk->setState(ChunkState::GENERATED);
+    }
 }

@@ -32,6 +32,7 @@ set(
         src/Content/BlockRegistry/BlockRegistry.cpp
         src/Content/TextureRegistry/TextureRegistry.cpp
         src/Content/GUI/GUI.cpp
+        src/Engine/ThreadPool/ThreadPool.cpp
 )
 
 set(
@@ -43,9 +44,12 @@ set(
         ${CMAKE_SOURCE_DIR}/src/Engine/Camera
         ${CMAKE_SOURCE_DIR}/src/Engine/Input
         ${CMAKE_SOURCE_DIR}/src/Engine/Raycast
+        ${CMAKE_SOURCE_DIR}/src/Engine/ConcurrentQueue
         ${CMAKE_SOURCE_DIR}/src/Engine/Render/VAO
         ${CMAKE_SOURCE_DIR}/src/Engine/Render/VBO
         ${CMAKE_SOURCE_DIR}/src/Engine/Render/Shader
+        ${CMAKE_SOURCE_DIR}/src/Engine/ThreadPool
+        ${CMAKE_SOURCE_DIR}/src/Engine/Utils
         ${CMAKE_SOURCE_DIR}/src/Content/ChunkMesh
         ${CMAKE_SOURCE_DIR}/src/Content/ChunkMeshManager
         ${CMAKE_SOURCE_DIR}/src/Content/Chunk

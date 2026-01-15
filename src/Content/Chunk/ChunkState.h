@@ -4,6 +4,7 @@
 enum class ChunkState {
     EMPTY,
     GENERATING,
+    GENERATED,
     MESHING,
     READY,
     UNLOADING

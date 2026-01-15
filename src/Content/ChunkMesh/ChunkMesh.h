@@ -13,11 +13,15 @@ class World; // forward declaration
 #include "VAO.h"
 #include "Vertex.h"
 
+using ChunkMeshData = std::vector<Vertex>;
+
 class ChunkMesh
 {
     public:
-        ChunkMesh() = default;
-        ~ChunkMesh() = default;
+        ChunkPos position;
+        ChunkMeshData meshData;
+
+        ChunkMesh(const ChunkPos& cp);
 
         void rebuild(Chunk& chunk, const World& world);
         void upload() const;
@@ -25,7 +29,6 @@ class ChunkMesh
 
     private:
         VAO VAO;
-        std::vector<Vertex> meshData;
 
         static void createFace(
             std::vector<Vertex>& data,

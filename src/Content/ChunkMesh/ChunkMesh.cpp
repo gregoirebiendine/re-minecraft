@@ -1,6 +1,12 @@
 #include "ChunkMesh.h"
 #include "World.h"
 
+ChunkMesh::ChunkMesh(const ChunkPos& cp) :
+    position(cp)
+{
+    this->meshData.reserve(sizeof(Vertex) * Chunk::VOLUME);
+}
+
 void ChunkMesh::rebuild(Chunk& chunk, const World& world)
 {
     const auto [cx, cy, cz] = chunk.getPosition() * Chunk::SIZE;
@@ -116,7 +122,7 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world)
     // this->VAO.unbind();
 
     // Set chunk as not dirty, meaning it will not rebuild next frame
-    chunk.setDirty(false);
+    // chunk.setDirty(false);
 }
 
 void ChunkMesh::upload() const
