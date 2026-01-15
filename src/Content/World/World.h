@@ -6,6 +6,8 @@
 #include <ranges>
 #include <utility>
 
+#include "glm/glm.hpp"
+
 #include "BlockRegistry.h"
 #include "TextureRegistry.h"
 #include "ChunkManager.h"
@@ -20,13 +22,13 @@ class World {
 
     BlockRegistry blockRegistry;
     TextureRegistry textureRegistry;
-    TerrainGenerator terrainGenerator;
 
     public:
         explicit World(BlockRegistry _blockRegistry, const TextureRegistry& _textureRegistry);
 
         const BlockRegistry& getBlockRegistry() const;
         const TextureRegistry& getTextureRegistry() const;
+        const std::unique_ptr<ChunkManager>& getChunkManager() const;
 
         // Lifecycle
         void fill(glm::ivec3 from, glm::ivec3 to, Material id) const;

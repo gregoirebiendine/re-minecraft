@@ -32,7 +32,6 @@ set(
         src/Content/BlockRegistry/BlockRegistry.cpp
         src/Content/TextureRegistry/TextureRegistry.cpp
         src/Content/GUI/GUI.cpp
-        src/Engine/ThreadPool/ThreadPool.cpp
 )
 
 set(

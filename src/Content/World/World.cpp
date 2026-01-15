@@ -3,24 +3,14 @@
 World::World(BlockRegistry _blockRegistry, const TextureRegistry& _textureRegistry) :
     blockRegistry(std::move(_blockRegistry)),
     textureRegistry(_textureRegistry),
-    terrainGenerator(10, 8, blockRegistry)
+    meshManager(*this)
 {
-    this->chunkManager = std::make_unique<ChunkManager>(terrainGenerator);
+    this->chunkManager = std::make_unique<ChunkManager>();
 
     if (!this->chunkManager)
         throw std::runtime_error("ChunkManager failed to load");
 
-    // for (int cx = -1; cx <= 1; cx++)
-    // {
-    //     for (int cz = -1; cz <= 1; cz++)
-    //     {
-    //         for (int cy = 0; cy <= 1; cy++)
-    //         {
-    //             Chunk& chunk = this->chunkManager->getOrCreateChunk(cx, cy, cz);
-    //             this->terrainGenerator.generateChunkTerrain(chunk);
-    //         }
-    //     }
-    // }
+    // Create spawn Chunks
 }
 
 // World lifecycle
@@ -65,24 +55,29 @@ void World::fill(const glm::ivec3 from, const glm::ivec3 to, const Material id) 
 // Updates
 void World::update(const glm::vec3& cameraPos)
 {
-    this->chunkManager->update(cameraPos);
+    for (const auto&[pos, chunk] : this->chunkManager->getChunks()) {
+        if (chunk->getState() == ChunkState::READY) {
+            const float distance = glm::distance(
+                cameraPos,
+                glm::vec3(pos.x, pos.y, pos.z)
+            );
 
-    for (const auto& chunk : this->chunkManager->getChunks() | std::views::values)
-    {
-        if (chunk->isDirty())
-            this->meshManager.get(*chunk).rebuild(*chunk, *this);
+            meshManager.requestRebuild(*chunk, distance);
+        }
     }
+
+    meshManager.update(cameraPos);
 }
 
 void World::render(const Shader& worldShader)
 {
-    worldShader.use();
-
-    for (const auto& chunk : this->chunkManager->getChunks() | std::views::values)
-    {
-        worldShader.setUniformMat4("ModelMatrix", chunk->getChunkModel());
-        meshManager.get(*chunk).render();
-    }
+    // worldShader.use();
+    //
+    // for (const auto& chunk : this->chunkManager->getChunks() | std::views::values)
+    // {
+    //     worldShader.setUniformMat4("ModelMatrix", chunk->getChunkModel());
+    //     meshManager.get(*chunk).render();
+    // }
 }
 
 
@@ -95,4 +90,9 @@ const BlockRegistry& World::getBlockRegistry() const
 const TextureRegistry& World::getTextureRegistry() const
 {
     return this->textureRegistry;
+}
+
+const std::unique_ptr<ChunkManager> &World::getChunkManager() const
+{
+    return this->chunkManager;
 }

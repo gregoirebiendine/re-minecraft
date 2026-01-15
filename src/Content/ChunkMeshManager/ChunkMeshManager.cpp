@@ -1,35 +1,58 @@
 #include "ChunkMeshManager.h"
 
-ChunkMeshManager::ChunkMeshManager(World& _world) :
-    world(_world),
-    workers(std::thread::hardware_concurrency())
+ChunkMeshManager::ChunkMeshManager(World& world) :
+    world(world),
+    workers(std::thread::hardware_concurrency()
+)
 {
     // Empty
 }
 
-ChunkMeshData ChunkMeshManager::buildMesh(
-    const Chunk& chunk,
-    const ChunkNeighbors& n,
-    const BlockRegistry& blockRegistry,
-    const TextureRegistry& textureRegistry
-)
+void ChunkMeshManager::requestRebuild(Chunk& chunk, const float distance)
 {
-    ChunkMeshData meshData;
-    meshData.reserve(sizeof(Vertex) * Chunk::VOLUME);
+    chunk.bumpGenerationID();
+    chunk.setState(ChunkState::MESHING);
+
+    const ChunkJob job{
+        chunk.getPosition(),
+        distance,
+        chunk.getGenerationID()
+    };
+
+    workers.enqueue(job);
+}
+
+void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
+{
+    Chunk* chunk = world.getChunkManager()->getChunk(job.pos.x, job.pos.y, job.pos.z);
+
+    if (!chunk)
+        return;
+
+    /* CANCEL OBSOLETE JOB */
+    if (chunk->getGenerationID() != job.generationID)
+        return;
+
+    const ChunkNeighbors n = world.getChunkManager()->getNeighbors(job.pos);
+    const auto& textureRegistry = world.getTextureRegistry();
+
+    MeshData data;
+    data.reserve(36 * Chunk::VOLUME);
 
     for (int i = 0; i < Chunk::VOLUME; i++) {
         auto [x, y, z] = ChunkCoords::indexToLocalCoords(i);
 
         // Skip AIR
-        if (chunk.isAir(x, y, z)) continue;
+        if (chunk->isAir(x, y, z))
+            continue;
 
         // Retrieve Block Meta
-        const BlockMeta& meta = blockRegistry.get(chunk.getBlock(x, y, z));
+        const BlockMeta& meta = world.getBlockRegistry().get(chunk->getBlock(x, y, z));
 
         // NORTH face
-        if (isAirAt(chunk, n, x, y, z - 1)) {
+        if (isAirAt(*chunk, n, x, y, z - 1)) {
             buildFaceMesh(
-                meshData,
+                data,
                 {x,       y,       z},
                 {x,       1 + y,   z},
                 {1 + x,   1 + y,   z},
@@ -40,9 +63,9 @@ ChunkMeshData ChunkMeshManager::buildMesh(
         }
 
         // SOUTH face
-        if (isAirAt(chunk, n, x, y, z + 1)) {
+        if (isAirAt(*chunk, n, x, y, z + 1)) {
             buildFaceMesh(
-                meshData,
+                data,
                 {1 + x,   y,       1 + z},
                 {1 + x,   1 + y,   1 + z},
                 {x,       1 + y,   1 + z},
@@ -53,9 +76,9 @@ ChunkMeshData ChunkMeshManager::buildMesh(
         }
 
         // WEST face
-        if (isAirAt(chunk, n, x - 1, y, z)) {
+        if (isAirAt(*chunk, n, x - 1, y, z)) {
             buildFaceMesh(
-                meshData,
+                data,
                 {x,       y,       1 + z},
                 {x,       1 + y,   1 + z},
                 {x,       1 + y,   z},
@@ -66,9 +89,9 @@ ChunkMeshData ChunkMeshManager::buildMesh(
         }
 
         // EAST face
-        if (isAirAt(chunk, n, x + 1, y, z)) {
+        if (isAirAt(*chunk, n, x + 1, y, z)) {
              buildFaceMesh(
-                meshData,
+                data,
                 {1 + x,   y,       z},
                 {1 + x,   1 + y,   z},
                 {1 + x,   1 + y,   1 + z},
@@ -79,9 +102,9 @@ ChunkMeshData ChunkMeshManager::buildMesh(
         }
 
         // UP face
-        if (isAirAt(chunk, n, x, y + 1, z)) {
+        if (isAirAt(*chunk, n, x, y + 1, z)) {
             buildFaceMesh(
-                meshData,
+                data,
                 {x,       1 + y,   z},
                 {x,       1 + y,   1 + z},
                 {1 + x,   1 + y,   1 + z},
@@ -92,9 +115,9 @@ ChunkMeshData ChunkMeshManager::buildMesh(
         }
 
         // DOWN face
-        if (isAirAt(chunk, n, x, y - 1, z)) {
+        if (isAirAt(*chunk, n, x, y - 1, z)) {
             buildFaceMesh(
-                meshData,
+                data,
                 {x,       y,       z},
                 {1 + x,   y,       z},
                 {1 + x,   y,       1 + z},
@@ -105,44 +128,51 @@ ChunkMeshData ChunkMeshManager::buildMesh(
         }
     }
 
-    return meshData;
+    {
+        std::lock_guard lock(uploadMutex);
+        uploadQueue.emplace(job.pos, std::move(data));
+    }
+
+    chunk->setState(ChunkState::MESHED);
 }
 
-// void ChunkMeshManager::update(const ChunkManager& chunkManager)
-// {
-//     for (const auto& chunk : chunkManager.getChunks() | std::views::values) {
-//         if (chunk->getState() == ChunkState::GENERATED) {
-//             chunk->setState(ChunkState::MESHING);
-//             this->meshQueue.push(chunk.get());
-//         }
-//     }
-//
-//     // Main thread: upload finished meshes
-//     ChunkMesh mesh;
-//     while (this->readyMeshes.tryPop(mesh)) {
-//         mesh.upload();
-//         this->meshes[mesh.position] = std::move(mesh); //Needs modify
-//     }
-// }
-
-void ChunkMeshManager::workerLoop()
+void ChunkMeshManager::update()
 {
-    while (true) {
-        Chunk* chunk;
+    std::lock_guard lock(uploadMutex);
 
-        if (!meshQueue.tryPop(chunk))
-            continue;
+    while (!uploadQueue.empty()) {
+        auto [pos, data] = std::move(uploadQueue.front());
 
-        const auto n = this->chunkManager.getNeighbors(chunk->getPosition());
-        ChunkMesh mesh = buildMesh(*chunk, n);
+        uploadQueue.pop();
 
-        this->readyMeshes.push(std::move(mesh));
-        chunk->setState(ChunkState::READY);
+        auto& mesh = meshes.try_emplace(pos, pos).first->second;
+        mesh.upload(std::move(data));
+
+        // if (auto* c = world.getChunkManager()->getChunk(pos.x, pos.y, pos.z))
+        //     c->setDirty(false);
     }
 }
 
+// Statics
+bool ChunkMeshManager::isAirAt(const Chunk& c, const ChunkNeighbors& n, const int x, const int y, const int z)
+{
+    if (x >= 0 && x < Chunk::SIZE &&
+        y >= 0 && y < Chunk::SIZE &&
+        z >= 0 && z < Chunk::SIZE)
+        return c.isAir(x, y, z);
+
+    if (x < 0 && n.west)  return n.west->isAir(x + Chunk::SIZE, y, z);
+    if (x >= Chunk::SIZE && n.east) return n.east->isAir(x - Chunk::SIZE, y, z);
+    if (z < 0 && n.north) return n.north->isAir(x, y, z + Chunk::SIZE);
+    if (z >= Chunk::SIZE && n.south) return n.south->isAir(x, y, z - Chunk::SIZE);
+    if (y < 0 && n.down)  return n.down->isAir(x, y + Chunk::SIZE, z);
+    if (y >= Chunk::SIZE && n.up)    return n.up->isAir(x, y - Chunk::SIZE, z);
+
+    return true;
+}
+
 void ChunkMeshManager::buildFaceMesh(
-    ChunkMeshData& data,
+    MeshData& data,
     const glm::ivec3 &v0,
     const glm::ivec3 &v1,
     const glm::ivec3 &v2,
@@ -159,33 +189,4 @@ void ChunkMeshManager::buildFaceMesh(
         {v2, normals, {0, 1}, texId},
         {v3, normals, {0, 0}, texId},
     });
-}
-
-bool ChunkMeshManager::isAirAt(const Chunk& chunk, const ChunkNeighbors& n, const int x, const int y, const int z)
-{
-    if (x >= 0 && x < Chunk::SIZE &&
-        y >= 0 && y < Chunk::SIZE &&
-        z >= 0 && z < Chunk::SIZE
-    )
-        return chunk.isAir(x, y, z);
-
-    if (x < 0 && n.west)
-        return n.west->isAir(x + Chunk::SIZE, y, z);
-
-    if (x >= Chunk::SIZE && n.east)
-        return n.east->isAir(x - Chunk::SIZE, y, z);
-
-    if (z < 0 && n.north)
-        return n.north->isAir(x, y, z + Chunk::SIZE);
-
-    if (z >= Chunk::SIZE && n.south)
-        return n.south->isAir(x, y, z - Chunk::SIZE);
-
-    if (y < 0 && n.down)
-        return n.down->isAir(x, y + Chunk::SIZE, z);
-
-    if (y >= Chunk::SIZE && n.up)
-        return n.up->isAir(x, y - Chunk::SIZE, z);
-
-    return true;
 }

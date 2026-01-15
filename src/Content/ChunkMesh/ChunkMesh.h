@@ -3,46 +3,25 @@
 
 #pragma once
 
-class World; // forward declaration
-
 #include <vector>
 
-#include <glad/glad.h>
-
 #include "Chunk.h"
-#include "VAO.h"
 #include "Vertex.h"
+#include "VAO.h"
 
-using ChunkMeshData = std::vector<Vertex>;
+using MeshData = std::vector<Vertex>;
 
-class ChunkMesh
-{
+class ChunkMesh {
     public:
-        ChunkPos position;
-        ChunkMeshData meshData;
+        explicit ChunkMesh(const ChunkPos& pos);
 
-        ChunkMesh(const ChunkPos& cp);
-
-        void rebuild(Chunk& chunk, const World& world);
-        void upload() const;
+        void upload(MeshData&& data);
         void render() const;
 
     private:
+        ChunkPos position;
         VAO VAO;
-
-        static void createFace(
-            std::vector<Vertex>& data,
-            const glm::ivec3& v0,
-            const glm::ivec3& v1,
-            const glm::ivec3& v2,
-            const glm::ivec3& v3,
-            const glm::ivec3& normals,
-            const uint16_t& texId
-        );
-
-        // Statics
-        static std::tuple<GLint, GLint, GLint> coords(int index);
+        size_t vertexCount{0};
 };
-
 
 #endif //RE_MINECRAFT_CHUNKMESH_H

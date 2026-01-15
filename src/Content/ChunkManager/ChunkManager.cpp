@@ -1,9 +1,39 @@
 #include "ChunkManager.h"
 
-ChunkManager::ChunkManager(const TerrainGenerator& _terrainGenerator) :
-    terrainGenerator(_terrainGenerator)
+ChunkManager::ChunkManager() :
+    workers(std::thread::hardware_concurrency()
+)
 {
-    this->worker = std::jthread([this] { this->workerLoop(); });
+    workers.setWorker([this](const ChunkJob &job) {
+        generateJob(job);
+    });
+}
+
+void ChunkManager::requestChunk(const ChunkPos& pos)
+{
+    if (chunks.contains(pos))
+        return;
+
+    const auto& chunk = this->chunks[pos];
+
+    chunk->bumpGenerationID();
+    chunk->setState(ChunkState::GENERATING);
+
+    workers.enqueue({pos, 0.f, chunk->getGenerationID()});
+}
+
+void ChunkManager::generateJob(ChunkJob job) {
+    Chunk* chunk = getChunk(job.pos.x, job.pos.y, job.pos.z);
+
+    if (!chunk)
+        return;
+
+    if (chunk->getGenerationID() != job.generationID)
+        return;
+
+    TerrainGenerator::generate(*chunk); // Needs blockRegistry
+    chunk->setState(ChunkState::READY);
+    rebuildNeighbors(job.pos);
 }
 
 Chunk* ChunkManager::getChunk(const int cx, const int cy, const int cz) const
@@ -11,6 +41,21 @@ Chunk* ChunkManager::getChunk(const int cx, const int cy, const int cz) const
     const auto it = this->chunks.find({cx, cy, cz});
     return it != this->chunks.end() ? it->second.get() : nullptr;
 }
+
+void ChunkManager::rebuildNeighbors(const ChunkPos& pos) const
+{
+    static const int d[6][3] = {
+        {1,0,0},{-1,0,0},{0,1,0},{0,-1,0},{0,0,1},{0,0,-1}
+    };
+
+    for (auto& o : d) {
+        Chunk* n = getChunk(pos.x+o[0], pos.y+o[1], pos.z+o[2]);
+        if (n && n->getState() == ChunkState::MESHED)
+            n->setState(ChunkState::READY);
+    }
+}
+
+void ChunkManager::updateStreaming(const glm::vec3&) {}
 
 Chunk& ChunkManager::getOrCreateChunk(const int cx, const int cy, const int cz)
 {
@@ -28,11 +73,6 @@ Chunk& ChunkManager::getOrCreateChunk(const int cx, const int cy, const int cz)
 const ChunkMap& ChunkManager::getChunks() const
 {
     return this->chunks;
-}
-
-bool ChunkManager::chunkExist(const int cx, const int cy, const int cz) const
-{
-    return this->chunks.contains({cx, cy, cz});
 }
 
 void ChunkManager::markNeighborsDirty(const ChunkPos& cp, const std::optional<BlockPos>& bp) const
@@ -75,35 +115,4 @@ ChunkNeighbors ChunkManager::getNeighbors(const ChunkPos& cp) const
         this->getChunk(cp.x, cp.y + 1, cp.z),
         this->getChunk(cp.x, cp.y - 1, cp.z),
     };
-}
-
-void ChunkManager::update(const glm::vec3& cameraPos)
-{
-    const ChunkPos center = ChunkPos::fromWorld(cameraPos);
-
-    for (int x = -VIEW_DISTANCE; x <= VIEW_DISTANCE; x++)
-        for (int z = -VIEW_DISTANCE; z <= VIEW_DISTANCE; z++) {
-            ChunkPos pos{center.x + x, 0, center.z + z};
-
-            if (!this->chunks.contains(pos)) {
-                auto chunk = std::make_unique<Chunk>(pos);
-                chunk->setState(ChunkState::GENERATING);
-
-                this->generationQueue.push(chunk.get());
-                this->chunks.emplace(pos, std::move(chunk));
-            }
-        }
-}
-
-void ChunkManager::workerLoop()
-{
-    while (true) {
-        Chunk* chunk;
-
-        if (!this->generationQueue.tryPop(chunk))
-            continue;
-
-        this->terrainGenerator.generateChunkTerrain(*chunk);
-        chunk->setState(ChunkState::GENERATED);
-    }
 }

@@ -1,7 +1,7 @@
 #include "Chunk.h"
 
 Chunk::Chunk(const ChunkPos pos) :
-    _position(pos)
+    position(pos)
 {
     // Empty
 }
@@ -9,37 +9,31 @@ Chunk::Chunk(const ChunkPos pos) :
 glm::mat<4, 4, float> Chunk::getChunkModel() const
 {
     const auto offset = glm::vec3(
-        this->_position.x * SIZE,
-        this->_position.y * SIZE,
-        this->_position.z * SIZE
+        this->position.x * SIZE,
+        this->position.y * SIZE,
+        this->position.z * SIZE
     );
     return glm::translate(glm::mat4(1.0f), offset);
 }
 
 ChunkPos Chunk::getPosition() const
 {
-    return this->_position;
+    return this->position;
 }
 
 Material Chunk::getBlock(const uint8_t x, const uint8_t y, const uint8_t z) const
 {
-    return _blocks[index(x, y, z)];
+    return this->blocks[ChunkCoords::localCoordsToIndex(x, y, z)];
 }
 
 bool Chunk::isAir(const uint8_t x, const uint8_t y, const uint8_t z) const
 {
-    return _blocks[index(x, y, z)] == 0;
-}
-
-bool Chunk::isDirty() const
-{
-    return this->_isDirty;
+    return this->blocks[ChunkCoords::localCoordsToIndex(x, y, z)] == 0;
 }
 
 void Chunk::setBlock(const uint8_t x, const uint8_t y, const uint8_t z, const Material id)
 {
-    this->_blocks[index(x, y, z)] = id;
-    this->setDirty(true);
+    this->blocks[ChunkCoords::localCoordsToIndex(x, y, z)] = id;
 }
 
 void Chunk::fill(const glm::ivec3 from, const glm::ivec3 to, const Material id)
@@ -52,28 +46,33 @@ void Chunk::fill(const glm::ivec3 from, const glm::ivec3 to, const Material id)
             }
 }
 
-void Chunk::setDirty(const bool dirty)
+ChunkState Chunk::getState() const
 {
-    this->_isDirty = dirty;
+    return this->state.load();
 }
 
-const ChunkState& Chunk::getState() const
+void Chunk::setState(const ChunkState _state)
 {
-    return this->_state;
+    this->state.store(_state);
 }
 
-void Chunk::setState(const ChunkState state)
+uint64_t Chunk::getGenerationID() const
 {
-    this->_state = state;
+    return generationID.load();
+}
+
+void Chunk::bumpGenerationID()
+{
+    generationID.fetch_add(1);
 }
 
 // Statics
-uint16_t Chunk::index(const uint8_t x, const uint8_t y, const uint8_t z)
-{
-    return clamp(x) + SIZE * (clamp(y) + SIZE * clamp(z));
-}
-
-uint8_t Chunk::clamp(const uint8_t v)
-{
-    return std::clamp(v, static_cast<uint8_t>(0), SIZE);
-}
+// uint16_t Chunk::index(const uint8_t x, const uint8_t y, const uint8_t z)
+// {
+//     return clamp(x) + SIZE * (clamp(y) + SIZE * clamp(z));
+// }
+//
+// uint8_t Chunk::clamp(const uint8_t v)
+// {
+//     return std::clamp(v, static_cast<uint8_t>(0), SIZE);
+// }

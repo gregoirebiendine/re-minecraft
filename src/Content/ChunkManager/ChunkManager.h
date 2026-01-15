@@ -11,35 +11,46 @@
 
 #include <glm/glm.hpp>
 
-#include "ConcurrentQueue.h"
 #include "TerrainGenerator.h"
+#include "ThreadPool.h"
 #include "ChunkPos.h"
 #include "Chunk.h"
 #include "ChunkNeighbors.h"
 
 using ChunkMap = std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash>;
 
+struct ChunkJob {
+    ChunkPos pos;
+    float distance;
+    uint64_t generationID;
+
+    bool operator<(const ChunkJob& other) const {
+        return distance > other.distance;
+    }
+};
+
+
 class ChunkManager {
     static constexpr uint8_t VIEW_DISTANCE = 8;
 
     ChunkMap chunks;
-    ConcurrentQueue<Chunk*> generationQueue;
-    std::jthread worker;
+    ThreadPool<ChunkJob> workers;
 
-    TerrainGenerator terrainGenerator;
+    void generateJob(ChunkJob job);
+    void rebuildNeighbors(const ChunkPos& pos) const;
 
     public:
-        explicit ChunkManager(const TerrainGenerator& _terrainGenerator);
+        ChunkManager();
 
-        Chunk& getOrCreateChunk(int cx, int cy, int cz);
-        [[nodiscard]] Chunk* getChunk(int cx, int cy, int cz) const;
         [[nodiscard]] const ChunkMap& getChunks() const;
-        [[nodiscard]] bool chunkExist(int cx, int cy, int cz) const;
-        void markNeighborsDirty(const ChunkPos& cp, const std::optional<BlockPos>& bp = std::nullopt) const;
-        ChunkNeighbors getNeighbors(const ChunkPos &cp) const;
+        [[nodiscard]] ChunkNeighbors getNeighbors(const ChunkPos &cp) const;
 
-        [[noreturn]] void workerLoop();
-        void update(const glm::vec3& cameraPos);
+        void updateStreaming(const glm::vec3& cameraPos);
+        void requestChunk(const ChunkPos& pos);
+
+        [[nodiscard]] Chunk* getChunk(int cx, int cy, int cz) const;
+        Chunk& getOrCreateChunk(int cx, int cy, int cz);
+        void markNeighborsDirty(const ChunkPos& cp, const std::optional<BlockPos>& bp = std::nullopt) const;
 };
 
 #endif //RE_MINECRAFT_CHUNKMANAGER_H

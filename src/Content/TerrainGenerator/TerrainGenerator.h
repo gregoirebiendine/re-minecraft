@@ -9,16 +9,14 @@
 
 class TerrainGenerator
 {
-    const BlockRegistry& blockRegistry;
-    FastNoiseLite noise;
-    int baseHeight;
-    int amplitude;
+    static  FastNoiseLite noise;
+    static int baseHeight;
+    static int amplitude;
 
     public:
-        TerrainGenerator(int _baseHeight, int _amplitude, const BlockRegistry& _blockRegistry);
-
-        [[nodiscard]] int getTerrainHeight(int worldX, int worldZ) const;
-        void generateChunkTerrain(Chunk& chunk) const;
+        static void init();
+        [[nodiscard]] static int getTerrainHeight(int worldX, int worldZ);
+        static void generate(Chunk& chunk, const BlockRegistry& blockRegistry);
 };
 
 

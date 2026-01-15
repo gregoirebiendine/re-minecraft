@@ -1,54 +1,44 @@
 #ifndef RE_MINECRAFT_CHUNKMESHMANAGER_H
 #define RE_MINECRAFT_CHUNKMESHMANAGER_H
 
-#include <unordered_map>
-#include <memory>
-#include <thread>
-#include <ranges>
+#pragma once
 
-#include "ConcurrentQueue.h"
-#include "ChunkMesh.h"
-#include "ChunkManager.h"
-#include "ChunkNeighbors.h"
-#include "ThreadPool.h"
+#include <unordered_map>
+#include <queue>
+#include <mutex>
+
 #include "Utils.h"
+#include "ChunkMesh.h"
+#include "ThreadPool.h"
+#include "World.h"
 
 class ChunkMeshManager {
     public:
-        explicit ChunkMeshManager(World& _world);
-
-        // static ChunkMeshData buildMesh(
-        //     const Chunk& chunk,
-        //     const ChunkNeighbors& n,
-        //     const BlockRegistry& blockRegistry,
-        //     const TextureRegistry& textureRegistry
-        // );
+        explicit ChunkMeshManager(World& world);
 
         void update();
-        void requestRebuild(Chunk&);
+        void requestRebuild(Chunk& chunk, float distance);
 
     private:
-        void buildJob(ChunkPos pos);
+        static bool isAirAt(const Chunk& c, const ChunkNeighbors& n, int x, int y, int z);
+        static void buildFaceMesh(
+            MeshData& data,
+            const glm::ivec3 &v0,
+            const glm::ivec3 &v1,
+            const glm::ivec3 &v2,
+            const glm::ivec3 &v3,
+            const glm::ivec3 &normals,
+            const uint16_t& texId
+        );
+        void buildMeshJob(const ChunkJob& job);
 
         World& world;
-        ThreadPool workers;
+        ThreadPool<ChunkJob> workers;
 
         std::unordered_map<ChunkPos, ChunkMesh, ChunkPosHash> meshes;
 
         std::mutex uploadMutex;
-        std::queue<std::pair<ChunkPos, ChunkMeshData>> uploadQueue;
-
-        // static void buildFaceMesh(
-        //     ChunkMeshData& data,
-        //     const glm::ivec3& v0,
-        //     const glm::ivec3& v1,
-        //     const glm::ivec3& v2,
-        //     const glm::ivec3& v3,
-        //     const glm::ivec3& normals,
-        //     const uint16_t& texId
-        // );
-
-        static bool isAirAt(const Chunk& chunk, const ChunkNeighbors& n, int x, int y, int z);
+        std::queue<std::pair<ChunkPos, MeshData>> uploadQueue;
 };
 
 #endif //RE_MINECRAFT_CHUNKMESHMANAGER_H
