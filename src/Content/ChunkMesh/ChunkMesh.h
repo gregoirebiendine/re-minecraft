@@ -23,7 +23,7 @@ class ChunkMesh
         void render() const;
 
     private:
-        VAO VAO;
+        VAO vao;
         std::vector<Vertex> meshData;
 
         static void createFace(

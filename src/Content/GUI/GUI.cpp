@@ -13,10 +13,10 @@ GUI::GUI()
 
     this->createCrosshair();
 
-    this->VAO.bind();
-    this->VAO.addData<GLfloat, GL_FLOAT>(this->vertices, 0, 2);
-    this->VAO.addData<GLfloat, GL_FLOAT>(this->colors, 1, 4);
-    this->VAO.unbind();
+    this->vao.bind();
+    this->vao.addData<GLfloat, GL_FLOAT>(this->vertices, 0, 2);
+    this->vao.addData<GLfloat, GL_FLOAT>(this->colors, 1, 4);
+    this->vao.unbind();
 }
 
 void GUI::createCrosshair() {
@@ -99,9 +99,9 @@ void GUI::render() const
     this->shader->use();
     this->shader->setUniformMat4("ProjectionMatrix", ProjectionMatrix);
 
-    this->VAO.bind();
+    this->vao.bind();
     glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(this->vertices.size()));
-    this->VAO.unbind();
+    this->vao.unbind();
 
     glEnable(GL_DEPTH_TEST);
     glDisable( GL_BLEND);
