@@ -111,9 +111,9 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world)
     }
     
     // Link data to VA0 before rendering
-    this->VAO.bind();
-    this->VAO.storeBlockData(this->meshData);
-    this->VAO.unbind();
+    this->vao.bind();
+    this->vao.storeBlockData(this->meshData);
+    this->vao.unbind();
 
     // Set chunk as not dirty, meaning it will not rebuild next frame
     chunk.setDirty(false);
@@ -121,9 +121,9 @@ void ChunkMesh::rebuild(Chunk& chunk, const World& world)
 
 void ChunkMesh::render() const
 {
-    this->VAO.bind();
+    this->vao.bind();
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->meshData.size()));
-    this->VAO.unbind();
+    this->vao.unbind();
 }
 
 // Statics

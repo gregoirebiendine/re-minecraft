@@ -55,7 +55,7 @@ class GUI
 
     std::vector<GLfloat> vertices{};
     std::vector<GLfloat> colors{};
-    VAO VAO;
+    VAO vao;
 
     static float toScreenSpace(float v, float minIn, float maxIn);
     static float percent(float baseValue, float percentage);

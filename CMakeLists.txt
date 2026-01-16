@@ -14,8 +14,7 @@ set(
 )
 
 file(
-    GLOB_RECURSE CONFIGURE_DEPENDS
-    CPP_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+    GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
 # either you want all .cpp and .c files within the lib directory:
     # "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.cpp"
     # "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.c"
@@ -84,6 +83,7 @@ set(
 )
 
 add_subdirectory(lib/flint) # compile the flint lib
+add_subdirectory(lib/GLFW) # compile the GLFW lib RIGHT
 
 add_executable(
         re_minecraft
@@ -91,6 +91,7 @@ add_executable(
 )
 
 target_link_libraries(re_minecraft PRIVATE flint) # we link the flint lib to the main executable
+target_link_libraries(re_minecraft PRIVATE glfw) # imagine doing stuff cross-platform but using the windows binary lib :eyes:
 
 
 target_include_directories(
@@ -99,8 +100,8 @@ target_include_directories(
         ${HEADERS}
 )
 
-target_link_libraries(
-        re_minecraft
-        PRIVATE
-        ${CMAKE_SOURCE_DIR}/lib/GLFW/libglfw3.a
-)
+# target_link_libraries(
+#         re_minecraft
+#         PRIVATE
+#         ${CMAKE_SOURCE_DIR}/lib/GLFW/libglfw3.a
+# )
