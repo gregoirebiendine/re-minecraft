@@ -6,31 +6,61 @@ set(CMAKE_CXX_STANDARD 26)
 add_compile_options(-Wall -Wextra -Wpedantic)
 
 set(
-        SOURCES
-
-        lib/glad/src/glad.c
-        lib/stbi/stb_image.cpp
-        lib/imgui/src/imgui.cpp
-        lib/imgui/src/imgui_draw.cpp
-        lib/imgui/src/imgui_impl_opengl3.cpp
-        lib/imgui/src/imgui_impl_glfw.cpp
-        lib/imgui/src/imgui_tables.cpp
-        lib/imgui/src/imgui_widgets.cpp
-
-        main.cpp
-        src/Engine/Engine.cpp
-        src/Engine/Camera/Camera.cpp
-        src/Engine/Render/VAO/VAO.cpp
-        src/Engine/Render/VBO/VBO.cpp
-        src/Engine/Render/Shader/Shader.cpp
-        src/Content/ChunkMesh/ChunkMesh.cpp
-        src/Content/ChunkMeshManager/ChunkMeshManager.cpp
-        src/Content/Chunk/Chunk.cpp
-        src/Content/World/World.cpp
-        src/Content/BlockRegistry/BlockRegistry.cpp
-        src/Content/TextureRegistry/TextureRegistry.cpp
-        src/Content/GUI/GUI.cpp
+    CMAKE_CXX_ABI_COMPILED ON
 )
+
+set(
+    CMAKE_CXX_FLAGS -rdynamic
+)
+
+file(
+    GLOB_RECURSE CONFIGURE_DEPENDS
+    CPP_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+# either you want all .cpp and .c files within the lib directory:
+    # "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.cpp"
+    # "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.c"
+# or we add em manually on the following instruction
+)
+
+list(APPEND SOURCES # that one
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/glad/src/glad.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/stbi/stb_image.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/src/imgui.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/src/imgui_draw.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/src/imgui_impl_opengl3.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/src/imgui_impl_glfw.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/src/imgui_tables.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/src/imgui_widgets.cpp"
+)
+
+# also note: moved main.cpp to the src directory. it's quite berk to have source code files within the root of your repo
+
+# set(
+#         SOURCES
+#
+#         lib/glad/src/glad.c
+#         lib/stbi/stb_image.cpp
+#         lib/imgui/src/imgui.cpp
+#         lib/imgui/src/imgui_draw.cpp
+#         lib/imgui/src/imgui_impl_opengl3.cpp
+#         lib/imgui/src/imgui_impl_glfw.cpp
+#         lib/imgui/src/imgui_tables.cpp
+#         lib/imgui/src/imgui_widgets.cpp
+#
+#         main.cpp
+#         src/Engine/Engine.cpp
+#         src/Engine/Camera/Camera.cpp
+#         src/Engine/Render/VAO/VAO.cpp
+#         src/Engine/Render/VBO/VBO.cpp
+#         src/Engine/Render/Shader/Shader.cpp
+#         src/Content/ChunkMesh/ChunkMesh.cpp
+#         src/Content/ChunkMeshManager/ChunkMeshManager.cpp
+#         src/Content/Chunk/Chunk.cpp
+#         src/Content/World/World.cpp
+#         src/Content/BlockRegistry/BlockRegistry.cpp
+#         src/Content/TextureRegistry/TextureRegistry.cpp
+#         src/Content/GUI/GUI.cpp
+# )
 
 set(
         HEADERS
@@ -53,10 +83,14 @@ set(
         ${CMAKE_SOURCE_DIR}/src/Content/GUI
 )
 
+add_subdirectory(lib/flint) # compile the flint lib
+
 add_executable(
         re_minecraft
         ${SOURCES}
 )
+
+target_link_libraries(re_minecraft PRIVATE flint) # we link the flint lib to the main executable
 
 
 target_include_directories(
