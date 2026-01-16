@@ -12,8 +12,6 @@
 #include "TextureRegistry.h"
 #include "ChunkManager.h"
 #include "ChunkMeshManager.h"
-#include "TerrainGenerator.h"
-#include "Chunk.h"
 #include "Shader.h"
 
 class World {
@@ -38,7 +36,7 @@ class World {
 
         // Updates
         void update(const glm::vec3& cameraPos);
-        void render(const Shader& worldShader);
+        void render(const Shader& worldShader) const;
 };
 
 #endif //WORLD_H

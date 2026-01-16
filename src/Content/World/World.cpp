@@ -1,16 +1,21 @@
 #include "World.h"
 
 World::World(BlockRegistry _blockRegistry, const TextureRegistry& _textureRegistry) :
+    meshManager(*this),
     blockRegistry(std::move(_blockRegistry)),
-    textureRegistry(_textureRegistry),
-    meshManager(*this)
+    textureRegistry(_textureRegistry)
 {
-    this->chunkManager = std::make_unique<ChunkManager>();
+    TerrainGenerator::init();
+
+    this->chunkManager = std::make_unique<ChunkManager>(this->blockRegistry);
 
     if (!this->chunkManager)
         throw std::runtime_error("ChunkManager failed to load");
 
-    // Create spawn Chunks
+    constexpr ChunkPos center{0,0,0};
+    for (int z = -4; z <= 4; ++z)
+        for (int x = -4; x <= 4; ++x)
+            this->chunkManager->requestChunk({center.x+x, 0, center.z+z});
 }
 
 // World lifecycle
@@ -33,14 +38,12 @@ bool World::isAir(const int wx, const int wy, const int wz) const
 
 void World::setBlock(const int wx, const int wy, const int wz, const Material id) const
 {
-    const auto cp = ChunkPos::fromWorld(wx, wy, wz);
-    Chunk& chunk = this->chunkManager->getOrCreateChunk(cp.x, cp.y, cp.z);
-
+    const auto [cx, cy, cz] = ChunkPos::fromWorld(wx, wy, wz);
     const auto [x, y, z] = BlockPos::fromWorld(wx, wy, wz);
-    chunk.setBlock(x, y, z, id);
 
-    if (x == 0 || x == Chunk::SIZE - 1 || y == 0 || y == Chunk::SIZE - 1 || z == 0 || z == Chunk::SIZE - 1)
-        this->chunkManager->markNeighborsDirty(cp, BlockPos({x,y,z}));
+    Chunk* chunk = this->chunkManager->getChunk(cx, cy, cz);
+    chunk->setBlock(x, y, z, id);
+    this->chunkManager->rebuildNeighbors({cx, cy, cz});
 }
 
 void World::fill(const glm::ivec3 from, const glm::ivec3 to, const Material id) const {
@@ -55,29 +58,21 @@ void World::fill(const glm::ivec3 from, const glm::ivec3 to, const Material id) 
 // Updates
 void World::update(const glm::vec3& cameraPos)
 {
-    for (const auto&[pos, chunk] : this->chunkManager->getChunks()) {
-        if (chunk->getState() == ChunkState::READY) {
-            const float distance = glm::distance(
-                cameraPos,
-                glm::vec3(pos.x, pos.y, pos.z)
-            );
-
-            meshManager.requestRebuild(*chunk, distance);
-        }
-    }
-
-    meshManager.update(cameraPos);
+    this->chunkManager->updateStreaming(cameraPos);
+    this->meshManager.scheduleMeshing(cameraPos);
+    this->meshManager.update();
 }
 
-void World::render(const Shader& worldShader)
+void World::render(const Shader& worldShader) const
 {
-    // worldShader.use();
-    //
-    // for (const auto& chunk : this->chunkManager->getChunks() | std::views::values)
-    // {
-    //     worldShader.setUniformMat4("ModelMatrix", chunk->getChunkModel());
-    //     meshManager.get(*chunk).render();
-    // }
+    worldShader.use();
+
+    for (const auto chunk : this->chunkManager->getRenderableChunks()) {
+        const auto& mesh = this->meshManager.getMesh(chunk->getPosition());
+
+        worldShader.setUniformMat4("ModelMatrix", chunk->getChunkModel());
+        mesh.render();
+    }
 }
 
 

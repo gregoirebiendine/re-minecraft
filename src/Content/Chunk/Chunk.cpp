@@ -34,6 +34,7 @@ bool Chunk::isAir(const uint8_t x, const uint8_t y, const uint8_t z) const
 void Chunk::setBlock(const uint8_t x, const uint8_t y, const uint8_t z, const Material id)
 {
     this->blocks[ChunkCoords::localCoordsToIndex(x, y, z)] = id;
+    this->setState(ChunkState::GENERATED);
 }
 
 void Chunk::fill(const glm::ivec3 from, const glm::ivec3 to, const Material id)
@@ -65,14 +66,3 @@ void Chunk::bumpGenerationID()
 {
     generationID.fetch_add(1);
 }
-
-// Statics
-// uint16_t Chunk::index(const uint8_t x, const uint8_t y, const uint8_t z)
-// {
-//     return clamp(x) + SIZE * (clamp(y) + SIZE * clamp(z));
-// }
-//
-// uint8_t Chunk::clamp(const uint8_t v)
-// {
-//     return std::clamp(v, static_cast<uint8_t>(0), SIZE);
-// }

@@ -1,5 +1,4 @@
 #include "ChunkMesh.h"
-#include "World.h"
 
 ChunkMesh::ChunkMesh(const ChunkPos& pos) :
     position(pos)

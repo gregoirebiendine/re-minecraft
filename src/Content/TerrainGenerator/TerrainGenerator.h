@@ -9,15 +9,14 @@
 
 class TerrainGenerator
 {
-    static  FastNoiseLite noise;
-    static int baseHeight;
-    static int amplitude;
-
     public:
+        static inline FastNoiseLite noise{3120};
+        static inline int baseHeight = 10;
+        static inline int amplitude = 8;
+
         static void init();
         [[nodiscard]] static int getTerrainHeight(int worldX, int worldZ);
         static void generate(Chunk& chunk, const BlockRegistry& blockRegistry);
 };
-
 
 #endif //RE_MINECRAFT_TERRAINGENERATOR_H

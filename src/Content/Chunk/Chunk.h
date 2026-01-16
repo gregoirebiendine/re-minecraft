@@ -43,10 +43,6 @@ class Chunk {
 
         std::atomic<ChunkState> state{ChunkState::UNLOADED};
         std::atomic<uint64_t> generationID{0};
-
-        // Statics
-        // [[nodiscard]] static uint16_t index(uint8_t x, uint8_t y, uint8_t z);
-        // [[nodiscard]] static uint8_t clamp(uint8_t v);
 };
 
 #endif //RE_MINECRAFT_CHUNK_H

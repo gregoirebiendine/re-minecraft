@@ -31,7 +31,7 @@
 
 class Engine {
     glm::ivec2 ScreenSize{};
-    float aspectRatio{};
+    float aspectRatio;
 
     GLFWwindow *window = nullptr;
     InputState inputs;

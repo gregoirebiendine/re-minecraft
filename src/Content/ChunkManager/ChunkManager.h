@@ -7,7 +7,9 @@
 #include <unordered_set>
 #include <queue>
 #include <memory>
+#include <ranges>
 #include <iostream>
+#include <utility>
 
 #include <glm/glm.hpp>
 
@@ -17,7 +19,7 @@
 #include "Chunk.h"
 #include "ChunkNeighbors.h"
 
-using ChunkMap = std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash>;
+using ChunkMap = std::unordered_map<ChunkPos, Chunk, ChunkPosHash>;
 
 struct ChunkJob {
     ChunkPos pos;
@@ -33,24 +35,23 @@ struct ChunkJob {
 class ChunkManager {
     static constexpr uint8_t VIEW_DISTANCE = 8;
 
-    ChunkMap chunks;
+    std::unordered_map<ChunkPos, Chunk, ChunkPosHash> chunks;
     ThreadPool<ChunkJob> workers;
+    BlockRegistry blockRegistry;
 
     void generateJob(ChunkJob job);
-    void rebuildNeighbors(const ChunkPos& pos) const;
 
     public:
-        ChunkManager();
+        explicit ChunkManager(BlockRegistry _blockRegistry);
 
-        [[nodiscard]] const ChunkMap& getChunks() const;
-        [[nodiscard]] ChunkNeighbors getNeighbors(const ChunkPos &cp) const;
+        [[nodiscard]] ChunkMap& getChunks();
+        [[nodiscard]] Chunk* getChunk(int cx, int cy, int cz);
+        std::vector<Chunk*> getRenderableChunks();
+        [[nodiscard]] ChunkNeighbors getNeighbors(const ChunkPos &cp);
+        void rebuildNeighbors(const ChunkPos& pos);
 
         void updateStreaming(const glm::vec3& cameraPos);
         void requestChunk(const ChunkPos& pos);
-
-        [[nodiscard]] Chunk* getChunk(int cx, int cy, int cz) const;
-        Chunk& getOrCreateChunk(int cx, int cy, int cz);
-        void markNeighborsDirty(const ChunkPos& cp, const std::optional<BlockPos>& bp = std::nullopt) const;
 };
 
 #endif //RE_MINECRAFT_CHUNKMANAGER_H

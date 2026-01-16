@@ -2,12 +2,7 @@
 
 void TerrainGenerator::init()
 {
-    baseHeight = 10;
-    amplitude = 8;
-
-    noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2S);
     noise.SetFrequency(0.020);
-    noise.SetSeed(3120);
 }
 
 int TerrainGenerator::getTerrainHeight(const int worldX, const int worldZ)

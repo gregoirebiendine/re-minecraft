@@ -1,11 +1,14 @@
 #include "ChunkMeshManager.h"
+#include "World.h"
 
-ChunkMeshManager::ChunkMeshManager(World& world) :
-    world(world),
+ChunkMeshManager::ChunkMeshManager(World& _world) :
+    world(_world),
     workers(std::thread::hardware_concurrency()
 )
 {
-    // Empty
+    this->workers.setWorker([this](const ChunkJob &job) {
+        this->buildMeshJob(job);
+    });
 }
 
 void ChunkMeshManager::requestRebuild(Chunk& chunk, const float distance)
@@ -19,7 +22,47 @@ void ChunkMeshManager::requestRebuild(Chunk& chunk, const float distance)
         chunk.getGenerationID()
     };
 
-    workers.enqueue(job);
+    this->workers.enqueue(job);
+}
+
+void ChunkMeshManager::scheduleMeshing(const glm::vec3& cameraPos)
+{
+    for (auto&[pos, chunk] : world.getChunkManager()->getChunks()) {
+        if (chunk.getState() != ChunkState::GENERATED)
+            continue;
+
+        chunk.setState(ChunkState::MESHING);
+        chunk.bumpGenerationID();
+
+        const auto center = glm::vec3(
+            pos.x * Chunk::SIZE + Chunk::SIZE / 2.0f,
+            pos.y * Chunk::SIZE + Chunk::SIZE / 2.0f,
+            pos.z * Chunk::SIZE + Chunk::SIZE / 2.0f
+        );
+
+        workers.enqueue({
+            pos,
+            glm::distance(cameraPos, center),
+            chunk.getGenerationID()
+        });
+    }
+}
+
+void ChunkMeshManager::update()
+{
+    std::lock_guard lock(uploadMutex);
+
+    while (!uploadQueue.empty()) {
+        auto [pos, data] = std::move(uploadQueue.front());
+
+        uploadQueue.pop();
+
+        auto& mesh = meshes.try_emplace(pos, pos).first->second;
+        mesh.upload(std::move(data));
+
+        if (Chunk* c = world.getChunkManager()->getChunk(pos.x, pos.y, pos.z))
+            c->setState(ChunkState::READY);
+    }
 }
 
 void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
@@ -136,21 +179,9 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
     chunk->setState(ChunkState::MESHED);
 }
 
-void ChunkMeshManager::update()
+const ChunkMesh& ChunkMeshManager::getMesh(const ChunkPos &pos) const
 {
-    std::lock_guard lock(uploadMutex);
-
-    while (!uploadQueue.empty()) {
-        auto [pos, data] = std::move(uploadQueue.front());
-
-        uploadQueue.pop();
-
-        auto& mesh = meshes.try_emplace(pos, pos).first->second;
-        mesh.upload(std::move(data));
-
-        // if (auto* c = world.getChunkManager()->getChunk(pos.x, pos.y, pos.z))
-        //     c->setDirty(false);
-    }
+    return this->meshes.at(pos);
 }
 
 // Statics
@@ -171,15 +202,7 @@ bool ChunkMeshManager::isAirAt(const Chunk& c, const ChunkNeighbors& n, const in
     return true;
 }
 
-void ChunkMeshManager::buildFaceMesh(
-    MeshData& data,
-    const glm::ivec3 &v0,
-    const glm::ivec3 &v1,
-    const glm::ivec3 &v2,
-    const glm::ivec3 &v3,
-    const glm::ivec3 &normals,
-    const uint16_t& texId
-)
+void ChunkMeshManager::buildFaceMesh(MeshData& data, const glm::ivec3 &v0, const glm::ivec3 &v1, const glm::ivec3 &v2, const glm::ivec3 &v3, const glm::ivec3 &normals, const uint16_t& texId)
 {
     data.insert(data.end(), {
         {v0, normals, {1, 0}, texId},
