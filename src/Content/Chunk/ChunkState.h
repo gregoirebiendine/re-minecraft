@@ -2,12 +2,12 @@
 #define RE_MINECRAFT_CHUNKSTATE_H
 
 enum class ChunkState {
-    UNLOADED,       // Unloaded,
-    GENERATING,     // Generating,
-    GENERATED,      // Ready,
-    MESHING,        // Meshing,
-    MESHED,         // MeshReady,
-    READY,          // Uploaded
+    UNLOADED,
+    GENERATING,
+    GENERATED,
+    MESHING,
+    MESHED,
+    READY,
 };
 
 #endif //RE_MINECRAFT_CHUNKSTATE_H

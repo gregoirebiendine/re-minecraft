@@ -72,7 +72,6 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
     if (!chunk)
         return;
 
-    /* CANCEL OBSOLETE JOB */
     if (chunk->getGenerationID() != job.generationID)
         return;
 

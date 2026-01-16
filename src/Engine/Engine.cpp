@@ -41,7 +41,6 @@ Engine::Engine()
 
     // Make window current context for GLFW
     glfwMakeContextCurrent(this->window);
-    glfwSwapInterval(1);
 
     // Initialize GLAD Manager
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
@@ -60,6 +59,9 @@ Engine::Engine()
     // Enable culling
     glCullFace(GL_BACK);
     glEnable(GL_CULL_FACE);
+
+    // Use VSYNC
+    glfwSwapInterval(1);
 
     // Setup STBI image load
     stbi_set_flip_vertically_on_load(true);
@@ -186,8 +188,6 @@ void Engine::clearInputs()
 
 void Engine::update() const
 {
-    this->worldShader->use();
-
     // Apply camera position and rotation
     this->setViewMatrix();
 
@@ -197,7 +197,7 @@ void Engine::update() const
 
 void Engine::render() const
 {
-    // Clear window and buffer (sky : 130,200,229)
+    // Clear window and buffer
     glClearColor(0.509f, 0.784f, 0.898f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -222,8 +222,9 @@ void Engine::setViewMatrix() const
     const auto forward = this->camera->getForwardVector();
     const auto cameraPos = this->camera->getPosition();
     const glm::mat4 view = glm::lookAt(cameraPos, cameraPos + forward, {0,1,0});
-    const glm::mat4 projection = glm::perspective(Camera::FOV, this->aspectRatio, 0.1f, 128.f);
+    const glm::mat4 projection = glm::perspective(Camera::FOV, this->aspectRatio, 0.1f, 256.f);
 
+    this->worldShader->use();
     this->worldShader->setUniformMat4("ProjectionMatrix", projection);
     this->worldShader->setUniformMat4("ViewMatrix", view);
     // this->worldShader->setUniformVec3("CameraPosition", cameraPos);

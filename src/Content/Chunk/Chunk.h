@@ -34,6 +34,9 @@ class Chunk {
         [[nodiscard]] ChunkState getState() const;
         void setState(ChunkState _state);
 
+        [[nodiscard]] bool isDirty() const;
+        void setDirty(bool _dirty);
+
         [[nodiscard]] uint64_t getGenerationID() const;
         void bumpGenerationID();
 
@@ -43,6 +46,7 @@ class Chunk {
 
         std::atomic<ChunkState> state{ChunkState::UNLOADED};
         std::atomic<uint64_t> generationID{0};
+        std::atomic<bool> dirty{false};
 };
 
 #endif //RE_MINECRAFT_CHUNK_H

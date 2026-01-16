@@ -34,6 +34,7 @@ bool Chunk::isAir(const uint8_t x, const uint8_t y, const uint8_t z) const
 void Chunk::setBlock(const uint8_t x, const uint8_t y, const uint8_t z, const Material id)
 {
     this->blocks[ChunkCoords::localCoordsToIndex(x, y, z)] = id;
+    // this->setDirty(true);
     this->setState(ChunkState::GENERATED);
 }
 
@@ -55,6 +56,16 @@ ChunkState Chunk::getState() const
 void Chunk::setState(const ChunkState _state)
 {
     this->state.store(_state);
+}
+
+bool Chunk::isDirty() const
+{
+    return this->dirty.load();
+}
+
+void Chunk::setDirty(const bool _dirty)
+{
+    this->dirty.store(_dirty);
 }
 
 uint64_t Chunk::getGenerationID() const

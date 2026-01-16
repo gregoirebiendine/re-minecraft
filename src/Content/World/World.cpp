@@ -65,8 +65,6 @@ void World::update(const glm::vec3& cameraPos)
 
 void World::render(const Shader& worldShader) const
 {
-    worldShader.use();
-
     for (const auto chunk : this->chunkManager->getRenderableChunks()) {
         const auto& mesh = this->meshManager.getMesh(chunk->getPosition());
 

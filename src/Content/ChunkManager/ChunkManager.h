@@ -31,7 +31,6 @@ struct ChunkJob {
     }
 };
 
-
 class ChunkManager {
     static constexpr uint8_t VIEW_DISTANCE = 8;
 
@@ -46,7 +45,7 @@ class ChunkManager {
 
         [[nodiscard]] ChunkMap& getChunks();
         [[nodiscard]] Chunk* getChunk(int cx, int cy, int cz);
-        std::vector<Chunk*> getRenderableChunks();
+        [[nodiscard]] std::vector<Chunk*> getRenderableChunks();
         [[nodiscard]] ChunkNeighbors getNeighbors(const ChunkPos &cp);
         void rebuildNeighbors(const ChunkPos& pos);
 

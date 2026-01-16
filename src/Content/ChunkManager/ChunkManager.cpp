@@ -50,7 +50,7 @@ void ChunkManager::rebuildNeighbors(const ChunkPos& pos)
 
     for (auto& o : d) {
         Chunk* n = this->getChunk(pos.x+o[0], pos.y+o[1], pos.z+o[2]);
-        if (n && n->getState() == ChunkState::READY)
+        if (n && n->getState() >= ChunkState::GENERATED)
             n->setState(ChunkState::GENERATED);
     }
 }
@@ -60,15 +60,14 @@ void ChunkManager::updateStreaming(const glm::vec3& cameraPos)
     ChunkPos cameraChunk = ChunkPos::fromWorld(cameraPos);
     std::unordered_set<ChunkPos, ChunkPosHash> wanted;
 
-    // ------------------------------------------------------------
-    // 1. Compute wanted chunks (sphere / cube around camera)
-    // ------------------------------------------------------------
+    wanted.reserve((2 * VIEW_DISTANCE + 1) * (2 * VIEW_DISTANCE + 1) * 5);
+
     for (int z = -VIEW_DISTANCE; z <= VIEW_DISTANCE; ++z)
-        for (int y = -2; y <= 2; ++y)
+        for (int y = 0; y <= 2; ++y)
             for (int x = -VIEW_DISTANCE; x <= VIEW_DISTANCE; ++x) {
                 ChunkPos pos {
                     cameraChunk.x + x,
-                    cameraChunk.y + y,
+                    y,
                     cameraChunk.z + z
                 };
 
@@ -78,9 +77,6 @@ void ChunkManager::updateStreaming(const glm::vec3& cameraPos)
                     this->requestChunk(pos);
             }
 
-    // ------------------------------------------------------------
-    // 2. Unload far chunks
-    // ------------------------------------------------------------
     for (auto it = chunks.begin(); it != chunks.end(); ) {
         Chunk& chunk = it->second;
 
@@ -99,9 +95,6 @@ void ChunkManager::updateStreaming(const glm::vec3& cameraPos)
             ++it;
     }
 
-    // ------------------------------------------------------------
-    // 3. Schedule generation jobs (distance-priority)
-    // ------------------------------------------------------------
     for (const ChunkPos pos : wanted) {
         Chunk* chunk = this->getChunk(pos.x, pos.y, pos.z);
 
