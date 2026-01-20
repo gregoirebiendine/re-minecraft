@@ -2,7 +2,13 @@
 #define ENGINE_H
 
 #define GLM_ENABLE_EXPERIMENTAL
-#define UNUSED __attribute__ ((unused))
+
+#ifdef _WIN32
+    #include <windows.h>
+#elif defined(__linux__)
+    #include <time.h>
+    #include <cerrno>
+#endif
 
 #include <iostream>
 #include <memory>
@@ -21,7 +27,6 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
-#include "Shader.h"
 #include "World.h"
 #include "Camera.h"
 #include "InputState.h"
@@ -29,37 +34,48 @@
 #include "TextureRegistry.h"
 #include "GUI.h"
 
+using Clock = std::chrono::steady_clock;
+using Duration = std::chrono::duration<double>;
+
 class Engine {
+    static constexpr double targetFPS = 120.0;
+    static constexpr double targetFrameTime = 1.0 / targetFPS;
+    static constexpr double dt = 0.0166; // 60Hz
+
     glm::ivec2 ScreenSize{};
     float aspectRatio;
+    const bool useVsync = true;
 
     GLFWwindow *window = nullptr;
-    InputState inputs;
+    #ifdef _WIN32
+        HANDLE frameTimer = nullptr;
+    #endif
 
+    InputState inputs;
     BlockRegistry blockRegistry;
     TextureRegistry textureRegistry;
 
-    std::unique_ptr<Shader> worldShader;
     std::unique_ptr<World> world;
     std::unique_ptr<Camera> camera;
     std::unique_ptr<GUI> playerGUI;
 
+    void preciseWait(double seconds) const;
+    void handleInputs(double deltaTime) const;
+    void clearInputs();
+    void update() const;
+    void render() const;
+
     public:
-        static constexpr glm::ivec2 WindowSize{1920, 1080};
+        static constexpr glm::ivec2 WindowSize{1600, 900};
 
         Engine();
         ~Engine();
 
         void loop();
-        void handleInputs(double deltaTime) const;
-        void clearInputs();
-        void update() const;
-        void render() const;
-        void setViewMatrix() const;
 };
 
-void keyInputCallback(GLFWwindow* window, int key, UNUSED int scancode, int action, UNUSED int mods);
-void mouseButtonInputCallback(GLFWwindow* window, int button, int action, UNUSED int mods);
+void keyInputCallback(GLFWwindow* window, int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods);
+void mouseButtonInputCallback(GLFWwindow* window, int button, int action, [[maybe_unused]] int mods);
 void mouseInputCallback(GLFWwindow* window, double x, double y);
 
 #endif //ENGINE_H

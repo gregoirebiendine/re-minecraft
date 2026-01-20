@@ -69,6 +69,17 @@ glm::vec3 Camera::getForwardVector() const
     return glm::normalize(forward);
 }
 
+void Camera::setViewMatrix(const Shader& shader, const float& aspect) const
+{
+    const auto forward = this->getForwardVector();
+    const glm::mat4 view = glm::lookAt(this->_position, this->_position + forward, {0,1,0});
+    const glm::mat4 projection = glm::perspective(FOV, aspect, 0.1f, 256.f);
+
+    shader.use();
+    shader.setUniformMat4("ProjectionMatrix", projection);
+    shader.setUniformMat4("ViewMatrix", view);
+}
+
 void Camera::moveCamera(const double mouseX, const double mouseY, const double deltaTime)
 {
     if (!this->isMouseCaptured)

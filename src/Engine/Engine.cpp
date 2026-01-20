@@ -2,6 +2,16 @@
 
 Engine::Engine()
 {
+    #ifdef _WIN32
+        this->frameTimer = CreateWaitableTimerExW(
+            nullptr, nullptr,
+            CREATE_WAITABLE_TIMER_HIGH_RESOLUTION,
+            TIMER_ALL_ACCESS
+        );
+        if (!this->frameTimer)
+            this->frameTimer = CreateWaitableTimerW(nullptr, TRUE, nullptr);
+    #endif
+
     if (!glfwInit())
         throw std::runtime_error("Cannot initialize GLFW3");
 
@@ -60,8 +70,8 @@ Engine::Engine()
     glCullFace(GL_BACK);
     glEnable(GL_CULL_FACE);
 
-    // Use VSYNC
-    glfwSwapInterval(1);
+    // VSYNC
+    glfwSwapInterval(this->useVsync);
 
     // Setup STBI image load
     stbi_set_flip_vertically_on_load(true);
@@ -85,26 +95,18 @@ Engine::Engine()
     glfwSetCursorPosCallback(window, mouseInputCallback);
     glfwSetMouseButtonCallback(window, mouseButtonInputCallback);
 
-    // Create world shader
-    this->worldShader = std::make_unique<Shader>(
-        "../resources/shaders/WorldShader/world.vert",
-        "../resources/shaders/WorldShader/world.frag"
-    );
-
-    // Create textures array and register it in the world shader
     this->textureRegistry.createTextures();
-    this->worldShader->use();
-    this->worldShader->setUniformInt("Textures", 0);
-
     this->camera = std::make_unique<Camera>(glm::vec3{8.5f, 17.5f, 8.5f}, this->blockRegistry);
     this->world = std::make_unique<World>(this->blockRegistry, this->textureRegistry);
     this->playerGUI = std::make_unique<GUI>();
-
-    if (!this->worldShader || !this->world || !this->camera || !this->playerGUI)
-        throw std::runtime_error("Failed to initialize pointers");
 }
 
 Engine::~Engine() {
+    #ifdef _WIN32
+        if (this->frameTimer)
+            CloseHandle(this->frameTimer);
+    #endif
+
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
@@ -114,21 +116,70 @@ Engine::~Engine() {
 }
 
 void Engine::loop() {
-    double lastTime = glfwGetTime();
+    auto previousTime = Clock::now();
+    double accumulator = 0.0;
 
     while (!glfwWindowShouldClose(this->window)) {
-        // Compute deltaTime
-        const double now = glfwGetTime();
-        const double deltaTime = now - lastTime;
-        lastTime = now;
+        auto frameStart = Clock::now();
+        double frameTime = std::chrono::duration_cast<Duration>(frameStart - previousTime).count();
+        if (frameTime > 0.25)
+            frameTime = 0.25;
 
-        // Update and render
+        previousTime = frameStart;
+        accumulator += frameTime;
+
+        // INPUTS
         glfwPollEvents();
-        this->handleInputs(deltaTime);
-        this->update();
-        this->render();
+        this->handleInputs(frameTime);
         this->clearInputs();
+
+        // UPDATES
+        while (accumulator >= dt) {
+            this->update();
+            accumulator -= dt;
+        }
+
+        // RENDERING
+        // const double alpha = accumulator / dt;
+        this->render();
+
+        // FPS CAP
+        auto frameEnd = Clock::now();
+        double elapsed = std::chrono::duration_cast<Duration>(frameEnd - frameStart).count();
+
+        if (!this->useVsync && elapsed < targetFrameTime) {
+            this->preciseWait(targetFrameTime - elapsed);
+        }
     }
+}
+
+void Engine::preciseWait(const double seconds) const
+{
+    if (seconds <= 0.0)
+        return;
+
+    #ifdef _WIN32
+        if (this->frameTimer) {
+            LARGE_INTEGER dueTime;
+            dueTime.QuadPart = -static_cast<LONGLONG>(seconds * 10'000'000.0);
+
+            if (SetWaitableTimerEx(this->frameTimer, &dueTime, 0, nullptr, nullptr, nullptr, 0)) {
+                WaitForSingleObject(this->frameTimer, INFINITE);
+                return;
+            }
+        }
+        std::this_thread::sleep_for(std::chrono::duration_cast<Clock::duration>(Duration(seconds)));
+
+    #elif defined(__linux__)
+        struct timespec req;
+        req.tv_sec = static_cast<time_t>(seconds);
+        req.tv_nsec = static_cast<long>((seconds - req.tv_sec) * 1'000'000'000.0);
+
+        while (clock_nanosleep(CLOCK_MONOTONIC, 0, &req, &req) == EINTR) {}
+
+    #else
+        std::this_thread::sleep_for(std::chrono::duration_cast<Clock::duration>(Duration(seconds)));
+    #endif
 }
 
 void Engine::handleInputs(const double deltaTime) const
@@ -189,7 +240,7 @@ void Engine::clearInputs()
 void Engine::update() const
 {
     // Apply camera position and rotation
-    this->setViewMatrix();
+    this->camera->setViewMatrix(this->world->getShader(), this->aspectRatio);
 
     // Update world
     this->world->update(this->camera->getPosition());
@@ -201,10 +252,9 @@ void Engine::render() const
     glClearColor(0.509f, 0.784f, 0.898f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Render World (chunks)
-    this->worldShader->use();
+    // Render World
     this->textureRegistry.bind();
-    this->world->render(*this->worldShader);
+    this->world->render();
 
     // Render ImGui Frame
     GUI::createImGuiFrame();
@@ -217,21 +267,8 @@ void Engine::render() const
     glfwSwapBuffers(this->window);
 }
 
-void Engine::setViewMatrix() const
-{
-    const auto forward = this->camera->getForwardVector();
-    const auto cameraPos = this->camera->getPosition();
-    const glm::mat4 view = glm::lookAt(cameraPos, cameraPos + forward, {0,1,0});
-    const glm::mat4 projection = glm::perspective(Camera::FOV, this->aspectRatio, 0.1f, 256.f);
-
-    this->worldShader->use();
-    this->worldShader->setUniformMat4("ProjectionMatrix", projection);
-    this->worldShader->setUniformMat4("ViewMatrix", view);
-    // this->worldShader->setUniformVec3("CameraPosition", cameraPos);
-}
-
 // Statics callback
-void keyInputCallback(GLFWwindow* window, const int key, UNUSED const int scancode, const int action, UNUSED const int mods)
+void keyInputCallback(GLFWwindow* window, const int key, [[maybe_unused]] const int scancode, const int action, [[maybe_unused]] const int mods)
 {
     const auto glfwPointer = glfwGetWindowUserPointer(window);
 
@@ -252,7 +289,7 @@ void keyInputCallback(GLFWwindow* window, const int key, UNUSED const int scanco
     }
 }
 
-void mouseButtonInputCallback(GLFWwindow* window, const int button, const int action, UNUSED const int mods)
+void mouseButtonInputCallback(GLFWwindow* window, const int button, const int action, [[maybe_unused]] const int mods)
 {
     const auto glfwPointer = glfwGetWindowUserPointer(window);
 

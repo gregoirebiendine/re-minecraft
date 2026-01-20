@@ -35,12 +35,18 @@ struct ChunkPos {
 
     static ChunkPos fromWorld(const glm::vec3& pos)
     {
-        return {static_cast<int>(pos.x) >> 4, static_cast<int>(pos.y) >> 4, static_cast<int>(pos.z) >> 4};
+        return {
+            static_cast<int>(pos.x) >> 4,
+            static_cast<int>(pos.y) >> 4,
+            static_cast<int>(pos.z) >> 4
+        };
     }
 
     bool operator<(const ChunkPos& other) const
     {
-        return x < other.x && y < other.y && z < other.z;
+        if (x != other.x) return x < other.x;
+        if (y != other.y) return y < other.y;
+        return z < other.z;
     }
 
     bool operator==(const ChunkPos& other) const
@@ -56,9 +62,9 @@ struct ChunkPos {
 
 struct ChunkPosHash {
     std::size_t operator()(const ChunkPos& p) const noexcept {
-        std::size_t h1 = std::hash<int>{}(p.x);
-        std::size_t h2 = std::hash<int>{}(p.y);
-        std::size_t h3 = std::hash<int>{}(p.z);
+        const std::size_t h1 = std::hash<int>{}(p.x);
+        const std::size_t h2 = std::hash<int>{}(p.y);
+        const std::size_t h3 = std::hash<int>{}(p.z);
         return h1 ^ (h2 << 1) ^ (h3 << 2);
     }
 };

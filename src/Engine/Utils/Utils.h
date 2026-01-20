@@ -11,9 +11,9 @@ namespace ChunkCoords
     inline BlockPos indexToLocalCoords(const int index)
     {
         return {
-            index / (ChunkSize * ChunkSize),
+            index % ChunkSize,
             (index / ChunkSize) % ChunkSize,
-            index % ChunkSize
+            index / (ChunkSize * ChunkSize)
         };
     }
 

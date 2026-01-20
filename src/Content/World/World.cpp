@@ -5,12 +5,15 @@ World::World(BlockRegistry _blockRegistry, const TextureRegistry& _textureRegist
     blockRegistry(std::move(_blockRegistry)),
     textureRegistry(_textureRegistry)
 {
-    TerrainGenerator::init();
-
     this->chunkManager = std::make_unique<ChunkManager>(this->blockRegistry);
+    this->shader = std::make_unique<Shader>(
+        "../resources/shaders/WorldShader/world.vert",
+        "../resources/shaders/WorldShader/world.frag"
+    );
+    this->shader->use();
+    this->shader->setUniformInt("Textures", 0);
 
-    if (!this->chunkManager)
-        throw std::runtime_error("ChunkManager failed to load");
+    TerrainGenerator::init();
 
     constexpr ChunkPos center{0,0,0};
     for (int z = -4; z <= 4; ++z)
@@ -63,12 +66,14 @@ void World::update(const glm::vec3& cameraPos)
     this->meshManager.update();
 }
 
-void World::render(const Shader& worldShader) const
+void World::render() const
 {
+    this->shader->use();
+
     for (const auto chunk : this->chunkManager->getRenderableChunks()) {
         const auto& mesh = this->meshManager.getMesh(chunk->getPosition());
 
-        worldShader.setUniformMat4("ModelMatrix", chunk->getChunkModel());
+        this->shader->setUniformMat4("ModelMatrix", chunk->getChunkModel());
         mesh.render();
     }
 }
@@ -88,4 +93,9 @@ const TextureRegistry& World::getTextureRegistry() const
 const std::unique_ptr<ChunkManager> &World::getChunkManager() const
 {
     return this->chunkManager;
+}
+
+const Shader& World::getShader() const
+{
+    return *this->shader;
 }

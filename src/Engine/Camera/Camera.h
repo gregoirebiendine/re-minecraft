@@ -39,6 +39,7 @@ class Camera {
 
         [[nodiscard]] Raycast::Hit raycast(const World& world) const;
         [[nodiscard]] glm::vec3 getForwardVector() const;
+        void setViewMatrix(const Shader& shader, const float& aspect) const;
 
         [[nodiscard]] bool getMouseCapture() const;
         void toggleMouseCapture();
