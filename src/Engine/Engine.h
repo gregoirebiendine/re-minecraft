@@ -28,11 +28,10 @@
 #include <glm/gtx/vector_angle.hpp>
 
 #include "World.h"
-#include "Camera.h"
+#include "Player.h"
 #include "InputState.h"
 #include "BlockRegistry.h"
 #include "TextureRegistry.h"
-#include "GUI.h"
 
 using Clock = std::chrono::steady_clock;
 using Duration = std::chrono::duration<double>;
@@ -44,7 +43,7 @@ class Engine {
 
     glm::ivec2 ScreenSize{};
     float aspectRatio;
-    const bool useVsync = true;
+    bool useVsync = true;
 
     GLFWwindow *window = nullptr;
     #ifdef _WIN32
@@ -55,9 +54,8 @@ class Engine {
     BlockRegistry blockRegistry;
     TextureRegistry textureRegistry;
 
+    std::unique_ptr<Player> player;
     std::unique_ptr<World> world;
-    std::unique_ptr<Camera> camera;
-    std::unique_ptr<GUI> playerGUI;
 
     void preciseWait(double seconds) const;
     void handleInputs(double deltaTime) const;

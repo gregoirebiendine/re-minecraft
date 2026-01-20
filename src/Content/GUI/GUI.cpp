@@ -1,16 +1,12 @@
 #include "GUI.h"
 #include "Engine.h"
 
-GUI::GUI()
-{
-    this->shader = std::make_unique<Shader>(
+GUI::GUI() :
+    shader(
     "../resources/shaders/UIShader/ui.vert",
     "../resources/shaders/UIShader/ui.frag"
-    );
-
-    if (!this->shader)
-        throw std::runtime_error("GUI Shader creation failed");
-
+    )
+{
     this->createCrosshair();
 
     this->VAO.bind();
@@ -96,8 +92,8 @@ void GUI::render() const
     glDisable(GL_DEPTH_TEST);
     glEnable( GL_BLEND);
 
-    this->shader->use();
-    this->shader->setUniformMat4("ProjectionMatrix", ProjectionMatrix);
+    this->shader.use();
+    this->shader.setUniformMat4("ProjectionMatrix", ProjectionMatrix);
 
     this->VAO.bind();
     glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(this->vertices.size()));
@@ -114,10 +110,9 @@ void GUI::createImGuiFrame()
     ImGui::NewFrame();
 }
 
-void GUI::renderImGuiFrame(const Camera& camera, const BlockRegistry& blockRegistry)
+void GUI::renderImGuiFrame(const Camera& camera)
 {
     const auto cameraPos = camera.getPosition();
-    const auto selectedBlock = camera.getSelectedMaterial();
     const auto facing = forwardToCardinal(camera.getForwardVector());
     const ChunkPos cp{
         static_cast<int>(cameraPos.x) / 16,
@@ -130,7 +125,6 @@ void GUI::renderImGuiFrame(const Camera& camera, const BlockRegistry& blockRegis
     ImGui::Text("Position : %.2f, %.2f, %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
     ImGui::Text("Chunk : %d, %d, %d", cp.x, cp.y, cp.z);
     ImGui::Text("Facing : %s", facing.c_str());
-    ImGui::Text("Selected block : %s", blockRegistry.get(selectedBlock).getName().c_str());
     ImGui::End();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

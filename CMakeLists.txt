@@ -32,6 +32,7 @@ set(
         src/Content/BlockRegistry/BlockRegistry.cpp
         src/Content/TextureRegistry/TextureRegistry.cpp
         src/Content/GUI/GUI.cpp
+        src/Content/Player/Player.cpp
 )
 
 set(
@@ -58,6 +59,7 @@ set(
         ${CMAKE_SOURCE_DIR}/src/Content/BlockRegistry
         ${CMAKE_SOURCE_DIR}/src/Content/TextureRegistry
         ${CMAKE_SOURCE_DIR}/src/Content/GUI
+        ${CMAKE_SOURCE_DIR}/src/Content/Player
 )
 
 add_executable(

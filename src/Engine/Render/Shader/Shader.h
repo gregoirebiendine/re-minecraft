@@ -21,6 +21,9 @@ class Shader {
         Shader(const std::string& vertexPath, const std::string& fragPath);
         ~Shader();
 
+        Shader(const Shader&) = delete;
+        Shader& operator=(const Shader&) = delete;
+
         void use() const;
         void setUniformInt(const char *name, int value) const;
         void setUniformFloat(const char *name, float value) const;

@@ -25,20 +25,17 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragPath)
     const char *vertexShaderSource = vertexContent.c_str();
     const char *fragmentShaderSource = fragContent.c_str();
 
-    if (vertexShaderSource == nullptr || fragmentShaderSource == nullptr)
-        throw std::runtime_error("Failed to load vertex shader and/or fragment shaders!");
-
     // Create Vertex Shader of count 1, that read from vertexShaderSource (basic shape)
     const GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
     glCompileShader(vertexShader);
-    Shader::checkCompileErrors(vertexShader, "VERTEX");
+    checkCompileErrors(vertexShader, "VERTEX");
 
     // Create Fragment Shader of count 1, that read from fragmentShaderSource (color & rasterization)
     const GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
     glCompileShader(fragmentShader);
-    Shader::checkCompileErrors(fragmentShader, "FRAGMENT");
+    checkCompileErrors(fragmentShader, "FRAGMENT");
 
     // Create a Shader Program and link Vertex/Fragment shaders
     this->ID = glCreateProgram();
@@ -60,7 +57,7 @@ void Shader::use() const
     glUseProgram(this->ID);
 }
 
-void Shader::checkCompileErrors(GLuint shader, const char* name)
+void Shader::checkCompileErrors(const GLuint shader, const char* name)
 {
     GLint success;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);

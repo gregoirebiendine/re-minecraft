@@ -96,12 +96,12 @@ Engine::Engine()
     glfwSetMouseButtonCallback(window, mouseButtonInputCallback);
 
     this->textureRegistry.createTextures();
-    this->camera = std::make_unique<Camera>(glm::vec3{8.5f, 17.5f, 8.5f}, this->blockRegistry);
+    this->player = std::make_unique<Player>(this->blockRegistry);
     this->world = std::make_unique<World>(this->blockRegistry, this->textureRegistry);
-    this->playerGUI = std::make_unique<GUI>();
 }
 
-Engine::~Engine() {
+Engine::~Engine()
+{
     #ifdef _WIN32
         if (this->frameTimer)
             CloseHandle(this->frameTimer);
@@ -115,7 +115,8 @@ Engine::~Engine() {
     glfwTerminate();
 }
 
-void Engine::loop() {
+void Engine::loop()
+{
     auto previousTime = Clock::now();
     double accumulator = 0.0;
 
@@ -184,49 +185,49 @@ void Engine::preciseWait(const double seconds) const
 
 void Engine::handleInputs(const double deltaTime) const
 {
-    this->camera->moveCamera(this->inputs.mouseX, this->inputs.mouseY, deltaTime);
+    this->player->getCamera().moveCamera(this->inputs.mouseX, this->inputs.mouseY, deltaTime);
 
     if (this->inputs.mousePressed[GLFW_MOUSE_BUTTON_LEFT])
     {
-        if (const Raycast::Hit raycast = this->camera->raycast(*this->world); raycast.hit)
+        if (const Raycast::Hit raycast = this->player->getCamera().raycast(*this->world); raycast.hit)
             this->world->setBlock(raycast.pos.x, raycast.pos.y, raycast.pos.z, this->blockRegistry.getByName("core:air"));
     }
 
     if (this->inputs.mousePressed[GLFW_MOUSE_BUTTON_RIGHT])
     {
-        if (const Raycast::Hit raycast = this->camera->raycast(*this->world); raycast.hit)
-            this->world->setBlock(raycast.previousPos.x, raycast.previousPos.y, raycast.previousPos.z, this->camera->getSelectedMaterial());
+        if (const Raycast::Hit raycast = this->player->getCamera().raycast(*this->world); raycast.hit)
+            this->world->setBlock(raycast.previousPos.x, raycast.previousPos.y, raycast.previousPos.z, this->player->getSelectedMaterial());
     }
 
     if (this->inputs.mousePressed[GLFW_MOUSE_BUTTON_MIDDLE])
     {
-        if (const Raycast::Hit raycast = this->camera->raycast(*this->world); raycast.hit)
+        if (const Raycast::Hit raycast = this->player->getCamera().raycast(*this->world); raycast.hit)
         {
             const Material block = this->world->getBlock(raycast.pos.x, raycast.pos.y, raycast.pos.z);
 
             if (!this->blockRegistry.isEqual(block, "core:air"))
-                this->camera->setSelectedMaterial(block);
+                this->player->setSelectedMaterial(block);
         }
     }
 
     if (this->inputs.keyPressed[GLFW_KEY_SPACE])
     {
-        glfwSetInputMode(window, GLFW_CURSOR, !this->camera->getMouseCapture() ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
-        this->camera->toggleMouseCapture();
+        glfwSetInputMode(window, GLFW_CURSOR, !this->player->getCamera().getMouseCapture() ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+        this->player->getCamera().toggleMouseCapture();
     }
 
     if (this->inputs.keyDown[GLFW_KEY_W])
-        this->camera->move({0,0,1}, static_cast<float>(deltaTime));
+        this->player->getCamera().move({0,0,1}, static_cast<float>(deltaTime));
     if (this->inputs.keyDown[GLFW_KEY_S])
-        this->camera->move({0,0,-1}, static_cast<float>(deltaTime));
+        this->player->getCamera().move({0,0,-1}, static_cast<float>(deltaTime));
     if (this->inputs.keyDown[GLFW_KEY_A])
-        this->camera->move({-1,0,0}, static_cast<float>(deltaTime));
+        this->player->getCamera().move({-1,0,0}, static_cast<float>(deltaTime));
     if (this->inputs.keyDown[GLFW_KEY_D])
-        this->camera->move({1,0,0}, static_cast<float>(deltaTime));
+        this->player->getCamera().move({1,0,0}, static_cast<float>(deltaTime));
     if (this->inputs.keyDown[GLFW_KEY_Q])
-        this->camera->move({0,1,0}, static_cast<float>(deltaTime));
+        this->player->getCamera().move({0,1,0}, static_cast<float>(deltaTime));
     if (this->inputs.keyDown[GLFW_KEY_E])
-        this->camera->move({0,-1,0}, static_cast<float>(deltaTime));
+        this->player->getCamera().move({0,-1,0}, static_cast<float>(deltaTime));
 }
 
 void Engine::clearInputs()
@@ -240,10 +241,10 @@ void Engine::clearInputs()
 void Engine::update() const
 {
     // Apply camera position and rotation
-    this->camera->setViewMatrix(this->world->getShader(), this->aspectRatio);
+    this->player->getCamera().setViewMatrix(this->world->getShader(), this->aspectRatio);
 
     // Update world
-    this->world->update(this->camera->getPosition());
+    this->world->update(this->player->getCamera().getPosition());
 }
 
 void Engine::render() const
@@ -256,12 +257,8 @@ void Engine::render() const
     this->textureRegistry.bind();
     this->world->render();
 
-    // Render ImGui Frame
-    GUI::createImGuiFrame();
-    GUI::renderImGuiFrame(*this->camera, this->blockRegistry);
-
-    // Render GUI
-    this->playerGUI->render();
+    // Render Player
+    this->player->render();
 
     // Update buffer
     glfwSwapBuffers(this->window);

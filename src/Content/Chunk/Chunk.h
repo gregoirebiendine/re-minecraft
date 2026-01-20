@@ -41,8 +41,8 @@ class Chunk {
         void bumpGenerationID();
 
     private:
-        std::array<Material, VOLUME> blocks{};
         ChunkPos position;
+        std::array<Material, VOLUME> blocks{};
 
         std::atomic<ChunkState> state{ChunkState::UNLOADED};
         std::atomic<uint64_t> generationID{0};

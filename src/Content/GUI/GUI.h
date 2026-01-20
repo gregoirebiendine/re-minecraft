@@ -51,8 +51,7 @@ class GUI
     static constexpr float THICKNESS = 4.f;
     static constexpr float OFFSET = 3.f;
 
-    std::unique_ptr<Shader> shader;
-
+    Shader shader;
     std::vector<GLfloat> vertices{};
     std::vector<GLfloat> colors{};
     VAO VAO;
@@ -70,7 +69,7 @@ class GUI
         void render() const;
 
         static void createImGuiFrame();
-        static void renderImGuiFrame(const Camera& camera, const BlockRegistry& blockRegistry);
+        static void renderImGuiFrame(const Camera& camera);
 };
 
 #endif //RE_MINECRAFT_GUI_H
