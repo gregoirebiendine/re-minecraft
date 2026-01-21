@@ -21,6 +21,9 @@ Engine::Engine()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
+    // Use MSAA 4x
+    glfwWindowHint(GLFW_SAMPLES, 4);
+
     // Create the window
     this->window = glfwCreateWindow(WindowSize.x, WindowSize.y, "Re Minecraft", nullptr, nullptr);
     if (!this->window) {
@@ -69,6 +72,9 @@ Engine::Engine()
     // Enable culling
     glCullFace(GL_BACK);
     glEnable(GL_CULL_FACE);
+
+    // Enable MSAA
+    glEnable(GL_MULTISAMPLE);
 
     // VSYNC
     glfwSwapInterval(this->useVsync);
@@ -183,35 +189,28 @@ void Engine::preciseWait(const double seconds) const
     #endif
 }
 
-void Engine::handleInputs(const double deltaTime) const
+void Engine::handleInputs(const double deltaTime)
 {
     this->player->getCamera().moveCamera(this->inputs.mouseX, this->inputs.mouseY, deltaTime);
+    this->lastRaycastHit = this->player->getCamera().raycast(*this->world);
 
-    if (this->inputs.mousePressed[GLFW_MOUSE_BUTTON_LEFT])
-    {
-        if (const Raycast::Hit raycast = this->player->getCamera().raycast(*this->world); raycast.hit)
-            this->world->setBlock(raycast.pos.x, raycast.pos.y, raycast.pos.z, this->blockRegistry.getByName("core:air"));
+    // Mouse Left button pressed
+    if (this->inputs.mousePressed[GLFW_MOUSE_BUTTON_LEFT] && this->lastRaycastHit.hit)
+        this->world->setBlock(this->lastRaycastHit.pos.x, this->lastRaycastHit.pos.y, this->lastRaycastHit.pos.z, this->blockRegistry.getByName("core:air"));
+
+    // Mouse Right button pressed
+    if (this->inputs.mousePressed[GLFW_MOUSE_BUTTON_RIGHT] && this->lastRaycastHit.hit)
+        this->world->setBlock(this->lastRaycastHit.previousPos.x, this->lastRaycastHit.previousPos.y, this->lastRaycastHit.previousPos.z, this->player->getSelectedMaterial());
+
+    // Mouse Middle button pressed
+    if (this->inputs.mousePressed[GLFW_MOUSE_BUTTON_MIDDLE] && this->lastRaycastHit.hit) {
+        const Material block = this->world->getBlock(this->lastRaycastHit.pos.x, this->lastRaycastHit.pos.y, this->lastRaycastHit.pos.z);
+
+        if (!this->blockRegistry.isEqual(block, "core:air"))
+            this->player->setSelectedMaterial(block);
     }
 
-    if (this->inputs.mousePressed[GLFW_MOUSE_BUTTON_RIGHT])
-    {
-        if (const Raycast::Hit raycast = this->player->getCamera().raycast(*this->world); raycast.hit)
-            this->world->setBlock(raycast.previousPos.x, raycast.previousPos.y, raycast.previousPos.z, this->player->getSelectedMaterial());
-    }
-
-    if (this->inputs.mousePressed[GLFW_MOUSE_BUTTON_MIDDLE])
-    {
-        if (const Raycast::Hit raycast = this->player->getCamera().raycast(*this->world); raycast.hit)
-        {
-            const Material block = this->world->getBlock(raycast.pos.x, raycast.pos.y, raycast.pos.z);
-
-            if (!this->blockRegistry.isEqual(block, "core:air"))
-                this->player->setSelectedMaterial(block);
-        }
-    }
-
-    if (this->inputs.keyPressed[GLFW_KEY_SPACE])
-    {
+    if (this->inputs.keyPressed[GLFW_KEY_SPACE]) {
         glfwSetInputMode(window, GLFW_CURSOR, !this->player->getCamera().getMouseCapture() ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
         this->player->getCamera().toggleMouseCapture();
     }
@@ -258,9 +257,8 @@ void Engine::render() const
     this->world->render();
 
     // Render faced block outline
-    const auto raycast = this->player->getCamera().raycast(*this->world);
-    if (raycast.hit)
-        this->player->renderBlockOutline(this->aspectRatio, raycast.pos);
+    if (this->lastRaycastHit.hit)
+        this->player->renderBlockOutline(this->aspectRatio, this->lastRaycastHit.pos);
 
     // Render Player
     this->player->render();

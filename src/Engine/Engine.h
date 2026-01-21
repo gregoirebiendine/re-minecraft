@@ -51,6 +51,7 @@ class Engine {
     float aspectRatio;
     bool useVsync = true;
 
+    Raycast::Hit lastRaycastHit{};
     InputState inputs;
     BlockRegistry blockRegistry;
     TextureRegistry textureRegistry;
@@ -59,7 +60,7 @@ class Engine {
     std::unique_ptr<World> world;
 
     void preciseWait(double seconds) const;
-    void handleInputs(double deltaTime) const;
+    void handleInputs(double deltaTime);
     void clearInputs();
     void update() const;
     void render() const;
