@@ -51,7 +51,6 @@ void World::setBlock(const int wx, const int wy, const int wz, const Material id
 
     chunk->setBlock(x, y, z, id);
     chunk->setDirty(true);
-    chunk->setState(ChunkState::GENERATED);
 
     this->chunkManager->rebuildNeighbors({cx, cy, cz});
 }
@@ -68,9 +67,8 @@ void World::fill(const glm::ivec3 from, const glm::ivec3 to, const Material id) 
 // Updates
 void World::update(const glm::vec3& cameraPos)
 {
-    // Swap buffers for any chunks with pending changes
     for (auto& chunk : chunkManager->getChunks() | std::views::values) {
-        if (chunk.hasPendingChanges() && chunk.getState() == ChunkState::GENERATED)
+        if (chunk.hasPendingChanges())
             chunk.swapBuffers();
     }
 

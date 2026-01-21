@@ -28,11 +28,17 @@ void ChunkMeshManager::requestRebuild(Chunk& chunk, const float distance)
 void ChunkMeshManager::scheduleMeshing(const glm::vec3& cameraPos)
 {
     for (auto&[pos, chunk] : world.getChunkManager()->getChunks()) {
-        if (chunk.getState() != ChunkState::GENERATED)
+        const bool needsFirstMesh = chunk.getState() == ChunkState::GENERATED;
+        const bool needsRemesh = chunk.getState() == ChunkState::READY && chunk.isDirty();
+
+        if (!needsFirstMesh && !needsRemesh)
             continue;
 
-        chunk.setState(ChunkState::MESHING);
+        if (needsFirstMesh)
+            chunk.setState(ChunkState::MESHING);
+
         chunk.bumpGenerationID();
+        chunk.setDirty(false);
 
         const auto center = glm::vec3(
             pos.x * Chunk::SIZE + Chunk::SIZE / 2.0f,
@@ -59,9 +65,12 @@ void ChunkMeshManager::update()
 
         auto& mesh = meshes.try_emplace(pos, pos).first->second;
         mesh.upload(std::move(data));
+        mesh.swapBuffers();
 
-        if (Chunk* c = world.getChunkManager()->getChunk(pos.x, pos.y, pos.z))
-            c->setState(ChunkState::READY);
+        if (Chunk* c = world.getChunkManager()->getChunk(pos.x, pos.y, pos.z)) {
+            if (c->getState() == ChunkState::MESHED)
+                c->setState(ChunkState::READY);
+        }
     }
 }
 
@@ -185,7 +194,9 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
         uploadQueue.emplace(job.pos, std::move(data));
     }
 
-    chunk->setState(ChunkState::MESHED);
+    // Only change state for first-time meshing, not for remeshing
+    if (chunk->getState() == ChunkState::MESHING)
+        chunk->setState(ChunkState::MESHED);
 }
 
 const ChunkMesh& ChunkMeshManager::getMesh(const ChunkPos &pos) const

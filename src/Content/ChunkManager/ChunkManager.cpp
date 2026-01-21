@@ -54,7 +54,14 @@ void ChunkManager::rebuildNeighbors(const ChunkPos& pos)
 
     for (auto& o : d) {
         Chunk* n = this->getChunk(pos.x+o[0], pos.y+o[1], pos.z+o[2]);
-        if (n && n->getState() >= ChunkState::GENERATED)
+        if (!n)
+            continue;
+
+        // For READY chunks, mark dirty for remeshing (keeps rendering)
+        // For other states, set to GENERATED for first-time meshing
+        if (n->getState() == ChunkState::READY)
+            n->setDirty(true);
+        else if (n->getState() >= ChunkState::GENERATED)
             n->setState(ChunkState::GENERATED);
     }
 }

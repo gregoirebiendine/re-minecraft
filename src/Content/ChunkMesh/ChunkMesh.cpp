@@ -8,19 +8,39 @@ ChunkMesh::ChunkMesh(const ChunkPos& pos) :
 
 void ChunkMesh::upload(MeshData&& data)
 {
-    this->vertexCount = data.size();
+    // Determine back buffer index (opposite of front)
+    const uint8_t backIndex = 1 - frontBufferIndex.load(std::memory_order_acquire);
 
-    this->VAO.bind();
-    this->VAO.storeBlockData(data);
-    this->VAO.unbind();
+    // Store vertex count for the back buffer
+    vertexCounts[backIndex] = data.size();
+
+    // Upload to back buffer VAO/VBO
+    buffers[backIndex].bind();
+    buffers[backIndex].storeBlockData(data);
+    buffers[backIndex].unbind();
+}
+
+void ChunkMesh::swapBuffers()
+{
+    // Atomically swap front and back buffer indices
+    const uint8_t current = frontBufferIndex.load(std::memory_order_acquire);
+    frontBufferIndex.store(1 - current, std::memory_order_release);
 }
 
 void ChunkMesh::render() const
 {
-    if (vertexCount == 0)
+    const uint8_t frontIndex = frontBufferIndex.load(std::memory_order_acquire);
+
+    if (vertexCounts[frontIndex] == 0)
         return;
 
-    this->VAO.bind();
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertexCount));
-    this->VAO.unbind();
+    buffers[frontIndex].bind();
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertexCounts[frontIndex]));
+    buffers[frontIndex].unbind();
+}
+
+bool ChunkMesh::hasGeometry() const
+{
+    const uint8_t frontIndex = frontBufferIndex.load(std::memory_order_acquire);
+    return vertexCounts[frontIndex] > 0;
 }
