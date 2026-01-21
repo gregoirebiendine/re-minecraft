@@ -22,7 +22,8 @@ void ChunkManager::requestChunk(const ChunkPos& pos)
     workers.enqueue({pos, 0.f, chunk.getGenerationID()});
 }
 
-void ChunkManager::generateJob(ChunkJob job) {
+void ChunkManager::generateJob(const ChunkJob& job)
+{
     Chunk* chunk = getChunk(job.pos.x, job.pos.y, job.pos.z);
 
     if (!chunk)
@@ -31,9 +32,12 @@ void ChunkManager::generateJob(ChunkJob job) {
     if (chunk->getGenerationID() != job.generationID)
         return;
 
+    // Generate terrain (uses setBlockDirect)
     TerrainGenerator::generate(*chunk, this->blockRegistry);
+
+    // State transition
     chunk->setState(ChunkState::GENERATED);
-    rebuildNeighbors(job.pos);
+    this->rebuildNeighbors(job.pos);
 }
 
 Chunk* ChunkManager::getChunk(const int cx, const int cy, const int cz)

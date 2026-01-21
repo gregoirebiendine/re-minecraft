@@ -24,15 +24,20 @@ void TerrainGenerator::generate(Chunk& chunk, const BlockRegistry& blockRegistry
             for (int y = 0; y < Chunk::SIZE; y++) {
                 const int wy = cy * Chunk::SIZE + y;
 
+                Material mat;
                 if (wy < 2)
-                    chunk.setBlock(x, y, z, blockRegistry.getByName("core:stone"));
+                    mat = blockRegistry.getByName("core:stone");
                 else if (wy < height)
-                    chunk.setBlock(x, y, z, blockRegistry.getByName("core:dirt"));
+                    mat = blockRegistry.getByName("core:dirt");
                 else if (wy == height)
-                    chunk.setBlock(x, y, z, blockRegistry.getByName("core:grass"));
+                    mat = blockRegistry.getByName("core:grass");
                 else
-                    chunk.setBlock(x, y, z, blockRegistry.getByName("core:air"));
+                    mat = blockRegistry.getByName("core:air");
+
+                chunk.setBlockDirect(x, y, z, mat);  // Direct write, no buffering
             }
         }
     }
+
+    chunk.finalizeGeneration();
 }

@@ -38,7 +38,7 @@ class ChunkManager {
     ThreadPool<ChunkJob> workers;
     BlockRegistry blockRegistry;
 
-    void generateJob(ChunkJob job);
+    void generateJob(const ChunkJob& job);
 
     public:
         explicit ChunkManager(BlockRegistry _blockRegistry);

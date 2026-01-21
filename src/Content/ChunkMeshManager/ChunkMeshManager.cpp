@@ -75,7 +75,18 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
     if (chunk->getGenerationID() != job.generationID)
         return;
 
-    const ChunkNeighbors n = world.getChunkManager()->getNeighbors(job.pos);
+    const auto blockData = chunk->getBlockSnapshot();
+    const auto [north, south, east, west, up, down] = world.getChunkManager()->getNeighbors(job.pos);
+
+    NeighborData neighbors[6];
+    neighbors[0] = { north != nullptr, north ? north->getBlockSnapshot() : std::array<Material, Chunk::VOLUME>{} };
+    neighbors[1] = { south != nullptr, south ? south->getBlockSnapshot() : std::array<Material, Chunk::VOLUME>{} };
+    neighbors[2] = { east  != nullptr, east  ? east->getBlockSnapshot()  : std::array<Material, Chunk::VOLUME>{} };
+    neighbors[3] = { west  != nullptr, west  ? west->getBlockSnapshot()  : std::array<Material, Chunk::VOLUME>{} };
+    neighbors[4] = { up    != nullptr, up    ? up->getBlockSnapshot()    : std::array<Material, Chunk::VOLUME>{} };
+    neighbors[5] = { down  != nullptr, down  ? down->getBlockSnapshot()  : std::array<Material, Chunk::VOLUME>{} };
+
+
     const auto& textureRegistry = world.getTextureRegistry();
 
     MeshData data;
@@ -83,16 +94,15 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
 
     for (int i = 0; i < Chunk::VOLUME; i++) {
         auto [x, y, z] = ChunkCoords::indexToLocalCoords(i);
+        const Material mat = blockData[i];
 
-        // Skip AIR
-        if (chunk->isAir(x, y, z))
+        if (mat == 0) // Skip AIR
             continue;
 
-        // Retrieve Block Meta
-        const BlockMeta& meta = world.getBlockRegistry().get(chunk->getBlock(x, y, z));
+        const BlockMeta& meta = world.getBlockRegistry().get(mat);
 
         // NORTH face
-        if (isAirAt(*chunk, n, x, y, z - 1)) {
+        if (isAirAtSnapshot(blockData, neighbors, x, y, z - 1)) {
             buildFaceMesh(
                 data,
                 {x,       y,       z},
@@ -105,7 +115,7 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
         }
 
         // SOUTH face
-        if (isAirAt(*chunk, n, x, y, z + 1)) {
+        if (isAirAtSnapshot(blockData, neighbors, x, y, z + 1)) {
             buildFaceMesh(
                 data,
                 {1 + x,   y,       1 + z},
@@ -118,7 +128,7 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
         }
 
         // WEST face
-        if (isAirAt(*chunk, n, x - 1, y, z)) {
+        if (isAirAtSnapshot(blockData, neighbors, x - 1, y, z)) {
             buildFaceMesh(
                 data,
                 {x,       y,       1 + z},
@@ -131,7 +141,7 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
         }
 
         // EAST face
-        if (isAirAt(*chunk, n, x + 1, y, z)) {
+        if (isAirAtSnapshot(blockData, neighbors, x + 1, y, z)) {
              buildFaceMesh(
                 data,
                 {1 + x,   y,       z},
@@ -144,7 +154,7 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
         }
 
         // UP face
-        if (isAirAt(*chunk, n, x, y + 1, z)) {
+        if (isAirAtSnapshot(blockData, neighbors, x, y + 1, z)) {
             buildFaceMesh(
                 data,
                 {x,       1 + y,   z},
@@ -157,7 +167,7 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
         }
 
         // DOWN face
-        if (isAirAt(*chunk, n, x, y - 1, z)) {
+        if (isAirAtSnapshot(blockData, neighbors, x, y - 1, z)) {
             buildFaceMesh(
                 data,
                 {x,       y,       z},
@@ -184,19 +194,44 @@ const ChunkMesh& ChunkMeshManager::getMesh(const ChunkPos &pos) const
 }
 
 // Statics
-bool ChunkMeshManager::isAirAt(const Chunk& c, const ChunkNeighbors& n, const int x, const int y, const int z)
+bool ChunkMeshManager::isAirAtSnapshot(
+    const std::array<Material, Chunk::VOLUME>& blockData,
+    const NeighborData neighbors[6],
+    const int x, const int y, const int z
+)
 {
+    // Inside current chunk
     if (x >= 0 && x < Chunk::SIZE &&
         y >= 0 && y < Chunk::SIZE &&
-        z >= 0 && z < Chunk::SIZE)
-        return c.isAir(x, y, z);
+        z >= 0 && z < Chunk::SIZE
+    )
+        return blockData[ChunkCoords::localCoordsToIndex(x, y, z)] == 0;
 
-    if (x < 0 && n.west)  return n.west->isAir(x + Chunk::SIZE, y, z);
-    if (x >= Chunk::SIZE && n.east) return n.east->isAir(x - Chunk::SIZE, y, z);
-    if (z < 0 && n.north) return n.north->isAir(x, y, z + Chunk::SIZE);
-    if (z >= Chunk::SIZE && n.south) return n.south->isAir(x, y, z - Chunk::SIZE);
-    if (y < 0 && n.down)  return n.down->isAir(x, y + Chunk::SIZE, z);
-    if (y >= Chunk::SIZE && n.up)    return n.up->isAir(x, y - Chunk::SIZE, z);
+    // Check neighbors
+    if (z < 0) {  // NORTH
+        if (!neighbors[0].exists) return true;
+        return neighbors[0].blocks[ChunkCoords::localCoordsToIndex(x, y, z + Chunk::SIZE)] == 0;
+    }
+    if (z >= Chunk::SIZE) {  // SOUTH
+        if (!neighbors[1].exists) return true;
+        return neighbors[1].blocks[ChunkCoords::localCoordsToIndex(x, y, z - Chunk::SIZE)] == 0;
+    }
+    if (x >= Chunk::SIZE) {  // EAST
+        if (!neighbors[2].exists) return true;
+        return neighbors[2].blocks[ChunkCoords::localCoordsToIndex(x - Chunk::SIZE, y, z)] == 0;
+    }
+    if (x < 0) {  // WEST
+        if (!neighbors[3].exists) return true;
+        return neighbors[3].blocks[ChunkCoords::localCoordsToIndex(x + Chunk::SIZE, y, z)] == 0;
+    }
+    if (y >= Chunk::SIZE) {  // UP
+        if (!neighbors[4].exists) return true;
+        return neighbors[4].blocks[ChunkCoords::localCoordsToIndex(x, y - Chunk::SIZE, z)] == 0;
+    }
+    if (y < 0) {  // DOWN
+        if (!neighbors[5].exists) return true;
+        return neighbors[5].blocks[ChunkCoords::localCoordsToIndex(x, y + Chunk::SIZE, z)] == 0;
+    }
 
     return true;
 }
