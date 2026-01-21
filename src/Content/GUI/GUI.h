@@ -5,7 +5,6 @@
 
 class Engine; // forward declaration
 
-#include <memory>
 #include <vector>
 
 #include <imgui.h>
@@ -52,9 +51,9 @@ class GUI
     static constexpr float OFFSET = 3.f;
 
     Shader shader;
-    std::vector<GLfloat> vertices{};
-    std::vector<GLfloat> colors{};
-    VAO VAO;
+    VAO vao;
+    glm::mat4 projectionMatrix;
+    std::vector<GuiVertex> data;
 
     static float toScreenSpace(float v, float minIn, float maxIn);
     static float percent(float baseValue, float percentage);

@@ -5,14 +5,20 @@ GUI::GUI() :
     shader(
     "../resources/shaders/UIShader/ui.vert",
     "../resources/shaders/UIShader/ui.frag"
+    ),
+    projectionMatrix(
+        glm::ortho(
+            0.0f, static_cast<float>(Engine::WindowSize.x),
+            static_cast<float>(Engine::WindowSize.y), 0.0f,
+            -1.f, 1.0f
+        )
     )
 {
     this->createCrosshair();
 
-    this->VAO.bind();
-    this->VAO.addData<GLfloat, GL_FLOAT>(this->vertices, 0, 2);
-    this->VAO.addData<GLfloat, GL_FLOAT>(this->colors, 1, 4);
-    this->VAO.unbind();
+    this->vao.bind();
+    this->vao.storeGuiData(this->data);
+    this->vao.unbind();
 }
 
 void GUI::createCrosshair() {
@@ -59,45 +65,30 @@ void GUI::createRectangle(const float x, const float y, const float width, const
     const float x1 = x + width;
     const float y1 = y + height;
 
-    this->vertices.insert(this->vertices.end(), {
+    this->data.insert(this->data.end(), {
         // First triangle
-        x,  y,
-        x,  y1,
-        x1, y1,
+        {{x, y}, {color.r, color.g, color.b, color.a}},
+        {{x, y1}, {color.r, color.g, color.b, color.a}},
+        {{x1, y1}, {color.r, color.g, color.b, color.a}},
 
         // Second triangle
-        x,  y,
-        x1, y1,
-        x1, y,
-    });
-
-    this->colors.insert(this->colors.end(), {
-        color.r, color.g, color.b, color.a,
-        color.r, color.g, color.b, color.a,
-        color.r, color.g, color.b, color.a,
-        color.r, color.g, color.b, color.a,
-        color.r, color.g, color.b, color.a,
-        color.r, color.g, color.b, color.a,
+        {{x, y}, {color.r, color.g, color.b, color.a}},
+        {{x1, y1}, {color.r, color.g, color.b, color.a}},
+        {{x1, y}, {color.r, color.g, color.b, color.a}},
     });
 }
 
 void GUI::render() const
 {
-    const glm::mat4 ProjectionMatrix = glm::ortho(
-        0.0f, static_cast<float>(Engine::WindowSize.x),
-        static_cast<float>(Engine::WindowSize.y), 0.0f,
-        -1.f, 1.0f
-    );
-
     glDisable(GL_DEPTH_TEST);
     glEnable( GL_BLEND);
 
     this->shader.use();
-    this->shader.setUniformMat4("ProjectionMatrix", ProjectionMatrix);
+    this->shader.setUniformMat4("ProjectionMatrix", this->projectionMatrix);
 
-    this->VAO.bind();
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(this->vertices.size()));
-    this->VAO.unbind();
+    this->vao.bind();
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->data.size()));
+    this->vao.unbind();
 
     glEnable(GL_DEPTH_TEST);
     glDisable( GL_BLEND);

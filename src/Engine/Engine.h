@@ -41,14 +41,14 @@ class Engine {
     static constexpr double targetFrameTime = 1.0 / targetFPS;
     static constexpr double dt = 0.0166; // 60Hz
 
-    glm::ivec2 ScreenSize{};
-    float aspectRatio;
-    bool useVsync = true;
-
     GLFWwindow *window = nullptr;
     #ifdef _WIN32
         HANDLE frameTimer = nullptr;
     #endif
+
+    glm::ivec2 ScreenSize{};
+    float aspectRatio;
+    bool useVsync = true;
 
     InputState inputs;
     BlockRegistry blockRegistry;
