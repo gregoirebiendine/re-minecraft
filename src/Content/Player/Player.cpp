@@ -18,6 +18,11 @@ void Player::render() const
     this->gui.render();
 }
 
+void Player::renderBlockOutline(const float& aspect, const glm::vec3& cubePos) const
+{
+    this->gui.renderBlockOutline(this->camera, aspect, cubePos);
+}
+
 void Player::setSelectedMaterial(const Material newMaterial)
 {
     this->selectedMaterial = newMaterial;

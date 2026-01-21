@@ -14,12 +14,205 @@ The codebase already provides the necessary foundations:
 
 ### 1. Create a Line Cube Mesh
 
-Create a static wireframe cube mesh representing the 12 edges of a unit cube.
+Create a static wireframe cube mesh representing the 12 edges of a unit cube using 3D beams for configurable line width.
 
-- Use `GL_LINES` draw mode (24 vertices total, 2 per edge)
-- Vertices span from `(0,0,0)` to `(1,1,1)`
+- Use `GL_TRIANGLES` draw mode (288 vertices total: 12 edges × 4 faces × 2 triangles × 3 vertices)
+- Vertices span from `(-w, -w, -w)` to `(1+w, 1+w, 1+w)` where `w` is half the line width
 - Create once at startup, reuse every frame
-- Store in a dedicated VAO/VBO (simpler vertex format: position only)
+- Store in a dedicated VAO/VBO (position only)
+
+**Vertex Generation (with configurable width `w`):**
+
+Each edge becomes a rectangular beam with 4 faces (no end caps), ensuring consistent appearance from all viewing angles:
+- X-axis edges: 4 faces expanding in Y and Z
+- Y-axis edges: 4 faces expanding in X and Z
+- Z-axis edges: 4 faces expanding in X and Y
+
+```cpp
+const float W = 0.005f; // half line width
+
+float vertices[] = {
+    // ============================================================
+    // BOTTOM FACE EDGES (4 edges)
+    // ============================================================
+
+    // Edge: (0,0,0) -> (1,0,0) along X
+    // Face -Z
+    -W, -W, -W,   1+W, -W, -W,   1+W, +W, -W,
+    -W, -W, -W,   1+W, +W, -W,   -W, +W, -W,
+    // Face +Z
+    -W, -W, +W,   -W, +W, +W,   1+W, +W, +W,
+    -W, -W, +W,   1+W, +W, +W,   1+W, -W, +W,
+    // Face -Y
+    -W, -W, -W,   -W, -W, +W,   1+W, -W, +W,
+    -W, -W, -W,   1+W, -W, +W,   1+W, -W, -W,
+    // Face +Y
+    -W, +W, -W,   1+W, +W, -W,   1+W, +W, +W,
+    -W, +W, -W,   1+W, +W, +W,   -W, +W, +W,
+
+    // Edge: (1,0,0) -> (1,1,0) along Y
+    // Face -Z
+    1-W, -W, -W,   1+W, -W, -W,   1+W, 1+W, -W,
+    1-W, -W, -W,   1+W, 1+W, -W,   1-W, 1+W, -W,
+    // Face +Z
+    1-W, -W, +W,   1-W, 1+W, +W,   1+W, 1+W, +W,
+    1-W, -W, +W,   1+W, 1+W, +W,   1+W, -W, +W,
+    // Face -X
+    1-W, -W, -W,   1-W, 1+W, -W,   1-W, 1+W, +W,
+    1-W, -W, -W,   1-W, 1+W, +W,   1-W, -W, +W,
+    // Face +X
+    1+W, -W, -W,   1+W, -W, +W,   1+W, 1+W, +W,
+    1+W, -W, -W,   1+W, 1+W, +W,   1+W, 1+W, -W,
+
+    // Edge: (1,1,0) -> (0,1,0) along X
+    // Face -Z
+    -W, 1-W, -W,   1+W, 1-W, -W,   1+W, 1+W, -W,
+    -W, 1-W, -W,   1+W, 1+W, -W,   -W, 1+W, -W,
+    // Face +Z
+    -W, 1-W, +W,   -W, 1+W, +W,   1+W, 1+W, +W,
+    -W, 1-W, +W,   1+W, 1+W, +W,   1+W, 1-W, +W,
+    // Face -Y
+    -W, 1-W, -W,   -W, 1-W, +W,   1+W, 1-W, +W,
+    -W, 1-W, -W,   1+W, 1-W, +W,   1+W, 1-W, -W,
+    // Face +Y
+    -W, 1+W, -W,   1+W, 1+W, -W,   1+W, 1+W, +W,
+    -W, 1+W, -W,   1+W, 1+W, +W,   -W, 1+W, +W,
+
+    // Edge: (0,1,0) -> (0,0,0) along Y
+    // Face -Z
+    -W, -W, -W,   +W, -W, -W,   +W, 1+W, -W,
+    -W, -W, -W,   +W, 1+W, -W,   -W, 1+W, -W,
+    // Face +Z
+    -W, -W, +W,   -W, 1+W, +W,   +W, 1+W, +W,
+    -W, -W, +W,   +W, 1+W, +W,   +W, -W, +W,
+    // Face -X
+    -W, -W, -W,   -W, 1+W, -W,   -W, 1+W, +W,
+    -W, -W, -W,   -W, 1+W, +W,   -W, -W, +W,
+    // Face +X
+    +W, -W, -W,   +W, -W, +W,   +W, 1+W, +W,
+    +W, -W, -W,   +W, 1+W, +W,   +W, 1+W, -W,
+
+    // ============================================================
+    // TOP FACE EDGES (4 edges)
+    // ============================================================
+
+    // Edge: (0,0,1) -> (1,0,1) along X
+    // Face -Z
+    -W, -W, 1-W,   1+W, -W, 1-W,   1+W, +W, 1-W,
+    -W, -W, 1-W,   1+W, +W, 1-W,   -W, +W, 1-W,
+    // Face +Z
+    -W, -W, 1+W,   -W, +W, 1+W,   1+W, +W, 1+W,
+    -W, -W, 1+W,   1+W, +W, 1+W,   1+W, -W, 1+W,
+    // Face -Y
+    -W, -W, 1-W,   -W, -W, 1+W,   1+W, -W, 1+W,
+    -W, -W, 1-W,   1+W, -W, 1+W,   1+W, -W, 1-W,
+    // Face +Y
+    -W, +W, 1-W,   1+W, +W, 1-W,   1+W, +W, 1+W,
+    -W, +W, 1-W,   1+W, +W, 1+W,   -W, +W, 1+W,
+
+    // Edge: (1,0,1) -> (1,1,1) along Y
+    // Face -Z
+    1-W, -W, 1-W,   1+W, -W, 1-W,   1+W, 1+W, 1-W,
+    1-W, -W, 1-W,   1+W, 1+W, 1-W,   1-W, 1+W, 1-W,
+    // Face +Z
+    1-W, -W, 1+W,   1-W, 1+W, 1+W,   1+W, 1+W, 1+W,
+    1-W, -W, 1+W,   1+W, 1+W, 1+W,   1+W, -W, 1+W,
+    // Face -X
+    1-W, -W, 1-W,   1-W, 1+W, 1-W,   1-W, 1+W, 1+W,
+    1-W, -W, 1-W,   1-W, 1+W, 1+W,   1-W, -W, 1+W,
+    // Face +X
+    1+W, -W, 1-W,   1+W, -W, 1+W,   1+W, 1+W, 1+W,
+    1+W, -W, 1-W,   1+W, 1+W, 1+W,   1+W, 1+W, 1-W,
+
+    // Edge: (1,1,1) -> (0,1,1) along X
+    // Face -Z
+    -W, 1-W, 1-W,   1+W, 1-W, 1-W,   1+W, 1+W, 1-W,
+    -W, 1-W, 1-W,   1+W, 1+W, 1-W,   -W, 1+W, 1-W,
+    // Face +Z
+    -W, 1-W, 1+W,   -W, 1+W, 1+W,   1+W, 1+W, 1+W,
+    -W, 1-W, 1+W,   1+W, 1+W, 1+W,   1+W, 1-W, 1+W,
+    // Face -Y
+    -W, 1-W, 1-W,   -W, 1-W, 1+W,   1+W, 1-W, 1+W,
+    -W, 1-W, 1-W,   1+W, 1-W, 1+W,   1+W, 1-W, 1-W,
+    // Face +Y
+    -W, 1+W, 1-W,   1+W, 1+W, 1-W,   1+W, 1+W, 1+W,
+    -W, 1+W, 1-W,   1+W, 1+W, 1+W,   -W, 1+W, 1+W,
+
+    // Edge: (0,1,1) -> (0,0,1) along Y
+    // Face -Z
+    -W, -W, 1-W,   +W, -W, 1-W,   +W, 1+W, 1-W,
+    -W, -W, 1-W,   +W, 1+W, 1-W,   -W, 1+W, 1-W,
+    // Face +Z
+    -W, -W, 1+W,   -W, 1+W, 1+W,   +W, 1+W, 1+W,
+    -W, -W, 1+W,   +W, 1+W, 1+W,   +W, -W, 1+W,
+    // Face -X
+    -W, -W, 1-W,   -W, 1+W, 1-W,   -W, 1+W, 1+W,
+    -W, -W, 1-W,   -W, 1+W, 1+W,   -W, -W, 1+W,
+    // Face +X
+    +W, -W, 1-W,   +W, -W, 1+W,   +W, 1+W, 1+W,
+    +W, -W, 1-W,   +W, 1+W, 1+W,   +W, 1+W, 1-W,
+
+    // ============================================================
+    // VERTICAL EDGES (4 edges along Z)
+    // ============================================================
+
+    // Edge: (0,0,0) -> (0,0,1) along Z
+    // Face -X
+    -W, -W, -W,   -W, +W, -W,   -W, +W, 1+W,
+    -W, -W, -W,   -W, +W, 1+W,   -W, -W, 1+W,
+    // Face +X
+    +W, -W, -W,   +W, -W, 1+W,   +W, +W, 1+W,
+    +W, -W, -W,   +W, +W, 1+W,   +W, +W, -W,
+    // Face -Y
+    -W, -W, -W,   -W, -W, 1+W,   +W, -W, 1+W,
+    -W, -W, -W,   +W, -W, 1+W,   +W, -W, -W,
+    // Face +Y
+    -W, +W, -W,   +W, +W, -W,   +W, +W, 1+W,
+    -W, +W, -W,   +W, +W, 1+W,   -W, +W, 1+W,
+
+    // Edge: (1,0,0) -> (1,0,1) along Z
+    // Face -X
+    1-W, -W, -W,   1-W, +W, -W,   1-W, +W, 1+W,
+    1-W, -W, -W,   1-W, +W, 1+W,   1-W, -W, 1+W,
+    // Face +X
+    1+W, -W, -W,   1+W, -W, 1+W,   1+W, +W, 1+W,
+    1+W, -W, -W,   1+W, +W, 1+W,   1+W, +W, -W,
+    // Face -Y
+    1-W, -W, -W,   1-W, -W, 1+W,   1+W, -W, 1+W,
+    1-W, -W, -W,   1+W, -W, 1+W,   1+W, -W, -W,
+    // Face +Y
+    1-W, +W, -W,   1+W, +W, -W,   1+W, +W, 1+W,
+    1-W, +W, -W,   1+W, +W, 1+W,   1-W, +W, 1+W,
+
+    // Edge: (1,1,0) -> (1,1,1) along Z
+    // Face -X
+    1-W, 1-W, -W,   1-W, 1+W, -W,   1-W, 1+W, 1+W,
+    1-W, 1-W, -W,   1-W, 1+W, 1+W,   1-W, 1-W, 1+W,
+    // Face +X
+    1+W, 1-W, -W,   1+W, 1-W, 1+W,   1+W, 1+W, 1+W,
+    1+W, 1-W, -W,   1+W, 1+W, 1+W,   1+W, 1+W, -W,
+    // Face -Y
+    1-W, 1-W, -W,   1-W, 1-W, 1+W,   1+W, 1-W, 1+W,
+    1-W, 1-W, -W,   1+W, 1-W, 1+W,   1+W, 1-W, -W,
+    // Face +Y
+    1-W, 1+W, -W,   1+W, 1+W, -W,   1+W, 1+W, 1+W,
+    1-W, 1+W, -W,   1+W, 1+W, 1+W,   1-W, 1+W, 1+W,
+
+    // Edge: (0,1,0) -> (0,1,1) along Z
+    // Face -X
+    -W, 1-W, -W,   -W, 1+W, -W,   -W, 1+W, 1+W,
+    -W, 1-W, -W,   -W, 1+W, 1+W,   -W, 1-W, 1+W,
+    // Face +X
+    +W, 1-W, -W,   +W, 1-W, 1+W,   +W, 1+W, 1+W,
+    +W, 1-W, -W,   +W, 1+W, 1+W,   +W, 1+W, -W,
+    // Face -Y
+    -W, 1-W, -W,   -W, 1-W, 1+W,   +W, 1-W, 1+W,
+    -W, 1-W, -W,   +W, 1-W, 1+W,   +W, 1-W, -W,
+    // Face +Y
+    -W, 1+W, -W,   +W, 1+W, -W,   +W, 1+W, 1+W,
+    -W, 1+W, -W,   +W, 1+W, 1+W,   -W, 1+W, 1+W,
+};
+```
 
 ### 2. Create an Outline Shader
 
@@ -44,7 +237,7 @@ In `Engine::render()`, after drawing the world:
    - Bind outline shader
    - Set MVP uniforms
    - Apply depth offset to prevent z-fighting
-   - Draw wireframe cube with `glDrawArrays(GL_LINES, 0, 24)`
+   - Draw outline cube with `glDrawArrays(GL_TRIANGLES, 0, 288)`
    - Reset depth offset
 
 ### 4. Handle Depth Fighting
@@ -61,7 +254,7 @@ Recommended: Use `glPolygonOffset` or slight scale increase.
 
 ### 5. Optional Enhancements
 
-- **Line width**: Call `glLineWidth(2.0f)` for thicker lines (limited support on modern OpenGL/some drivers)
+- **Line width**: Adjust the `W` constant when generating vertices (rebuilds mesh)
 - **Dynamic color**: Choose outline color based on block brightness
 - **Animation**: Subtle pulsing or breathing effect on the outline
 
@@ -86,13 +279,13 @@ Engine::render()
 │   ├── If hit, bind outline shader
 │   ├── Set model matrix to hit.pos
 │   ├── Enable polygon offset
-│   ├── Draw wireframe cube
+│   ├── Draw outline cube
 │   └── Disable polygon offset
 └── Swap buffers
 ```
 
 ## Performance Notes
 
-- Adds one draw call per frame (24 vertices)
+- Adds one draw call per frame (288 vertices)
 - Raycast already performed in `handleInputs()` - consider caching the result
 - Static mesh, no per-frame vertex uploads needed

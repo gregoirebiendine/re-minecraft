@@ -2,9 +2,13 @@
 #include "Engine.h"
 
 GUI::GUI() :
-    shader(
-    "../resources/shaders/UIShader/ui.vert",
-    "../resources/shaders/UIShader/ui.frag"
+    guiShader(
+    "../resources/shaders/UI/ui.vert",
+    "../resources/shaders/UI/ui.frag"
+    ),
+    outlineShader(
+        "../resources/shaders/Outline/outline.vert",
+        "../resources/shaders/Outline/outline.frag"
     ),
     projectionMatrix(
         glm::ortho(
@@ -14,11 +18,16 @@ GUI::GUI() :
         )
     )
 {
+    // General GUI
     this->createCrosshair();
+    this->guiVao.bind();
+    this->guiVao.storeGuiData(this->data);
+    this->guiVao.unbind();
 
-    this->vao.bind();
-    this->vao.storeGuiData(this->data);
-    this->vao.unbind();
+    // Block Outline GUI
+    this->outlineVao.bind();
+    this->outlineVao.storeOutlineData(OUTLINE_VERTICES);
+    this->outlineVao.unbind();
 }
 
 void GUI::createCrosshair() {
@@ -83,15 +92,33 @@ void GUI::render() const
     glDisable(GL_DEPTH_TEST);
     glEnable( GL_BLEND);
 
-    this->shader.use();
-    this->shader.setUniformMat4("ProjectionMatrix", this->projectionMatrix);
+    this->guiShader.use();
+    this->guiShader.setUniformMat4("ProjectionMatrix", this->projectionMatrix);
 
-    this->vao.bind();
+    this->guiVao.bind();
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->data.size()));
-    this->vao.unbind();
+    this->guiVao.unbind();
 
     glEnable(GL_DEPTH_TEST);
     glDisable( GL_BLEND);
+}
+
+void GUI::renderBlockOutline(const Camera& camera, const float& aspect, const glm::vec3& cubePos) const
+{
+    glDisable(GL_CULL_FACE);
+    glPolygonOffset(-1, -1);
+
+    this->outlineShader.use();
+    this->outlineShader.setUniformMat4("ProjectionMatrix", camera.getProjectionMatrix(aspect));
+    this->outlineShader.setUniformMat4("ViewMatrix", camera.getViewMatrix());
+    this->outlineShader.setUniformMat4("ModelMatrix", glm::translate(glm::mat4(1.0f), glm::vec3(cubePos)));
+
+    this->outlineVao.bind();
+    glDrawArrays(GL_TRIANGLES, 0, 288);
+    this->outlineVao.unbind();
+
+    glPolygonOffset(0, 0);
+    glEnable(GL_CULL_FACE);
 }
 
 void GUI::createImGuiFrame()
@@ -128,7 +155,7 @@ float GUI::toScreenSpace(const float v, const float minIn, const float maxIn)
     return std::clamp(res, -1.0f, 1.0f);
 }
 
-float GUI::percent(const float baseValue, float percentage)
+float GUI::percent(const float baseValue, const float percentage)
 {
     return baseValue * (percentage/100.0f);
 }

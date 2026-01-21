@@ -65,15 +65,22 @@ glm::vec3 Camera::getForwardVector() const
     return glm::normalize(forward);
 }
 
-void Camera::setViewMatrix(const Shader& shader, const float& aspect) const
+glm::mat4 Camera::getProjectionMatrix(const float& aspect) const
+{
+    return glm::perspective(FOV, aspect, 0.1f, 256.f);
+}
+
+glm::mat4 Camera::getViewMatrix() const
 {
     const auto forward = this->getForwardVector();
-    const glm::mat4 view = glm::lookAt(this->position, this->position + forward, {0,1,0});
-    const glm::mat4 projection = glm::perspective(FOV, aspect, 0.1f, 256.f);
+    return glm::lookAt(this->position, this->position + forward, {0,1,0});
+}
 
+void Camera::setViewMatrix(const Shader& shader, const float& aspect) const
+{
     shader.use();
-    shader.setUniformMat4("ProjectionMatrix", projection);
-    shader.setUniformMat4("ViewMatrix", view);
+    shader.setUniformMat4("ProjectionMatrix", this->getProjectionMatrix(aspect));
+    shader.setUniformMat4("ViewMatrix", this->getViewMatrix());
 }
 
 void Camera::moveCamera(const double mouseX, const double mouseY, const double deltaTime)

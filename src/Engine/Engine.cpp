@@ -257,6 +257,11 @@ void Engine::render() const
     this->textureRegistry.bind();
     this->world->render();
 
+    // Render faced block outline
+    const auto raycast = this->player->getCamera().raycast(*this->world);
+    if (raycast.hit)
+        this->player->renderBlockOutline(this->aspectRatio, raycast.pos);
+
     // Render Player
     this->player->render();
 

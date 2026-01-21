@@ -7,8 +7,8 @@ World::World(BlockRegistry _blockRegistry, const TextureRegistry& _textureRegist
 {
     this->chunkManager = std::make_unique<ChunkManager>(this->blockRegistry);
     this->shader = std::make_unique<Shader>(
-        "../resources/shaders/WorldShader/world.vert",
-        "../resources/shaders/WorldShader/world.frag"
+        "../resources/shaders/World/world.vert",
+        "../resources/shaders/World/world.frag"
     );
     this->shader->use();
     this->shader->setUniformInt("Textures", 0);

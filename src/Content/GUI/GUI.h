@@ -17,6 +17,7 @@ class Engine; // forward declaration
 #include "Camera.h"
 #include "Shader.h"
 #include "VAO.h"
+#include "OutlineVertices.h"
 
 struct DigitalColor
 {
@@ -50,8 +51,10 @@ class GUI
     static constexpr float THICKNESS = 4.f;
     static constexpr float OFFSET = 3.f;
 
-    Shader shader;
-    VAO vao;
+    Shader guiShader;
+    Shader outlineShader;
+    VAO guiVao;
+    VAO outlineVao;
     glm::mat4 projectionMatrix;
     std::vector<GuiVertex> data;
 
@@ -66,6 +69,7 @@ class GUI
         explicit GUI();
 
         void render() const;
+        void renderBlockOutline(const Camera& camera, const float& aspect, const glm::vec3& cubePos) const;
 
         static void createImGuiFrame();
         static void renderImGuiFrame(const Camera& camera);

@@ -27,6 +27,7 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
+#include "VAO.h"
 #include "World.h"
 #include "Player.h"
 #include "InputState.h"

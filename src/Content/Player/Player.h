@@ -16,6 +16,7 @@ class Player
 
         Camera &getCamera();
         void render() const;
+        void renderBlockOutline(const float& aspect, const glm::vec3& cubePos) const;
 
         void setSelectedMaterial(Material newMaterial);
         [[nodiscard]] Material getSelectedMaterial() const;
