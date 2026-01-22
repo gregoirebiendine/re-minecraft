@@ -1,148 +1,46 @@
 #include "ChunkMesh.h"
-#include "World.h"
 
-void ChunkMesh::rebuild(Chunk& chunk, const World& world)
+ChunkMesh::ChunkMesh(const ChunkPos& pos) :
+    position(pos)
 {
-    const auto [cx, cy, cz] = chunk.getPosition() * Chunk::SIZE;
+    // Empty
+}
 
-    // Reset meshes data
-    this->meshData.clear();
-    this->meshData.reserve(36 * Chunk::VOLUME);
+void ChunkMesh::upload(MeshData&& data)
+{
+    // Determine back buffer index (opposite of front)
+    const uint8_t backIndex = 1 - frontBufferIndex.load(std::memory_order_acquire);
 
-    // Iterate over all Materials to construct blocks
-    for (int i = 0; i < Chunk::VOLUME; i++) {
-        auto [x, y, z] = coords(i);
+    // Store vertex count for the back buffer
+    vertexCounts[backIndex] = data.size();
 
-        // Skip AIR
-        if (chunk.isAir(x, y, z)) continue;
+    // Upload to back buffer VAO/VBO
+    buffers[backIndex].bind();
+    buffers[backIndex].storeBlockData(data);
+    buffers[backIndex].unbind();
+}
 
-        // Retrieve Block Meta
-        const BlockMeta& meta = world.getBlockRegistry().get(chunk.getBlock(x, y, z));
-
-        // NORTH face
-        if (world.isAir(cx + x, cy + y, cz + z - 1)) {
-            const TextureId texId = world.getTextureRegistry().getByName(meta.getFaceTexture(NORTH));
-
-            createFace(
-                this->meshData,
-                {x,       y,       z},
-                {x,       1 + y,   z},
-                {1 + x,   1 + y,   z},
-                {1 + x,   y,       z},
-                {0, 0, -1},
-                texId
-            );
-        }
-
-        // SOUTH face
-        if (world.isAir(cx + x, cy + y, cz + z + 1)) {
-            const TextureId texId = world.getTextureRegistry().getByName(meta.getFaceTexture(SOUTH));
-
-            createFace(
-                this->meshData,
-                {1 + x,   y,       1 + z},
-                {1 + x,   1 + y,   1 + z},
-                {x,       1 + y,   1 + z},
-                {x,       y,       1 + z},
-                {0, 0, 1},
-                texId
-            );
-        }
-
-        // WEST face
-        if (world.isAir(cx + x - 1, cy + y, cz + z)) {
-            const TextureId texId = world.getTextureRegistry().getByName(meta.getFaceTexture(WEST));
-
-            createFace(
-                this->meshData,
-                {x,       y,       1 + z},
-                {x,       1 + y,   1 + z},
-                {x,       1 + y,   z},
-                {x,       y,       z},
-                {-1, 0, 0},
-                texId
-            );
-        }
-
-        // EAST face
-        if (world.isAir(cx + x + 1, cy + y, cz + z)) {
-            const TextureId texId = world.getTextureRegistry().getByName(meta.getFaceTexture(EAST));
-
-            createFace(
-                this->meshData,
-                {1 + x,   y,       z},
-                {1 + x,   1 + y,   z},
-                {1 + x,   1 + y,   1 + z},
-                {1 + x,   y,       1 + z},
-                {1, 0, 0},
-                texId
-            );
-        }
-
-        // UP face
-        if (world.isAir(cx + x, cy + y + 1, cz + z)) {
-            const TextureId texId = world.getTextureRegistry().getByName(meta.getFaceTexture(UP));
-
-            createFace(
-                this->meshData,
-                {x,       1 + y,   z},
-                {x,       1 + y,   1 + z},
-                {1 + x,   1 + y,   1 + z},
-                {1 + x,   1 + y,   z},
-                {0, 1, 0},
-                texId
-            );
-        }
-
-        // DOWN face
-        if (world.isAir(cx + x, cy + y - 1, cz + z)) {
-            const TextureId texId = world.getTextureRegistry().getByName(meta.getFaceTexture(DOWN));
-
-            createFace(
-                this->meshData,
-                {x,       y,       z},
-                {1 + x,   y,       z},
-                {1 + x,   y,       1 + z},
-                {x,       y,       1 + z},
-                {0, -1, 0},
-                texId
-            );
-        }
-    }
-    
-    // Link data to VA0 before rendering
-    this->vao.bind();
-    this->vao.storeBlockData(this->meshData);
-    this->vao.unbind();
-
-    // Set chunk as not dirty, meaning it will not rebuild next frame
-    chunk.setDirty(false);
+void ChunkMesh::swapBuffers()
+{
+    // Atomically swap front and back buffer indices
+    const uint8_t current = frontBufferIndex.load(std::memory_order_acquire);
+    frontBufferIndex.store(1 - current, std::memory_order_release);
 }
 
 void ChunkMesh::render() const
 {
-    this->vao.bind();
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->meshData.size()));
-    this->vao.unbind();
+    const uint8_t frontIndex = frontBufferIndex.load(std::memory_order_acquire);
+
+    if (vertexCounts[frontIndex] == 0)
+        return;
+
+    buffers[frontIndex].bind();
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertexCounts[frontIndex]));
+    buffers[frontIndex].unbind();
 }
 
-// Statics
-std::tuple<GLint, GLint, GLint> ChunkMesh::coords(const int index) {
-    return {
-        index / (Chunk::SIZE * Chunk::SIZE),
-        (index / Chunk::SIZE) % Chunk::SIZE,
-        index % Chunk::SIZE
-    };
-}
-
-void ChunkMesh::createFace(std::vector<Vertex> &data, const glm::ivec3 &v0, const glm::ivec3 &v1, const glm::ivec3 &v2, const glm::ivec3 &v3, const glm::ivec3 &normals, const uint16_t& texId)
+bool ChunkMesh::hasGeometry() const
 {
-    data.insert(data.end(), {
-        {v0, normals, {1, 0}, texId},
-        {v1, normals, {1, 1}, texId},
-        {v2, normals, {0, 1}, texId},
-        {v0, normals, {1, 0}, texId},
-        {v2, normals, {0, 1}, texId},
-        {v3, normals, {0, 0}, texId},
-    });
+    const uint8_t frontIndex = frontBufferIndex.load(std::memory_order_acquire);
+    return vertexCounts[frontIndex] > 0;
 }

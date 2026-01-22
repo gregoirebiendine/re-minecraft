@@ -3,9 +3,6 @@
 
 #pragma once
 
-class Engine; // forward declaration
-
-#include <memory>
 #include <vector>
 
 #include <imgui.h>
@@ -18,6 +15,7 @@ class Engine; // forward declaration
 #include "Camera.h"
 #include "Shader.h"
 #include "VAO.h"
+#include "OutlineVertices.h"
 
 struct DigitalColor
 {
@@ -51,26 +49,32 @@ class GUI
     static constexpr float THICKNESS = 4.f;
     static constexpr float OFFSET = 3.f;
 
-    std::unique_ptr<Shader> shader;
+    Shader guiShader;
+    Shader outlineShader;
+    VAO guiVao;
+    VAO outlineVao;
 
-    std::vector<GLfloat> vertices{};
-    std::vector<GLfloat> colors{};
-    VAO vao;
+    glm::mat4 projectionMatrix{};
+    std::vector<GuiVertex> data;
 
     static float toScreenSpace(float v, float minIn, float maxIn);
     static float percent(float baseValue, float percentage);
     static std::string forwardToCardinal(const glm::vec3& forwardVector);
 
-    void createCrosshair();
+    void createCrosshair(glm::ivec2 viewportSize);
     void createRectangle(float x, float y, float width, float height, DigitalColor color);
 
     public:
         explicit GUI();
 
+        void init(glm::ivec2 viewportSize);
+        void changeViewportSize(glm::ivec2 size);
+
         void render() const;
+        void renderBlockOutline(const Camera& camera, const float& aspect, const glm::vec3& cubePos) const;
 
         static void createImGuiFrame();
-        static void renderImGuiFrame(const Camera& camera, const BlockRegistry& blockRegistry);
+        static void renderImGuiFrame(const Camera& camera);
 };
 
 #endif //RE_MINECRAFT_GUI_H

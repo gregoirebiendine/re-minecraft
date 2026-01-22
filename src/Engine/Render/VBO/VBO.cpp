@@ -1,4 +1,3 @@
-
 #include "VBO.h"
 
 VBO::VBO()
@@ -14,12 +13,7 @@ VBO::~VBO()
 template<typename T = GLfloat>
 void VBO::addData(const std::vector<T> &v) const {
     this->bind();
-    glBufferData(GL_ARRAY_BUFFER, v.size() * sizeof(T), v.data(), GL_STATIC_DRAW);
-}
-
-void VBO::storeBlockData(const std::vector<Vertex> &v) const {
-    this->bind();
-    glBufferData(GL_ARRAY_BUFFER, v.size() * sizeof(Vertex), v.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(v.size() * sizeof(T)), v.data(), GL_STATIC_DRAW);
 }
 
 void VBO::bind() const
@@ -34,3 +28,5 @@ void VBO::unbind() const
 
 template void VBO::addData<GLfloat>(const std::vector<GLfloat> &v) const;
 template void VBO::addData<GLint>(const std::vector<GLint> &v) const;
+template void VBO::addData<Vertex>(const std::vector<Vertex> &v) const;
+template void VBO::addData<GuiVertex>(const std::vector<GuiVertex> &v) const;

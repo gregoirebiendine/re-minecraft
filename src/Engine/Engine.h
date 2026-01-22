@@ -2,64 +2,53 @@
 #define ENGINE_H
 
 #define GLM_ENABLE_EXPERIMENTAL
-#define UNUSED __attribute__ ((unused))
 
-#include <iostream>
-#include <memory>
-#include <filesystem>
+#ifdef _WIN32
+    #include <windows.h>
+#elif defined(__linux__)
+    #include <time.h>
+    #include <cerrno>
+#endif
+
 #include <thread>
+#include <memory>
 #include <chrono>
 
-#include <imgui.h>
-#include <imgui_impl_opengl3.h>
-#include <imgui_impl_glfw.h>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/rotate_vector.hpp>
-#include <glm/gtx/vector_angle.hpp>
-
-#include "Shader.h"
-#include "World.h"
-#include "Camera.h"
+#include "Viewport.h"
 #include "InputState.h"
 #include "BlockRegistry.h"
 #include "TextureRegistry.h"
-#include "GUI.h"
+#include "World.h"
+#include "Player.h"
+
+using Clock = std::chrono::steady_clock;
+using Duration = std::chrono::duration<double>;
 
 class Engine {
-    glm::ivec2 ScreenSize{};
-    float aspectRatio{};
+    #ifdef _WIN32
+        HANDLE frameTimer = nullptr;
+    #endif
 
-    GLFWwindow *window = nullptr;
+    Raycast::Hit lastRaycastHit{};
+
+    Viewport viewport;
     InputState inputs;
-
     BlockRegistry blockRegistry;
     TextureRegistry textureRegistry;
 
-    std::unique_ptr<Shader> worldShader;
+    std::unique_ptr<Player> player;
     std::unique_ptr<World> world;
-    std::unique_ptr<Camera> camera;
-    std::unique_ptr<GUI> playerGUI;
+
+    void preciseWait(double seconds) const;
+    void handleInputs(double deltaTime);
+    void update() const;
+    void render() const;
 
     public:
-        static constexpr glm::ivec2 WindowSize{1920, 1080};
-
         Engine();
         ~Engine();
 
         void loop();
-        void handleInputs(double deltaTime) const;
-        void clearInputs();
-        void update() const;
-        void render() const;
-        void setViewMatrix() const;
 };
-
-void keyInputCallback(GLFWwindow* window, int key, UNUSED int scancode, int action, UNUSED int mods);
-void mouseButtonInputCallback(GLFWwindow* window, int button, int action, UNUSED int mods);
-void mouseInputCallback(GLFWwindow* window, double x, double y);
 
 #endif //ENGINE_H

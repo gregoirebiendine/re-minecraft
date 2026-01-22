@@ -9,6 +9,15 @@ namespace Raycast
         bool hit = false;
         glm::ivec3 pos;
         glm::ivec3 previousPos;
+
+        bool operator==(const Hit& other) const
+        {
+            if (this->hit != other.hit)
+                return false;
+            if (!this->hit)
+                return true;
+            return this->pos == other.pos && this->previousPos == other.previousPos;
+        }
     };
 
     constexpr float MAX_DISTANCE = 6.0f;

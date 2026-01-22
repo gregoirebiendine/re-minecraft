@@ -70,28 +70,36 @@ set(
         ${CMAKE_SOURCE_DIR}/src/Engine/Camera
         ${CMAKE_SOURCE_DIR}/src/Engine/Input
         ${CMAKE_SOURCE_DIR}/src/Engine/Raycast
+        ${CMAKE_SOURCE_DIR}/src/Engine/ConcurrentQueue
         ${CMAKE_SOURCE_DIR}/src/Engine/Render/VAO
         ${CMAKE_SOURCE_DIR}/src/Engine/Render/VBO
         ${CMAKE_SOURCE_DIR}/src/Engine/Render/Shader
+        ${CMAKE_SOURCE_DIR}/src/Engine/Render/Viewport
+        ${CMAKE_SOURCE_DIR}/src/Engine/ThreadPool
+        ${CMAKE_SOURCE_DIR}/src/Engine/Utils
+        ${CMAKE_SOURCE_DIR}/src/Engine/Settings
         ${CMAKE_SOURCE_DIR}/src/Content/ChunkMesh
         ${CMAKE_SOURCE_DIR}/src/Content/ChunkMeshManager
         ${CMAKE_SOURCE_DIR}/src/Content/Chunk
+        ${CMAKE_SOURCE_DIR}/src/Content/ChunkManager/
         ${CMAKE_SOURCE_DIR}/src/Content/World
+        ${CMAKE_SOURCE_DIR}/src/Content/TerrainGenerator
         ${CMAKE_SOURCE_DIR}/src/Content/BlockRegistry
         ${CMAKE_SOURCE_DIR}/src/Content/TextureRegistry
         ${CMAKE_SOURCE_DIR}/src/Content/GUI
+        ${CMAKE_SOURCE_DIR}/src/Content/Player
 )
 
-add_subdirectory(lib/flint) # compile the flint lib
-add_subdirectory(lib/GLFW) # compile the GLFW lib RIGHT
+add_subdirectory(lib/flint)
+add_subdirectory(lib/GLFW)
 
 add_executable(
         re_minecraft
         ${SOURCES}
 )
 
-target_link_libraries(re_minecraft PRIVATE flint) # we link the flint lib to the main executable
-target_link_libraries(re_minecraft PRIVATE glfw) # imagine doing stuff cross-platform but using the windows binary lib :eyes:
+target_link_libraries(re_minecraft PRIVATE flint)
+target_link_libraries(re_minecraft PRIVATE glfw)
 
 
 target_include_directories(
