@@ -1,6 +1,10 @@
 #ifndef INCLUDED_LOGGING_HPP
 #define INCLUDED_LOGGING_HPP
 
+#define NOGDI
+
+#pragma once
+
 #include "../Colors/Colors.hpp"
 #include "../CxxABI/CxxABI.hpp"
 #include "../Exceptions/Exceptions.hpp"

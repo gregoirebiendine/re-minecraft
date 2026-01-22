@@ -18,9 +18,9 @@ set(
     CMAKE_CXX_ABI_COMPILED ON
 )
 
-set(
-    CMAKE_CXX_FLAGS -rdynamic
-)
+#set(
+#    CMAKE_CXX_FLAGS -rdynamic
+#)
 
 add_compile_options(
     -Wall -Wextra -Werror -Wno-error=vla
