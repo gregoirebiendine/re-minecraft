@@ -46,6 +46,11 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragPath)
     // Delete Vertex/Fragment shaders because they are combined into a Program
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+
+    this->use();
+    this->projectionMatrixUniform = glGetUniformLocation(this->ID, "ProjectionMatrix");
+    this->viewMatrixUniform = glGetUniformLocation(this->ID, "ViewMatrix");
+    this->modelMatrixUniform = glGetUniformLocation(this->ID, "ModelMatrix");
 }
 
 Shader::~Shader() {
@@ -99,4 +104,31 @@ void Shader::setUniformMat4(const char *name, glm::mat4 value) const
 {
     const int loc = glGetUniformLocation(this->ID, name);
     glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(value));
+}
+
+void Shader::setModelMatrix(const glm::mat4& modelMatrix) const
+{
+    GLint loc = this->modelMatrixUniform;
+
+    if (loc == -1)
+         loc = glGetUniformLocation(this->ID, "ModelMatrix");
+    glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+}
+
+void Shader::setViewMatrix(const glm::mat4& viewMatrix) const
+{
+    GLint loc = this->viewMatrixUniform;
+
+    if (loc == -1)
+        loc = glGetUniformLocation(this->ID, "ViewMatrix");
+    glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+}
+
+void Shader::setProjectionMatrix(const glm::mat4& projectionMatrix) const
+{
+    GLint loc = this->projectionMatrixUniform;
+
+    if (loc == -1)
+        loc = glGetUniformLocation(this->ID, "ProjectionMatrix");
+    glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 }

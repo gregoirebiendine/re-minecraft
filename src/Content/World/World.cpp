@@ -85,7 +85,7 @@ void World::render()
     for (const auto chunk : this->chunkManager.getRenderableChunks()) {
         const auto& mesh = this->meshManager.getMesh(chunk->getPosition());
 
-        this->shader.setUniformMat4("ModelMatrix", chunk->getChunkModel());
+        this->shader.setModelMatrix(chunk->getChunkModel());
         mesh.render();
     }
 }

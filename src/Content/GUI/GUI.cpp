@@ -102,7 +102,7 @@ void GUI::render() const
     glEnable( GL_BLEND);
 
     this->guiShader.use();
-    this->guiShader.setUniformMat4("ProjectionMatrix", this->projectionMatrix);
+    this->guiShader.setProjectionMatrix(this->projectionMatrix);
 
     this->guiVao.bind();
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->data.size()));
@@ -118,9 +118,9 @@ void GUI::renderBlockOutline(const Camera& camera, const float& aspect, const gl
     glPolygonOffset(-1, -1);
 
     this->outlineShader.use();
-    this->outlineShader.setUniformMat4("ProjectionMatrix", camera.getProjectionMatrix(aspect));
-    this->outlineShader.setUniformMat4("ViewMatrix", camera.getViewMatrix());
-    this->outlineShader.setUniformMat4("ModelMatrix", glm::translate(glm::mat4(1.0f), glm::vec3(cubePos)));
+    this->outlineShader.setModelMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(cubePos)));
+    this->outlineShader.setViewMatrix(camera.getViewMatrix());
+    this->outlineShader.setProjectionMatrix(camera.getProjectionMatrix(aspect));
 
     this->outlineVao.bind();
     glDrawArrays(GL_TRIANGLES, 0, 288);

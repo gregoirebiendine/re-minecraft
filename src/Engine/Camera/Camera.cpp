@@ -78,8 +78,8 @@ glm::mat4 Camera::getViewMatrix() const
 void Camera::setViewMatrix(const Shader& shader, const float& aspect) const
 {
     shader.use();
-    shader.setUniformMat4("ProjectionMatrix", this->getProjectionMatrix(aspect));
-    shader.setUniformMat4("ViewMatrix", this->getViewMatrix());
+    shader.setViewMatrix(this->getViewMatrix());
+    shader.setProjectionMatrix(this->getProjectionMatrix(aspect));
 }
 
 void Camera::moveCamera(const double mouseX, const double mouseY, const double deltaTime)
