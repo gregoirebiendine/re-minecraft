@@ -1,26 +1,46 @@
 #include "GUI.h"
-#include "Engine.h"
 
-GUI::GUI()
+GUI::GUI() :
+    guiShader(
+    "../resources/shaders/UI/ui.vert",
+    "../resources/shaders/UI/ui.frag"
+    ),
+    outlineShader(
+        "../resources/shaders/Outline/outline.vert",
+        "../resources/shaders/Outline/outline.frag"
+    )
 {
-    this->shader = std::make_unique<Shader>(
-    "../resources/shaders/UIShader/ui.vert",
-    "../resources/shaders/UIShader/ui.frag"
-    );
-
-    if (!this->shader)
-        throw std::runtime_error("GUI Shader creation failed");
-
-    this->createCrosshair();
-
-    this->VAO.bind();
-    this->VAO.addData<GLfloat, GL_FLOAT>(this->vertices, 0, 2);
-    this->VAO.addData<GLfloat, GL_FLOAT>(this->colors, 1, 4);
-    this->VAO.unbind();
+    // Empty
 }
 
-void GUI::createCrosshair() {
-    constexpr glm::vec2 mid = {Engine::WindowSize.x / 2 , Engine::WindowSize.y / 2};
+void GUI::init(const glm::ivec2 viewportSize)
+{
+    this->changeViewportSize(viewportSize);
+
+    // General GUI
+    this->createCrosshair(viewportSize);
+    this->guiVao.bind();
+    this->guiVao.storeGuiData(this->data);
+    this->guiVao.unbind();
+
+    // Block Outline GUI
+    this->outlineVao.bind();
+    this->outlineVao.storeOutlineData(OUTLINE_VERTICES);
+    this->outlineVao.unbind();
+}
+
+void GUI::changeViewportSize(const glm::ivec2 size)
+{
+    this->projectionMatrix = glm::ortho(
+        0.0f, static_cast<float>(size.x),
+        static_cast<float>(size.y), 0.0f,
+        -1.f, 1.0f
+    );
+}
+
+void GUI::createCrosshair(const glm::ivec2 viewportSize) {
+    // TODO: Update viewportSize when resizing
+    const glm::vec2 mid = {viewportSize.x / 2 , viewportSize.y / 2};
     const DigitalColor color{200, 200, 200, 0.8f};
 
     // Hor 1
@@ -63,48 +83,51 @@ void GUI::createRectangle(const float x, const float y, const float width, const
     const float x1 = x + width;
     const float y1 = y + height;
 
-    this->vertices.insert(this->vertices.end(), {
+    this->data.insert(this->data.end(), {
         // First triangle
-        x,  y,
-        x,  y1,
-        x1, y1,
+        {{x, y}, {color.r, color.g, color.b, color.a}},
+        {{x, y1}, {color.r, color.g, color.b, color.a}},
+        {{x1, y1}, {color.r, color.g, color.b, color.a}},
 
         // Second triangle
-        x,  y,
-        x1, y1,
-        x1, y,
-    });
-
-    this->colors.insert(this->colors.end(), {
-        color.r, color.g, color.b, color.a,
-        color.r, color.g, color.b, color.a,
-        color.r, color.g, color.b, color.a,
-        color.r, color.g, color.b, color.a,
-        color.r, color.g, color.b, color.a,
-        color.r, color.g, color.b, color.a,
+        {{x, y}, {color.r, color.g, color.b, color.a}},
+        {{x1, y1}, {color.r, color.g, color.b, color.a}},
+        {{x1, y}, {color.r, color.g, color.b, color.a}},
     });
 }
 
 void GUI::render() const
 {
-    const glm::mat4 ProjectionMatrix = glm::ortho(
-        0.0f, static_cast<float>(Engine::WindowSize.x),
-        static_cast<float>(Engine::WindowSize.y), 0.0f,
-        -1.f, 1.0f
-    );
-
     glDisable(GL_DEPTH_TEST);
     glEnable( GL_BLEND);
 
-    this->shader->use();
-    this->shader->setUniformMat4("ProjectionMatrix", ProjectionMatrix);
+    this->guiShader.use();
+    this->guiShader.setUniformMat4("ProjectionMatrix", this->projectionMatrix);
 
-    this->VAO.bind();
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(this->vertices.size()));
-    this->VAO.unbind();
+    this->guiVao.bind();
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->data.size()));
+    this->guiVao.unbind();
 
     glEnable(GL_DEPTH_TEST);
     glDisable( GL_BLEND);
+}
+
+void GUI::renderBlockOutline(const Camera& camera, const float& aspect, const glm::vec3& cubePos) const
+{
+    glDisable(GL_CULL_FACE);
+    glPolygonOffset(-1, -1);
+
+    this->outlineShader.use();
+    this->outlineShader.setUniformMat4("ProjectionMatrix", camera.getProjectionMatrix(aspect));
+    this->outlineShader.setUniformMat4("ViewMatrix", camera.getViewMatrix());
+    this->outlineShader.setUniformMat4("ModelMatrix", glm::translate(glm::mat4(1.0f), glm::vec3(cubePos)));
+
+    this->outlineVao.bind();
+    glDrawArrays(GL_TRIANGLES, 0, 288);
+    this->outlineVao.unbind();
+
+    glPolygonOffset(0, 0);
+    glEnable(GL_CULL_FACE);
 }
 
 void GUI::createImGuiFrame()
@@ -114,10 +137,9 @@ void GUI::createImGuiFrame()
     ImGui::NewFrame();
 }
 
-void GUI::renderImGuiFrame(const Camera& camera, const BlockRegistry& blockRegistry)
+void GUI::renderImGuiFrame(const Camera& camera)
 {
     const auto cameraPos = camera.getPosition();
-    const auto selectedBlock = camera.getSelectedMaterial();
     const auto facing = forwardToCardinal(camera.getForwardVector());
     const ChunkPos cp{
         static_cast<int>(cameraPos.x) / 16,
@@ -130,7 +152,6 @@ void GUI::renderImGuiFrame(const Camera& camera, const BlockRegistry& blockRegis
     ImGui::Text("Position : %.2f, %.2f, %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
     ImGui::Text("Chunk : %d, %d, %d", cp.x, cp.y, cp.z);
     ImGui::Text("Facing : %s", facing.c_str());
-    ImGui::Text("Selected block : %s", blockRegistry.get(selectedBlock).getName().c_str());
     ImGui::End();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -143,7 +164,7 @@ float GUI::toScreenSpace(const float v, const float minIn, const float maxIn)
     return std::clamp(res, -1.0f, 1.0f);
 }
 
-float GUI::percent(const float baseValue, float percentage)
+float GUI::percent(const float baseValue, const float percentage)
 {
     return baseValue * (percentage/100.0f);
 }

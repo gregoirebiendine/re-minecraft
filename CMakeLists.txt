@@ -11,9 +11,9 @@ set(
         lib/glad/src/glad.c
         lib/stbi/stb_image.cpp
         lib/imgui/src/imgui.cpp
-        lib/imgui/src/imgui_draw.cpp
         lib/imgui/src/imgui_impl_opengl3.cpp
         lib/imgui/src/imgui_impl_glfw.cpp
+        lib/imgui/src/imgui_draw.cpp
         lib/imgui/src/imgui_tables.cpp
         lib/imgui/src/imgui_widgets.cpp
 
@@ -23,13 +23,18 @@ set(
         src/Engine/Render/VAO/VAO.cpp
         src/Engine/Render/VBO/VBO.cpp
         src/Engine/Render/Shader/Shader.cpp
+        src/Engine/Render/Viewport/Viewport.cpp
+        src/Engine/Settings/Settings.cpp
         src/Content/ChunkMesh/ChunkMesh.cpp
         src/Content/ChunkMeshManager/ChunkMeshManager.cpp
+        src/Content/ChunkManager/ChunkManager.cpp
         src/Content/Chunk/Chunk.cpp
         src/Content/World/World.cpp
+        src/Content/TerrainGenerator/TerrainGenerator.cpp
         src/Content/BlockRegistry/BlockRegistry.cpp
         src/Content/TextureRegistry/TextureRegistry.cpp
         src/Content/GUI/GUI.cpp
+        src/Content/Player/Player.cpp
 )
 
 set(
@@ -41,16 +46,24 @@ set(
         ${CMAKE_SOURCE_DIR}/src/Engine/Camera
         ${CMAKE_SOURCE_DIR}/src/Engine/Input
         ${CMAKE_SOURCE_DIR}/src/Engine/Raycast
+        ${CMAKE_SOURCE_DIR}/src/Engine/ConcurrentQueue
         ${CMAKE_SOURCE_DIR}/src/Engine/Render/VAO
         ${CMAKE_SOURCE_DIR}/src/Engine/Render/VBO
         ${CMAKE_SOURCE_DIR}/src/Engine/Render/Shader
+        ${CMAKE_SOURCE_DIR}/src/Engine/Render/Viewport
+        ${CMAKE_SOURCE_DIR}/src/Engine/ThreadPool
+        ${CMAKE_SOURCE_DIR}/src/Engine/Utils
+        ${CMAKE_SOURCE_DIR}/src/Engine/Settings
         ${CMAKE_SOURCE_DIR}/src/Content/ChunkMesh
         ${CMAKE_SOURCE_DIR}/src/Content/ChunkMeshManager
         ${CMAKE_SOURCE_DIR}/src/Content/Chunk
+        ${CMAKE_SOURCE_DIR}/src/Content/ChunkManager/
         ${CMAKE_SOURCE_DIR}/src/Content/World
+        ${CMAKE_SOURCE_DIR}/src/Content/TerrainGenerator
         ${CMAKE_SOURCE_DIR}/src/Content/BlockRegistry
         ${CMAKE_SOURCE_DIR}/src/Content/TextureRegistry
         ${CMAKE_SOURCE_DIR}/src/Content/GUI
+        ${CMAKE_SOURCE_DIR}/src/Content/Player
 )
 
 add_executable(

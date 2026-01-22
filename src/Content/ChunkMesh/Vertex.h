@@ -10,4 +10,10 @@ struct Vertex {
     unsigned int texId;
 };
 
+struct GuiVertex {
+    glm::vec2 position;
+    glm::vec4 color;
+};
+
+
 #endif //RE_MINECRAFT_VERTEX_H
