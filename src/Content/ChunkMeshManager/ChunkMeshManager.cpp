@@ -27,7 +27,7 @@ void ChunkMeshManager::requestRebuild(Chunk& chunk, const float distance)
 
 void ChunkMeshManager::scheduleMeshing(const glm::vec3& cameraPos)
 {
-    for (auto&[pos, chunk] : world.getChunkManager()->getChunks()) {
+    for (auto&[pos, chunk] : world.getChunkManager().getChunks()) {
         const bool needsFirstMesh = chunk.getState() == ChunkState::GENERATED;
         const bool needsRemesh = chunk.getState() == ChunkState::READY && chunk.isDirty();
 
@@ -67,7 +67,7 @@ void ChunkMeshManager::update()
         mesh.upload(std::move(data));
         mesh.swapBuffers();
 
-        if (Chunk* c = world.getChunkManager()->getChunk(pos.x, pos.y, pos.z)) {
+        if (Chunk* c = world.getChunkManager().getChunk(pos.x, pos.y, pos.z)) {
             if (c->getState() == ChunkState::MESHED)
                 c->setState(ChunkState::READY);
         }
@@ -76,7 +76,7 @@ void ChunkMeshManager::update()
 
 void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
 {
-    Chunk* chunk = world.getChunkManager()->getChunk(job.pos.x, job.pos.y, job.pos.z);
+    Chunk* chunk = world.getChunkManager().getChunk(job.pos.x, job.pos.y, job.pos.z);
 
     if (!chunk)
         return;
@@ -85,7 +85,7 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
         return;
 
     const auto blockData = chunk->getBlockSnapshot();
-    const auto [north, south, east, west, up, down] = world.getChunkManager()->getNeighbors(job.pos);
+    const auto [north, south, east, west, up, down] = world.getChunkManager().getNeighbors(job.pos);
 
     NeighborData neighbors[6];
     neighbors[0] = { north != nullptr, north ? north->getBlockSnapshot() : std::array<Material, Chunk::VOLUME>{} };

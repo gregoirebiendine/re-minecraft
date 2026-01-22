@@ -7,7 +7,7 @@ Camera::Camera(const glm::vec3 _position) :
     Camera::firstMouse = true;
 }
 
-Raycast::Hit Camera::raycast(const World& world) const
+Raycast::Hit Camera::raycast(World& world) const
 {
     const glm::vec3 origin = this->getPosition();
     const glm::vec3 dir = this->getForwardVector();
@@ -20,8 +20,7 @@ Raycast::Hit Camera::raycast(const World& world) const
         pos = origin + dir * t;
         glm::ivec3 blockPos = glm::floor(pos);
 
-        if (blockPos == lastBlock)
-        {
+        if (blockPos == lastBlock) {
             t += Raycast::STEP;
             continue;
         }
