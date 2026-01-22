@@ -5,36 +5,21 @@ set(CMAKE_CXX_STANDARD 26)
 
 add_compile_options(-Wall -Wextra -Wpedantic)
 
-set(
-        SOURCES
+set(CMAKE_CXX_ABI_COMPILED ON)
 
-        lib/glad/src/glad.c
-        lib/stbi/stb_image.cpp
-        lib/imgui/src/imgui.cpp
-        lib/imgui/src/imgui_impl_opengl3.cpp
-        lib/imgui/src/imgui_impl_glfw.cpp
-        lib/imgui/src/imgui_draw.cpp
-        lib/imgui/src/imgui_tables.cpp
-        lib/imgui/src/imgui_widgets.cpp
+file(
+    GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+)
 
-        main.cpp
-        src/Engine/Engine.cpp
-        src/Engine/Camera/Camera.cpp
-        src/Engine/Render/VAO/VAO.cpp
-        src/Engine/Render/VBO/VBO.cpp
-        src/Engine/Render/Shader/Shader.cpp
-        src/Engine/Render/Viewport/Viewport.cpp
-        src/Engine/Settings/Settings.cpp
-        src/Content/ChunkMesh/ChunkMesh.cpp
-        src/Content/ChunkMeshManager/ChunkMeshManager.cpp
-        src/Content/ChunkManager/ChunkManager.cpp
-        src/Content/Chunk/Chunk.cpp
-        src/Content/World/World.cpp
-        src/Content/TerrainGenerator/TerrainGenerator.cpp
-        src/Content/BlockRegistry/BlockRegistry.cpp
-        src/Content/TextureRegistry/TextureRegistry.cpp
-        src/Content/GUI/GUI.cpp
-        src/Content/Player/Player.cpp
+list(APPEND SOURCES
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/glad/src/glad.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/stbi/stb_image.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/src/imgui.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/src/imgui_impl_opengl3.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/src/imgui_impl_glfw.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/src/imgui_draw.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/src/imgui_tables.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/src/imgui_widgets.cpp"
 )
 
 set(
@@ -66,20 +51,19 @@ set(
         ${CMAKE_SOURCE_DIR}/src/Content/Player
 )
 
+#add_subdirectory(lib/flint) # Comment for now as the lib won't compile on Windows
+add_subdirectory(lib/GLFW)
+
 add_executable(
         re_minecraft
         ${SOURCES}
 )
 
+#target_link_libraries(re_minecraft PRIVATE flint) # Comment for now as the lib won't compile on Windows
+target_link_libraries(re_minecraft PRIVATE glfw)
 
 target_include_directories(
         re_minecraft
         PRIVATE
         ${HEADERS}
-)
-
-target_link_libraries(
-        re_minecraft
-        PRIVATE
-        ${CMAKE_SOURCE_DIR}/lib/GLFW/libglfw3.a
 )
