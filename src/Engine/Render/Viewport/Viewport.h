@@ -10,8 +10,8 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_glfw.h>
 
-
 #include "Settings.h"
+#include "InputState.h"
 
 class Viewport
 {
@@ -27,7 +27,7 @@ class Viewport
     public:
         static constexpr double dt = 0.0166;
 
-        void initWindow();
+        void initWindow(InputState* inputs);
         void initViewport() const;
         void closeWindow() const;
 

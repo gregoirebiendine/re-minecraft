@@ -15,7 +15,7 @@ void Viewport::initGLFW()
     glfwWindowHint(GLFW_SAMPLES, 4);
 }
 
-void Viewport::initWindow()
+void Viewport::initWindow(InputState* inputs)
 {
     const auto viewportSize = this->settings.getViewportSize();
 
@@ -40,7 +40,13 @@ void Viewport::initWindow()
     if (glfwRawMouseMotionSupported())
         glfwSetInputMode(this->window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
-    // TODO: Register inputs callback functions to GLFW
+    // Forward input state array to GLFW
+    glfwSetWindowUserPointer(this->window, inputs);
+
+    // Register inputs callback functions to GLFW
+    glfwSetKeyCallback(this->window, InputState::keyInputCallback);
+    glfwSetCursorPosCallback(this->window, InputState::mouseInputCallback);
+    glfwSetMouseButtonCallback(this->window, InputState::mouseButtonInputCallback);
 
     // Initialize GLAD Manager
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))

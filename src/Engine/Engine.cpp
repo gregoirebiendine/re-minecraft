@@ -3,26 +3,18 @@
 Engine::Engine()
 {
     #ifdef _WIN32
-        this->frameTimer = CreateWaitableTimerExW(
-            nullptr, nullptr,
-            CREATE_WAITABLE_TIMER_HIGH_RESOLUTION,
-            TIMER_ALL_ACCESS
-        );
-        if (!this->frameTimer)
-            this->frameTimer = CreateWaitableTimerW(nullptr, TRUE, nullptr);
+    this->frameTimer = CreateWaitableTimerExW(
+        nullptr, nullptr,
+        CREATE_WAITABLE_TIMER_HIGH_RESOLUTION,
+        TIMER_ALL_ACCESS
+    );
+    if (!this->frameTimer)
+        this->frameTimer = CreateWaitableTimerW(nullptr, TRUE, nullptr);
     #endif
 
-    this->viewport.initWindow();
+    // Init GLFW window and viewport
+    this->viewport.initWindow(&this->inputs);
     this->viewport.initViewport();
-
-    // Forward input state array to GLFW
-    auto w = this->viewport.getWindow();
-    glfwSetWindowUserPointer(w, &this->inputs);
-
-    // Register inputs callback functions to GLFW
-    glfwSetKeyCallback(w, keyInputCallback);
-    glfwSetCursorPosCallback(w, mouseInputCallback);
-    glfwSetMouseButtonCallback(w, mouseButtonInputCallback);
 
     // Instantiate members
     this->textureRegistry.createTextures();
@@ -36,8 +28,8 @@ Engine::Engine()
 Engine::~Engine()
 {
     #ifdef _WIN32
-        if (this->frameTimer)
-            CloseHandle(this->frameTimer);
+    if (this->frameTimer)
+        CloseHandle(this->frameTimer);
     #endif
 }
 
@@ -60,7 +52,7 @@ void Engine::loop()
         // INPUTS
         Viewport::pollEvents();
         this->handleInputs(frameTime);
-        this->clearInputs();
+        this->inputs.clear();
 
         // UPDATES
         while (accumulator >= Viewport::dt) {
@@ -89,24 +81,26 @@ void Engine::preciseWait(const double seconds) const
     if (seconds <= 0.0) return;
 
     #ifdef _WIN32
-        if (this->frameTimer) {
-            LARGE_INTEGER dueTime;
-            dueTime.QuadPart = -static_cast<LONGLONG>(seconds * 10'000'000.0);
+    if (this->frameTimer) {
+        LARGE_INTEGER dueTime;
+        dueTime.QuadPart = -static_cast<LONGLONG>(seconds * 10'000'000.0);
 
-            if (SetWaitableTimerEx(this->frameTimer, &dueTime, 0, nullptr, nullptr, nullptr, 0)) {
-                WaitForSingleObject(this->frameTimer, INFINITE);
-                return;
-            }
+        if (SetWaitableTimerEx(this->frameTimer, &dueTime, 0, nullptr, nullptr, nullptr, 0)) {
+            WaitForSingleObject(this->frameTimer, INFINITE);
+            return;
         }
-        std::this_thread::sleep_for(std::chrono::duration_cast<Clock::duration>(Duration(seconds)));
-    #elif defined(__linux__)
-        struct timespec req;
-        req.tv_sec = static_cast<time_t>(seconds);
-        req.tv_nsec = static_cast<long>((seconds - req.tv_sec) * 1'000'000'000.0);
+    }
+    std::this_thread::sleep_for(std::chrono::duration_cast<Clock::duration>(Duration(seconds)));
 
-        while (clock_nanosleep(CLOCK_MONOTONIC, 0, &req, &req) == EINTR) {}
+    #elif defined(__linux__)
+    struct timespec req;
+    req.tv_sec = static_cast<time_t>(seconds);
+    req.tv_nsec = static_cast<long>((seconds - req.tv_sec) * 1'000'000'000.0);
+
+    while (clock_nanosleep(CLOCK_MONOTONIC, 0, &req, &req) == EINTR) {}
+
     #else
-        std::this_thread::sleep_for(std::chrono::duration_cast<Clock::duration>(Duration(seconds)));
+    std::this_thread::sleep_for(std::chrono::duration_cast<Clock::duration>(Duration(seconds)));
     #endif
 }
 
@@ -115,55 +109,41 @@ void Engine::handleInputs(const double deltaTime)
     this->player->getCamera().moveCamera(this->inputs.mouseX, this->inputs.mouseY, deltaTime);
     this->lastRaycastHit = this->player->getCamera().raycast(*this->world);
 
-    // Mouse Left button pressed
-    if (this->inputs.mousePressed[GLFW_MOUSE_BUTTON_LEFT] && this->lastRaycastHit.hit)
+    if (this->inputs.isMouseButtonPressed(Inputs::Mouse::LEFT) && this->lastRaycastHit.hit)
         this->world->setBlock(this->lastRaycastHit.pos.x, this->lastRaycastHit.pos.y, this->lastRaycastHit.pos.z, this->blockRegistry.getByName("core:air"));
 
-    // Mouse Right button pressed
-    if (this->inputs.mousePressed[GLFW_MOUSE_BUTTON_RIGHT] && this->lastRaycastHit.hit)
+    if (this->inputs.isMouseButtonPressed(Inputs::Mouse::RIGHT) && this->lastRaycastHit.hit)
         this->world->setBlock(this->lastRaycastHit.previousPos.x, this->lastRaycastHit.previousPos.y, this->lastRaycastHit.previousPos.z, this->player->getSelectedMaterial());
 
-    // Mouse Middle button pressed
-    if (this->inputs.mousePressed[GLFW_MOUSE_BUTTON_MIDDLE] && this->lastRaycastHit.hit) {
+    if (this->inputs.isMouseButtonPressed(Inputs::Mouse::MIDDLE) && this->lastRaycastHit.hit) {
         const Material block = this->world->getBlock(this->lastRaycastHit.pos.x, this->lastRaycastHit.pos.y, this->lastRaycastHit.pos.z);
 
         if (!this->blockRegistry.isEqual(block, "core:air"))
             this->player->setSelectedMaterial(block);
     }
 
-    if (this->inputs.keyPressed[GLFW_KEY_SPACE]) {
+    if (this->inputs.isKeyPressed(Inputs::Keys::SPACE)) {
         glfwSetInputMode(this->viewport.getWindow(), GLFW_CURSOR, !this->player->getCamera().getMouseCapture() ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
         this->player->getCamera().toggleMouseCapture();
     }
 
-    if (this->inputs.keyDown[GLFW_KEY_W])
+    if (this->inputs.isKeyDown(Inputs::Keys::W))
         this->player->getCamera().move({0,0,1}, static_cast<float>(deltaTime));
-    if (this->inputs.keyDown[GLFW_KEY_S])
+    if (this->inputs.isKeyDown(Inputs::Keys::S))
         this->player->getCamera().move({0,0,-1}, static_cast<float>(deltaTime));
-    if (this->inputs.keyDown[GLFW_KEY_A])
+    if (this->inputs.isKeyDown(Inputs::Keys::A))
         this->player->getCamera().move({-1,0,0}, static_cast<float>(deltaTime));
-    if (this->inputs.keyDown[GLFW_KEY_D])
+    if (this->inputs.isKeyDown(Inputs::Keys::D))
         this->player->getCamera().move({1,0,0}, static_cast<float>(deltaTime));
-    if (this->inputs.keyDown[GLFW_KEY_Q])
+    if (this->inputs.isKeyDown(Inputs::Keys::Q))
         this->player->getCamera().move({0,1,0}, static_cast<float>(deltaTime));
-    if (this->inputs.keyDown[GLFW_KEY_E])
+    if (this->inputs.isKeyDown(Inputs::Keys::E))
         this->player->getCamera().move({0,-1,0}, static_cast<float>(deltaTime));
-}
-
-void Engine::clearInputs()
-{
-    std::fill_n(this->inputs.keyPressed, sizeof(this->inputs.keyPressed), false);
-    std::fill_n(this->inputs.keyReleased, sizeof(this->inputs.keyReleased), false);
-    std::fill_n(this->inputs.mousePressed, sizeof(this->inputs.mousePressed), false);
-    std::fill_n(this->inputs.mouseReleased, sizeof(this->inputs.mouseReleased), false);
 }
 
 void Engine::update() const
 {
-    // Apply camera position and rotation
     this->player->getCamera().setViewMatrix(this->world->getShader(), this->viewport.getAspectRatio());
-
-    // Update world
     this->world->update(this->player->getCamera().getPosition());
 }
 
@@ -186,60 +166,4 @@ void Engine::render() const
 
     // Update buffer
     this->viewport.swapBuffers();
-}
-
-// Statics callback
-void keyInputCallback(GLFWwindow* window, const int key, [[maybe_unused]] const int scancode, const int action, [[maybe_unused]] const int mods)
-{
-    const auto glfwPointer = glfwGetWindowUserPointer(window);
-
-    if (glfwPointer == nullptr || key < 0 || key > GLFW_KEY_LAST)
-        return;
-
-    auto* input = static_cast<InputState*>(glfwPointer);
-
-    if (action == GLFW_PRESS)
-    {
-        input->keyDown[key] = true;
-        input->keyPressed[key] = true;
-    }
-    else if (action == GLFW_RELEASE)
-    {
-        input->keyDown[key] = false;
-        input->keyReleased[key] = true;
-    }
-}
-
-void mouseButtonInputCallback(GLFWwindow* window, const int button, const int action, [[maybe_unused]] const int mods)
-{
-    const auto glfwPointer = glfwGetWindowUserPointer(window);
-
-    if (glfwPointer == nullptr || button < 0 || button > GLFW_MOUSE_BUTTON_LAST)
-        return;
-
-    auto* input = static_cast<InputState*>(glfwPointer);
-
-    if (action == GLFW_PRESS)
-    {
-        input->mouseDown[button] = true;
-        input->mousePressed[button] = true;
-    }
-    else if (action == GLFW_RELEASE)
-    {
-        input->mouseDown[button] = false;
-        input->mouseReleased[button] = true;
-    }
-}
-
-void mouseInputCallback(GLFWwindow* window, const double x, const double y)
-{
-    const auto glfwPointer = glfwGetWindowUserPointer(window);
-
-    if (glfwPointer == nullptr)
-        return;
-
-    auto* input = static_cast<InputState*>(glfwPointer);
-
-    input->mouseX = x;
-    input->mouseY = y;
 }
