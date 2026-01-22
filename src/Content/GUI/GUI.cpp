@@ -1,5 +1,4 @@
 #include "GUI.h"
-#include "Engine.h"
 
 GUI::GUI() :
     guiShader(
@@ -9,17 +8,17 @@ GUI::GUI() :
     outlineShader(
         "../resources/shaders/Outline/outline.vert",
         "../resources/shaders/Outline/outline.frag"
-    ),
-    projectionMatrix(
-        glm::ortho(
-            0.0f, static_cast<float>(Engine::WindowSize.x),
-            static_cast<float>(Engine::WindowSize.y), 0.0f,
-            -1.f, 1.0f
-        )
     )
 {
+    // Empty
+}
+
+void GUI::init(const glm::ivec2 viewportSize)
+{
+    this->changeViewportSize(viewportSize);
+
     // General GUI
-    this->createCrosshair();
+    this->createCrosshair(viewportSize);
     this->guiVao.bind();
     this->guiVao.storeGuiData(this->data);
     this->guiVao.unbind();
@@ -30,8 +29,18 @@ GUI::GUI() :
     this->outlineVao.unbind();
 }
 
-void GUI::createCrosshair() {
-    constexpr glm::vec2 mid = {Engine::WindowSize.x / 2 , Engine::WindowSize.y / 2};
+void GUI::changeViewportSize(const glm::ivec2 size)
+{
+    this->projectionMatrix = glm::ortho(
+        0.0f, static_cast<float>(size.x),
+        static_cast<float>(size.y), 0.0f,
+        -1.f, 1.0f
+    );
+}
+
+void GUI::createCrosshair(const glm::ivec2 viewportSize) {
+    // TODO: Update viewportSize when resizing
+    const glm::vec2 mid = {viewportSize.x / 2 , viewportSize.y / 2};
     const DigitalColor color{200, 200, 200, 0.8f};
 
     // Hor 1

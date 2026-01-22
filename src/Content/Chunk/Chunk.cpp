@@ -174,9 +174,9 @@ bool Chunk::isDirty() const
     return this->dirty.load(std::memory_order_acquire);
 }
 
-void Chunk::setDirty(bool dirty)
+void Chunk::setDirty(const bool isDirty)
 {
-    this->dirty.store(dirty, std::memory_order_release);
+    this->dirty.store(isDirty, std::memory_order_release);
 }
 
 uint64_t Chunk::getGenerationID() const

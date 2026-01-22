@@ -27,7 +27,7 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
-#include "VAO.h"
+#include "Viewport.h"
 #include "World.h"
 #include "Player.h"
 #include "InputState.h"
@@ -38,18 +38,11 @@ using Clock = std::chrono::steady_clock;
 using Duration = std::chrono::duration<double>;
 
 class Engine {
-    static constexpr double targetFPS = 120.0;
-    static constexpr double targetFrameTime = 1.0 / targetFPS;
-    static constexpr double dt = 0.0166; // 60Hz
-
-    GLFWwindow *window = nullptr;
     #ifdef _WIN32
         HANDLE frameTimer = nullptr;
     #endif
 
-    glm::ivec2 ScreenSize{};
-    float aspectRatio;
-    bool useVsync = true;
+    Viewport viewport;
 
     Raycast::Hit lastRaycastHit{};
     InputState inputs;
@@ -66,8 +59,6 @@ class Engine {
     void render() const;
 
     public:
-        static constexpr glm::ivec2 WindowSize{1600, 900};
-
         Engine();
         ~Engine();
 

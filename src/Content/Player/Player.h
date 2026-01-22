@@ -15,6 +15,8 @@ class Player
         explicit Player(const BlockRegistry& blockRegistry);
 
         Camera &getCamera();
+        GUI& getGUI();
+
         void render() const;
         void renderBlockOutline(const float& aspect, const glm::vec3& cubePos) const;
 

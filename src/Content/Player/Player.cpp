@@ -11,6 +11,11 @@ Camera& Player::getCamera()
     return this->camera;
 }
 
+GUI& Player::getGUI()
+{
+    return this->gui;
+}
+
 void Player::render() const
 {
     GUI::createImGuiFrame();

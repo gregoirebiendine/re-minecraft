@@ -53,7 +53,7 @@ class Chunk {
         void setState(ChunkState newState);
 
         [[nodiscard]] bool isDirty() const;
-        void setDirty(bool dirty);
+        void setDirty(bool isDirty);
 
         [[nodiscard]] uint64_t getGenerationID() const;
         void bumpGenerationID();

@@ -12,98 +12,25 @@ Engine::Engine()
             this->frameTimer = CreateWaitableTimerW(nullptr, TRUE, nullptr);
     #endif
 
-    if (!glfwInit())
-        throw std::runtime_error("Cannot initialize GLFW3");
-
-    // Pass GLFW version to the lib
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-
-    // Use MSAA 4x
-    glfwWindowHint(GLFW_SAMPLES, 4);
-
-    // Create the window
-    this->window = glfwCreateWindow(WindowSize.x, WindowSize.y, "Re Minecraft", nullptr, nullptr);
-    if (!this->window) {
-        glfwTerminate();
-        throw std::runtime_error("Failed to open window");
-    }
-
-    // Get main monitor and get monitor screen size
-    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-    if (!monitor)
-    {
-        glfwTerminate();
-        throw std::runtime_error("Failed to get main monitor");
-    }
-
-    const GLFWvidmode* videoMode = glfwGetVideoMode(monitor);
-    if (!videoMode)
-    {
-        glfwTerminate();
-        throw std::runtime_error("Failed to get video mode");
-    }
-
-    this->ScreenSize = glm::ivec2(videoMode->width, videoMode->height);
-    this->aspectRatio = static_cast<float>(WindowSize.x) / static_cast<float>(WindowSize.y);
-
-    // Center window
-    glfwSetWindowPos(window, (videoMode->width / 2) - (WindowSize.x / 2),  (videoMode->height / 2) - (WindowSize.y / 2));
-
-    // Make window current context for GLFW
-    glfwMakeContextCurrent(this->window);
-
-    // Initialize GLAD Manager
-    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
-        throw std::runtime_error("Cannot initialize GLAD");
-
-    // Create viewport
-    glViewport(0, 0, WindowSize.x, WindowSize.y);
-
-    // Change transparency function
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    // Enable 3D depth
-    glDepthFunc(GL_LEQUAL);
-    glEnable(GL_DEPTH_TEST);
-
-    // Enable culling
-    glCullFace(GL_BACK);
-    glEnable(GL_CULL_FACE);
-
-    // Enable MSAA
-    glEnable(GL_MULTISAMPLE);
-
-    // VSYNC
-    glfwSwapInterval(this->useVsync);
-
-    // Setup STBI image load
-    stbi_set_flip_vertically_on_load(true);
-
-    // Setup ImGui implementation
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGui::StyleColorsDark();
-    ImGui_ImplGlfw_InitForOpenGL(this->window, true);
-    ImGui_ImplOpenGL3_Init("#version 460");
-
-    // Enable RAW mouse input
-    if (glfwRawMouseMotionSupported())
-        glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+    this->viewport.initWindow();
+    this->viewport.initViewport();
 
     // Forward input state array to GLFW
-    glfwSetWindowUserPointer(this->window, &this->inputs);
+    auto w = this->viewport.getWindow();
+    glfwSetWindowUserPointer(w, &this->inputs);
 
     // Register inputs callback functions to GLFW
-    glfwSetKeyCallback(window, keyInputCallback);
-    glfwSetCursorPosCallback(window, mouseInputCallback);
-    glfwSetMouseButtonCallback(window, mouseButtonInputCallback);
+    glfwSetKeyCallback(w, keyInputCallback);
+    glfwSetCursorPosCallback(w, mouseInputCallback);
+    glfwSetMouseButtonCallback(w, mouseButtonInputCallback);
 
+    // Instantiate members
     this->textureRegistry.createTextures();
     this->player = std::make_unique<Player>(this->blockRegistry);
     this->world = std::make_unique<World>(this->blockRegistry, this->textureRegistry);
+
+    // Init GUI
+    this->player->getGUI().init(this->viewport.getSettings().getViewportSize());
 }
 
 Engine::~Engine()
@@ -112,21 +39,16 @@ Engine::~Engine()
         if (this->frameTimer)
             CloseHandle(this->frameTimer);
     #endif
-
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-
-    glfwDestroyWindow(this->window);
-    glfwTerminate();
 }
 
 void Engine::loop()
 {
+    const auto targetFrameTime = this->viewport.getSettings().getFpsFrameTime();
     auto previousTime = Clock::now();
     double accumulator = 0.0;
 
-    while (!glfwWindowShouldClose(this->window)) {
+    while (!this->viewport.shouldClose())
+    {
         auto frameStart = Clock::now();
         double frameTime = std::chrono::duration_cast<Duration>(frameStart - previousTime).count();
         if (frameTime > 0.25)
@@ -136,14 +58,14 @@ void Engine::loop()
         accumulator += frameTime;
 
         // INPUTS
-        glfwPollEvents();
+        Viewport::pollEvents();
         this->handleInputs(frameTime);
         this->clearInputs();
 
         // UPDATES
-        while (accumulator >= dt) {
+        while (accumulator >= Viewport::dt) {
             this->update();
-            accumulator -= dt;
+            accumulator -= Viewport::dt;
         }
 
         // RENDERING
@@ -154,16 +76,17 @@ void Engine::loop()
         auto frameEnd = Clock::now();
         double elapsed = std::chrono::duration_cast<Duration>(frameEnd - frameStart).count();
 
-        if (!this->useVsync && elapsed < targetFrameTime) {
+        if (!this->viewport.useVSync() && elapsed < targetFrameTime) {
             this->preciseWait(targetFrameTime - elapsed);
         }
     }
+
+    this->viewport.closeWindow();
 }
 
 void Engine::preciseWait(const double seconds) const
 {
-    if (seconds <= 0.0)
-        return;
+    if (seconds <= 0.0) return;
 
     #ifdef _WIN32
         if (this->frameTimer) {
@@ -176,14 +99,12 @@ void Engine::preciseWait(const double seconds) const
             }
         }
         std::this_thread::sleep_for(std::chrono::duration_cast<Clock::duration>(Duration(seconds)));
-
     #elif defined(__linux__)
         struct timespec req;
         req.tv_sec = static_cast<time_t>(seconds);
         req.tv_nsec = static_cast<long>((seconds - req.tv_sec) * 1'000'000'000.0);
 
         while (clock_nanosleep(CLOCK_MONOTONIC, 0, &req, &req) == EINTR) {}
-
     #else
         std::this_thread::sleep_for(std::chrono::duration_cast<Clock::duration>(Duration(seconds)));
     #endif
@@ -211,7 +132,7 @@ void Engine::handleInputs(const double deltaTime)
     }
 
     if (this->inputs.keyPressed[GLFW_KEY_SPACE]) {
-        glfwSetInputMode(window, GLFW_CURSOR, !this->player->getCamera().getMouseCapture() ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+        glfwSetInputMode(this->viewport.getWindow(), GLFW_CURSOR, !this->player->getCamera().getMouseCapture() ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
         this->player->getCamera().toggleMouseCapture();
     }
 
@@ -240,7 +161,7 @@ void Engine::clearInputs()
 void Engine::update() const
 {
     // Apply camera position and rotation
-    this->player->getCamera().setViewMatrix(this->world->getShader(), this->aspectRatio);
+    this->player->getCamera().setViewMatrix(this->world->getShader(), this->viewport.getAspectRatio());
 
     // Update world
     this->world->update(this->player->getCamera().getPosition());
@@ -258,13 +179,13 @@ void Engine::render() const
 
     // Render faced block outline
     if (this->lastRaycastHit.hit)
-        this->player->renderBlockOutline(this->aspectRatio, this->lastRaycastHit.pos);
+        this->player->renderBlockOutline(this->viewport.getAspectRatio(), this->lastRaycastHit.pos);
 
     // Render Player
     this->player->render();
 
     // Update buffer
-    glfwSwapBuffers(this->window);
+    this->viewport.swapBuffers();
 }
 
 // Statics callback
