@@ -18,6 +18,7 @@
 #include "ChunkPos.h"
 #include "Chunk.h"
 #include "ChunkNeighbors.h"
+#include "Frustum.h"
 
 using ChunkMap = std::unordered_map<ChunkPos, Chunk, ChunkPosHash>;
 
@@ -37,6 +38,7 @@ class ChunkManager {
     std::unordered_map<ChunkPos, Chunk, ChunkPosHash> chunks;
     ThreadPool<ChunkJob> workers;
     BlockRegistry blockRegistry;
+    Frustum frustum{};
 
     void generateJob(const ChunkJob& job);
 
@@ -50,6 +52,7 @@ class ChunkManager {
         void rebuildNeighbors(const ChunkPos& pos);
 
         void updateStreaming(const glm::vec3& cameraPos);
+        void updateFrustum(const glm::mat4& vpMatrix);
         void requestChunk(const ChunkPos& pos);
 };
 

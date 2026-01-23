@@ -37,9 +37,9 @@ class Engine {
     std::unique_ptr<Player> player;
     std::unique_ptr<World> world;
 
-    void preciseWait(double seconds) const;
     void update() const;
     void render() const;
+    void preciseWait(double seconds) const;
 
     public:
         Engine();

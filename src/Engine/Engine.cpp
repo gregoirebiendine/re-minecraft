@@ -105,8 +105,9 @@ void Engine::preciseWait(const double seconds) const
 
 void Engine::update() const
 {
-    this->player->getCamera().setViewMatrix(this->world->getShader(), this->viewport.getAspectRatio());
-    this->world->update(this->player->getCamera().getPosition());
+    const auto vpMatrix = this->player->getCamera().setViewMatrix(this->world->getShader(), this->viewport.getAspectRatio());
+
+    this->world->update(this->player->getCamera().getPosition(), vpMatrix);
 }
 
 void Engine::render() const
@@ -119,10 +120,8 @@ void Engine::render() const
     this->textureRegistry.bind();
     this->world->render();
 
-    // Render faced block outline
-    this->player->renderBlockOutline(this->viewport.getAspectRatio());
-
     // Render Player
+    this->player->renderBlockOutline(this->viewport.getAspectRatio());
     this->player->render();
 
     // Update buffer

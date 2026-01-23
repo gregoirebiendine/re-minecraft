@@ -36,6 +36,7 @@ set(
     ${CMAKE_SOURCE_DIR}/src/Engine/Render/VBO
     ${CMAKE_SOURCE_DIR}/src/Engine/Render/Shader
     ${CMAKE_SOURCE_DIR}/src/Engine/Render/Viewport
+    ${CMAKE_SOURCE_DIR}/src/Engine/Render/Frustum
     ${CMAKE_SOURCE_DIR}/src/Engine/ThreadPool
     ${CMAKE_SOURCE_DIR}/src/Engine/Utils
     ${CMAKE_SOURCE_DIR}/src/Engine/Settings

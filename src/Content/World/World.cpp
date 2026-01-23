@@ -71,7 +71,7 @@ void World::fill(const glm::ivec3 from, const glm::ivec3 to, const Material id)
 }
 
 // Updates
-void World::update(const glm::vec3& cameraPos)
+void World::update(const glm::vec3& cameraPos, const glm::mat4& vpMatrix)
 {
     for (auto& chunk : chunkManager.getChunks() | std::views::values) {
         if (chunk.hasPendingChanges())
@@ -79,6 +79,8 @@ void World::update(const glm::vec3& cameraPos)
     }
 
     this->chunkManager.updateStreaming(cameraPos);
+    this->chunkManager.updateFrustum(vpMatrix);
+
     this->meshManager.scheduleMeshing(cameraPos);
     this->meshManager.update();
 }

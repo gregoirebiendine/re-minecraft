@@ -75,11 +75,16 @@ glm::mat4 Camera::getViewMatrix() const
     return glm::lookAt(this->position, this->position + forward, {0,1,0});
 }
 
-void Camera::setViewMatrix(const Shader& shader, const float& aspect) const
+glm::mat4 Camera::setViewMatrix(const Shader& shader, const float& aspect) const
 {
+    const auto v = this->getViewMatrix();
+    const auto p = this->getProjectionMatrix(aspect);
+
     shader.use();
-    shader.setViewMatrix(this->getViewMatrix());
-    shader.setProjectionMatrix(this->getProjectionMatrix(aspect));
+    shader.setViewMatrix(v);
+    shader.setProjectionMatrix(p);
+
+    return p * v;
 }
 
 void Camera::moveCamera(const double mouseX, const double mouseY, const double deltaTime)

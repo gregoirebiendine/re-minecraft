@@ -38,7 +38,7 @@ class World {
         [[nodiscard]] bool isAir(int wx, int wy, int wz);
 
         // Updates
-        void update(const glm::vec3& cameraPos);
+        void update(const glm::vec3& cameraPos, const glm::mat4& vpMatrix);
         void render();
 };
 

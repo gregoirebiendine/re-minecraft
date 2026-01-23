@@ -32,10 +32,8 @@ void ChunkManager::generateJob(const ChunkJob& job)
     if (chunk->getGenerationID() != job.generationID)
         return;
 
-    // Generate terrain (uses setBlockDirect)
     TerrainGenerator::generate(*chunk, this->blockRegistry);
 
-    // State transition
     chunk->setState(ChunkState::GENERATED);
     this->rebuildNeighbors(job.pos);
 }
@@ -57,8 +55,6 @@ void ChunkManager::rebuildNeighbors(const ChunkPos& pos)
         if (!n)
             continue;
 
-        // For READY chunks, mark dirty for remeshing (keeps rendering)
-        // For other states, set to GENERATED for first-time meshing
         if (n->getState() == ChunkState::READY)
             n->setDirty(true);
         else if (n->getState() >= ChunkState::GENERATED)
@@ -137,9 +133,24 @@ std::vector<Chunk *> ChunkManager::getRenderableChunks()
     std::vector<Chunk*> out;
 
     for (auto &c: this->chunks | std::views::values)
-        if (c.getState() == ChunkState::READY)
+    {
+        if (c.getState() != ChunkState::READY)
+            continue;
+
+        const auto& [x, y, z] = c.getPosition();
+        const glm::vec3 min(x * 16, y * 16, z * 16);
+        const glm::vec3 max = min + glm::vec3(16.0f);
+
+        if (frustum.isBoxVisible(min, max))
             out.push_back(&c);
+    }
+
     return out;
+}
+
+void ChunkManager::updateFrustum(const glm::mat4& vpMatrix)
+{
+    this->frustum.update(vpMatrix);
 }
 
 ChunkMap& ChunkManager::getChunks()
