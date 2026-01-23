@@ -29,8 +29,6 @@ class Engine {
         HANDLE frameTimer = nullptr;
     #endif
 
-    Raycast::Hit lastRaycastHit{};
-
     Viewport viewport;
     InputState inputs;
     BlockRegistry blockRegistry;
@@ -40,7 +38,6 @@ class Engine {
     std::unique_ptr<World> world;
 
     void preciseWait(double seconds) const;
-    void handleInputs(double deltaTime);
     void update() const;
     void render() const;
 

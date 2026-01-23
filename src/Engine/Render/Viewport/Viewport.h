@@ -43,6 +43,8 @@ class Viewport
 
         [[nodiscard]] float getAspectRatio() const;
 
+        void toggleCursor(bool isMouseCaptured) const;
+
 
 };
 

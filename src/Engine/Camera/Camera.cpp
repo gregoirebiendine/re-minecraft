@@ -4,7 +4,7 @@
 Camera::Camera(const glm::vec3 _position) :
     position(_position)
 {
-    Camera::firstMouse = true;
+    firstMouse = true;
 }
 
 Raycast::Hit Camera::raycast(World& world) const

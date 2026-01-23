@@ -55,6 +55,11 @@ void World::setBlock(const int wx, const int wy, const int wz, const Material id
     this->chunkManager.rebuildNeighbors({cx, cy, cz});
 }
 
+void World::setBlock(const int wx, const int wy, const int wz, const std::string& blockName)
+{
+    this->setBlock(wx, wy, wz, this->blockRegistry.getByName(blockName));
+}
+
 void World::fill(const glm::ivec3 from, const glm::ivec3 to, const Material id)
 {
     for (int z = from.z; z <= to.z; ++z)

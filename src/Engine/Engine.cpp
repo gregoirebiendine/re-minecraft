@@ -51,7 +51,7 @@ void Engine::loop()
 
         // INPUTS
         Viewport::pollEvents();
-        this->handleInputs(frameTime);
+        this->player->handleInputs(this->inputs, this->viewport, *this->world, frameTime);
         this->inputs.clear();
 
         // UPDATES
@@ -68,9 +68,8 @@ void Engine::loop()
         auto frameEnd = Clock::now();
         double elapsed = std::chrono::duration_cast<Duration>(frameEnd - frameStart).count();
 
-        if (!this->viewport.useVSync() && elapsed < targetFrameTime) {
+        if (!this->viewport.useVSync() && elapsed < targetFrameTime)
             this->preciseWait(targetFrameTime - elapsed);
-        }
     }
 
     this->viewport.closeWindow();
@@ -104,43 +103,6 @@ void Engine::preciseWait(const double seconds) const
     #endif
 }
 
-void Engine::handleInputs(const double deltaTime)
-{
-    this->player->getCamera().moveCamera(this->inputs.mouseX, this->inputs.mouseY, deltaTime);
-    this->lastRaycastHit = this->player->getCamera().raycast(*this->world);
-
-    if (this->inputs.isMouseButtonPressed(Inputs::Mouse::LEFT) && this->lastRaycastHit.hit)
-        this->world->setBlock(this->lastRaycastHit.pos.x, this->lastRaycastHit.pos.y, this->lastRaycastHit.pos.z, this->blockRegistry.getByName("core:air"));
-
-    if (this->inputs.isMouseButtonPressed(Inputs::Mouse::RIGHT) && this->lastRaycastHit.hit)
-        this->world->setBlock(this->lastRaycastHit.previousPos.x, this->lastRaycastHit.previousPos.y, this->lastRaycastHit.previousPos.z, this->player->getSelectedMaterial());
-
-    if (this->inputs.isMouseButtonPressed(Inputs::Mouse::MIDDLE) && this->lastRaycastHit.hit) {
-        const Material block = this->world->getBlock(this->lastRaycastHit.pos.x, this->lastRaycastHit.pos.y, this->lastRaycastHit.pos.z);
-
-        if (!this->blockRegistry.isEqual(block, "core:air"))
-            this->player->setSelectedMaterial(block);
-    }
-
-    if (this->inputs.isKeyPressed(Inputs::Keys::SPACE)) {
-        glfwSetInputMode(this->viewport.getWindow(), GLFW_CURSOR, !this->player->getCamera().getMouseCapture() ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
-        this->player->getCamera().toggleMouseCapture();
-    }
-
-    if (this->inputs.isKeyDown(Inputs::Keys::W))
-        this->player->getCamera().move({0,0,1}, static_cast<float>(deltaTime));
-    if (this->inputs.isKeyDown(Inputs::Keys::S))
-        this->player->getCamera().move({0,0,-1}, static_cast<float>(deltaTime));
-    if (this->inputs.isKeyDown(Inputs::Keys::A))
-        this->player->getCamera().move({-1,0,0}, static_cast<float>(deltaTime));
-    if (this->inputs.isKeyDown(Inputs::Keys::D))
-        this->player->getCamera().move({1,0,0}, static_cast<float>(deltaTime));
-    if (this->inputs.isKeyDown(Inputs::Keys::Q))
-        this->player->getCamera().move({0,1,0}, static_cast<float>(deltaTime));
-    if (this->inputs.isKeyDown(Inputs::Keys::E))
-        this->player->getCamera().move({0,-1,0}, static_cast<float>(deltaTime));
-}
-
 void Engine::update() const
 {
     this->player->getCamera().setViewMatrix(this->world->getShader(), this->viewport.getAspectRatio());
@@ -158,8 +120,7 @@ void Engine::render() const
     this->world->render();
 
     // Render faced block outline
-    if (this->lastRaycastHit.hit)
-        this->player->renderBlockOutline(this->viewport.getAspectRatio(), this->lastRaycastHit.pos);
+    this->player->renderBlockOutline(this->viewport.getAspectRatio());
 
     // Render Player
     this->player->render();

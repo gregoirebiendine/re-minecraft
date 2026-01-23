@@ -33,6 +33,7 @@ class World {
         // Lifecycle
         void fill(glm::ivec3 from, glm::ivec3 to, Material id);
         void setBlock(int wx, int wy, int wz, Material id);
+        void setBlock(int wx, int wy, int wz, const std::string& blockName);
         [[nodiscard]] Material getBlock(int wx, int wy, int wz);
         [[nodiscard]] bool isAir(int wx, int wy, int wz);
 
