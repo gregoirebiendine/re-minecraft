@@ -9,6 +9,9 @@ TextureRegistry::TextureRegistry()
     this->registerTexture("cobble", "cobble.png");
     this->registerTexture("stone", "stone.png");
     this->registerTexture("oak_plank", "oak_plank.png");
+    this->registerTexture("oak_log", "oak_log.png");
+    this->registerTexture("oak_log_top", "oak_log_top.png");
+    this->registerTexture("oak_leaves", "oak_leaves.png");
 }
 
 TextureRegistry::~TextureRegistry()

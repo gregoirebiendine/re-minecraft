@@ -50,6 +50,8 @@ class BlockRegistry
     std::vector<BlockMeta> blocks;
     std::unordered_map<std::string, Material> nameToMaterialId;
 
+    static BlockFaces uniformBlockFaces(std::string texture);
+
     public:
         BlockRegistry();
 

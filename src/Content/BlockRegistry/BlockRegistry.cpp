@@ -15,14 +15,7 @@ BlockRegistry::BlockRegistry()
         "dirt",
         false,
         1.f,
-        {
-            {MaterialFace::NORTH, "dirt"},
-            {MaterialFace::SOUTH, "dirt"},
-            {MaterialFace::WEST, "dirt"},
-            {MaterialFace::EAST, "dirt"},
-            {MaterialFace::UP, "dirt"},
-            {MaterialFace::DOWN, "dirt"}
-        }
+        uniformBlockFaces("dirt")
     });
 
     this->registerBlock({
@@ -45,14 +38,7 @@ BlockRegistry::BlockRegistry()
         "moss",
         false,
         1.f,
-        {
-            {MaterialFace::NORTH, "grass_block_top"},
-            {MaterialFace::SOUTH, "grass_block_top"},
-            {MaterialFace::WEST, "grass_block_top"},
-            {MaterialFace::EAST, "grass_block_top"},
-            {MaterialFace::UP, "grass_block_top"},
-            {MaterialFace::DOWN, "grass_block_top"}
-        }
+        uniformBlockFaces("grass_block_top")
     });
 
     this->registerBlock({
@@ -60,14 +46,7 @@ BlockRegistry::BlockRegistry()
         "cobble",
         false,
         2.f,
-        {
-            {MaterialFace::NORTH, "cobble"},
-            {MaterialFace::SOUTH, "cobble"},
-            {MaterialFace::WEST, "cobble"},
-            {MaterialFace::EAST, "cobble"},
-            {MaterialFace::UP, "cobble"},
-            {MaterialFace::DOWN, "cobble"}
-        }
+        uniformBlockFaces("cobble")
     });
 
     this->registerBlock({
@@ -75,14 +54,7 @@ BlockRegistry::BlockRegistry()
         "stone",
         false,
         1.5f,
-        {
-            {MaterialFace::NORTH, "stone"},
-            {MaterialFace::SOUTH, "stone"},
-            {MaterialFace::WEST, "stone"},
-            {MaterialFace::EAST, "stone"},
-            {MaterialFace::UP, "stone"},
-            {MaterialFace::DOWN, "stone"}
-        }
+        uniformBlockFaces("stone")
     });
 
     this->registerBlock({
@@ -90,14 +62,30 @@ BlockRegistry::BlockRegistry()
         "oak_plank",
         false,
         1.5f,
+        uniformBlockFaces("oak_plank")
+    });
+
+    this->registerBlock({
+        "core",
+        "oak_log",
+        false,
+        1.5f,
         {
-            {MaterialFace::NORTH, "oak_plank"},
-            {MaterialFace::SOUTH, "oak_plank"},
-            {MaterialFace::WEST, "oak_plank"},
-            {MaterialFace::EAST, "oak_plank"},
-            {MaterialFace::UP, "oak_plank"},
-            {MaterialFace::DOWN, "oak_plank"}
+            {MaterialFace::NORTH, "oak_log"},
+            {MaterialFace::SOUTH, "oak_log"},
+            {MaterialFace::WEST, "oak_log"},
+            {MaterialFace::EAST, "oak_log"},
+            {MaterialFace::UP, "oak_log_top"},
+            {MaterialFace::DOWN, "oak_log_top"}
         }
+    });
+
+    this->registerBlock({
+        "core",
+        "oak_leaves",
+        true,
+        0.1f,
+        uniformBlockFaces("oak_leaves")
     });
 }
 
@@ -136,7 +124,6 @@ Material BlockRegistry::getByName(const std::string& name) const
     return this->nameToMaterialId.at(name);
 }
 
-
 bool BlockRegistry::isEqual(const Material id, const std::string& name) const
 {
     if (id >= this->blocks.size()) {
@@ -144,4 +131,17 @@ bool BlockRegistry::isEqual(const Material id, const std::string& name) const
     }
 
     return this->blocks[id].getFullName() == name;
+}
+
+// Statics
+BlockFaces BlockRegistry::uniformBlockFaces(std::string texture)
+{
+    return {
+        {MaterialFace::NORTH, texture},
+        {MaterialFace::SOUTH, texture},
+        {MaterialFace::WEST, texture},
+        {MaterialFace::EAST, texture},
+        {MaterialFace::UP, texture},
+        {MaterialFace::DOWN, texture}
+    };
 }

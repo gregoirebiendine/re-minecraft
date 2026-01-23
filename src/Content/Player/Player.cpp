@@ -2,7 +2,7 @@
 
 Player::Player(const BlockRegistry& blockRegistry) :
     camera({8.5f, 18.5f, 8.5f}),
-    selectedMaterial(blockRegistry.getByName("core:oak_plank"))
+    selectedMaterial(blockRegistry.getByName("core:oak_leaves"))
 {
 }
 
