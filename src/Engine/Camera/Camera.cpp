@@ -4,7 +4,7 @@
 Camera::Camera(const glm::vec3 _position) :
     position(_position)
 {
-    firstMouse = true;
+    // Empty
 }
 
 Raycast::Hit Camera::raycast(World& world) const
@@ -66,7 +66,7 @@ glm::vec3 Camera::getForwardVector() const
 
 glm::mat4 Camera::getProjectionMatrix(const float& aspect) const
 {
-    return glm::perspective(FOV, aspect, 0.1f, 256.f);
+    return glm::perspective(glm::radians(static_cast<float>(this->fov)), aspect, 0.1f, 256.f);
 }
 
 glm::mat4 Camera::getViewMatrix() const
@@ -127,6 +127,11 @@ void Camera::move(const glm::vec3 direction, const float deltaTime)
         this->position += direction.y * glm::vec3{0, 1, 0} * SPEED * deltaTime;
     if (direction.z != 0)
         this->position += direction.z * forward * SPEED * deltaTime;
+}
+
+void Camera::setFOV(const float _fov)
+{
+    this->fov = _fov;
 }
 
 void Camera::setPosition(const glm::vec3 newPos)

@@ -21,8 +21,12 @@ Engine::Engine()
     this->player = std::make_unique<Player>(this->blockRegistry);
     this->world = std::make_unique<World>(this->blockRegistry, this->textureRegistry);
 
-    // Init GUI
-    this->player->getGUI().init(this->viewport.getSettings().getViewportSize());
+    // Apply settings to classes
+    const auto settings = this->viewport.getSettings();
+
+    this->player->getGUI().init(settings.getViewportSize());
+    this->player->getCamera().setFOV(settings.getFOV());
+    this->world->getChunkManager().setViewDistance(settings.getViewDistance());
 }
 
 Engine::~Engine()

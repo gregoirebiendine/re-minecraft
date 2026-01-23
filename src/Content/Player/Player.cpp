@@ -16,7 +16,7 @@ GUI& Player::getGUI()
     return this->gui;
 }
 
-void Player::handleInputs(const InputState& inputs, Viewport& viewport, World& world, const double deltaTime)
+void Player::handleInputs(const InputState& inputs, const Viewport& viewport, World& world, const double deltaTime)
 {
     this->camera.moveCamera(inputs.mouseX, inputs.mouseY, deltaTime);
     this->lastRaycast = this->camera.raycast(world);

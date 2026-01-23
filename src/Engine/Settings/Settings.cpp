@@ -38,3 +38,23 @@ glm::ivec2 Settings::getViewportSize() const
 {
     return this->viewportSize;
 }
+
+void Settings::setViewDistance(const uint8_t distance)
+{
+    this->viewDistance = distance;
+}
+
+uint8_t Settings::getViewDistance() const
+{
+    return this->viewDistance;
+}
+
+void Settings::setFOV(const uint8_t _fov)
+{
+    this->fov = _fov;
+}
+
+uint8_t Settings::getFOV() const
+{
+    return this->fov;
+}

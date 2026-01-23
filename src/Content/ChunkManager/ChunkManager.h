@@ -33,12 +33,13 @@ struct ChunkJob {
 };
 
 class ChunkManager {
-    static constexpr uint8_t VIEW_DISTANCE = 8;
-
     std::unordered_map<ChunkPos, Chunk, ChunkPosHash> chunks;
     ThreadPool<ChunkJob> workers;
     BlockRegistry blockRegistry;
     Frustum frustum{};
+
+    uint8_t viewDistance{8};
+    uint8_t unloadDistance{10};
 
     void generateJob(const ChunkJob& job);
 
@@ -50,6 +51,8 @@ class ChunkManager {
         [[nodiscard]] std::vector<Chunk*> getRenderableChunks();
         [[nodiscard]] ChunkNeighbors getNeighbors(const ChunkPos &cp);
         void rebuildNeighbors(const ChunkPos& pos);
+
+        void setViewDistance(unsigned char dist);
 
         void updateStreaming(const glm::vec3& cameraPos);
         void updateFrustum(const glm::mat4& vpMatrix);

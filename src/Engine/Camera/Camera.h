@@ -17,11 +17,11 @@
 #include "Raycast.h"
 
 class Camera {
-    static constexpr float FOV = glm::radians(90.f);
     static constexpr float SPEED = 8.f;
     static constexpr float SENSITIVITY = 5.f;
 
-    glm::vec3 position{};
+    glm::vec3 position;
+    uint8_t fov = 90;
     float yaw = -90.0f;
     float pitch = 0.0f;
     bool isMouseCaptured = false;
@@ -38,7 +38,7 @@ class Camera {
         void move(glm::vec3 direction, float deltaTime);
 
         [[nodiscard]] Raycast::Hit raycast(World& world) const;
-        glm::mat4 setViewMatrix(const Shader& shader, const float& aspect) const;
+        [[nodiscard]] glm::mat4 setViewMatrix(const Shader& shader, const float& aspect) const;
 
         [[nodiscard]] glm::vec3 getForwardVector() const;
         [[nodiscard]] glm::mat4 getViewMatrix() const;
@@ -47,6 +47,7 @@ class Camera {
         [[nodiscard]] bool getMouseCapture() const;
         void toggleMouseCapture();
 
+        void setFOV(float _fov);
         void setPosition(glm::vec3 newPos);
         [[nodiscard]] glm::vec3 getPosition() const;
         [[nodiscard]] glm::vec2 getRotation() const;

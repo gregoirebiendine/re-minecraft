@@ -62,16 +62,22 @@ void ChunkManager::rebuildNeighbors(const ChunkPos& pos)
     }
 }
 
+void ChunkManager::setViewDistance(const uint8_t dist)
+{
+    this->viewDistance = dist;
+    this->unloadDistance = dist + 2;
+}
+
 void ChunkManager::updateStreaming(const glm::vec3& cameraPos)
 {
     ChunkPos cameraChunk = ChunkPos::fromWorld(cameraPos);
     std::unordered_set<ChunkPos, ChunkPosHash> wanted;
 
-    wanted.reserve((2 * VIEW_DISTANCE + 1) * (2 * VIEW_DISTANCE + 1) * 5);
+    wanted.reserve((2 * this->viewDistance + 1) * (2 * this->viewDistance + 1) * 5);
 
-    for (int z = -VIEW_DISTANCE; z <= VIEW_DISTANCE; ++z)
+    for (int z = -this->viewDistance; z <= this->viewDistance; ++z)
         for (int y = 0; y <= 2; ++y)
-            for (int x = -VIEW_DISTANCE; x <= VIEW_DISTANCE; ++x) {
+            for (int x = -this->viewDistance; x <= this->viewDistance; ++x) {
                 ChunkPos pos {
                     cameraChunk.x + x,
                     y,
@@ -91,9 +97,9 @@ void ChunkManager::updateStreaming(const glm::vec3& cameraPos)
         const int dy = chunk.getPosition().y - cameraChunk.y;
         const int dz = chunk.getPosition().z - cameraChunk.z;
 
-        if (std::abs(dx) > VIEW_DISTANCE + 2 ||
-            std::abs(dy) > VIEW_DISTANCE + 2 ||
-            std::abs(dz) > VIEW_DISTANCE + 2)
+        if (std::abs(dx) > this->unloadDistance ||
+            std::abs(dy) > this->unloadDistance ||
+            std::abs(dz) > this->unloadDistance)
         {
             chunk.bumpGenerationID();
             it = chunks.erase(it);

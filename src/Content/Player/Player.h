@@ -21,7 +21,7 @@ class Player
         Camera &getCamera();
         GUI& getGUI();
 
-        void handleInputs(const InputState& inputs, Viewport& viewport, World& world, double deltaTime);
+        void handleInputs(const InputState& inputs, const Viewport& viewport, World& world, double deltaTime);
         void render() const;
         void renderBlockOutline(const float& aspect) const;
 
