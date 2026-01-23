@@ -137,7 +137,7 @@ void GUI::createImGuiFrame()
     ImGui::NewFrame();
 }
 
-void GUI::renderImGuiFrame(const Camera& camera)
+void GUI::renderImGuiFrame(const Camera& camera, const std::string& selectedBlockName)
 {
     const auto cameraPos = camera.getPosition();
     const auto facing = forwardToCardinal(camera.getForwardVector());
@@ -152,6 +152,7 @@ void GUI::renderImGuiFrame(const Camera& camera)
     ImGui::Text("Position : %.2f, %.2f, %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
     ImGui::Text("Chunk : %d, %d, %d", cp.x, cp.y, cp.z);
     ImGui::Text("Facing : %s", facing.c_str());
+    ImGui::Text("Selected block : %s", selectedBlockName.c_str());
     ImGui::End();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

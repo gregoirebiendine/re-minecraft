@@ -47,6 +47,7 @@ void Viewport::initWindow(InputState* inputs)
     glfwSetKeyCallback(this->window, InputState::keyInputCallback);
     glfwSetCursorPosCallback(this->window, InputState::mouseInputCallback);
     glfwSetMouseButtonCallback(this->window, InputState::mouseButtonInputCallback);
+    glfwSetScrollCallback(this->window, InputState::mouseScrollInputCallback);
 
     // Initialize GLAD Manager
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))

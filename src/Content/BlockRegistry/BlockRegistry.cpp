@@ -1,5 +1,7 @@
 #include "BlockRegistry.h"
 
+#include <ranges>
+
 BlockRegistry::BlockRegistry()
 {
     this->registerBlock({
@@ -126,11 +128,20 @@ Material BlockRegistry::getByName(const std::string& name) const
 
 bool BlockRegistry::isEqual(const Material id, const std::string& name) const
 {
-    if (id >= this->blocks.size()) {
+    if (id >= this->blocks.size())
         throw std::out_of_range("Invalid Material");
-    }
 
     return this->blocks[id].getFullName() == name;
+}
+
+std::vector<Material> BlockRegistry::getAll() const
+{
+    std::vector<Material> materials;
+
+    materials.reserve(this->nameToMaterialId.size());
+    for (const auto& id : this->nameToMaterialId | std::views::values)
+        materials.push_back(id);
+    return materials;
 }
 
 // Statics

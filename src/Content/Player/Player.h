@@ -10,13 +10,18 @@
 
 class Player
 {
+    const BlockRegistry& blockRegistry;
+
     GUI gui;
     Camera camera;
+
     Material selectedMaterial;
     Raycast::Hit lastRaycast{};
 
+    void changeSelectedMaterial(Inputs::Scroll dir);
+
     public:
-        explicit Player(const BlockRegistry& blockRegistry);
+        explicit Player(const BlockRegistry& _blockRegistry);
 
         Camera &getCamera();
         GUI& getGUI();

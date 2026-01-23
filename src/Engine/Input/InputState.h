@@ -22,6 +22,13 @@ namespace Inputs
         RIGHT = GLFW_MOUSE_BUTTON_RIGHT,
         MIDDLE = GLFW_MOUSE_BUTTON_MIDDLE
     };
+
+    enum Scroll : short
+    {
+        NONE = 0,
+        UP = 1,
+        DOWN = -1
+    };
 }
 
 struct InputState
@@ -36,6 +43,7 @@ struct InputState
 
     double mouseX{};
     double mouseY{};
+    Inputs::Scroll scroll{Inputs::Scroll::NONE};
 
     [[nodiscard]] bool isKeyDown(const int key) const { return keyDown[key]; };
     [[nodiscard]] bool isKeyPressed(const int key) const { return keyPressed[key]; };
@@ -51,6 +59,7 @@ struct InputState
         std::fill_n(keyReleased, sizeof(keyReleased), false);
         std::fill_n(mousePressed, sizeof(mousePressed), false);
         std::fill_n(mouseReleased, sizeof(mouseReleased), false);
+        this->scroll = Inputs::Scroll::NONE;
     }
 
     static void keyInputCallback(GLFWwindow* window, const int key, [[maybe_unused]] const int scancode, const int action, [[maybe_unused]] const int mods)
@@ -104,6 +113,17 @@ struct InputState
 
         input->mouseX = x;
         input->mouseY = y;
+    }
+    static void mouseScrollInputCallback(GLFWwindow* window, [[maybe_unused]] double xoffset, const double yoffset)
+    {
+        const auto glfwPointer = glfwGetWindowUserPointer(window);
+
+        if (glfwPointer == nullptr)
+            return;
+
+        auto* input = static_cast<InputState*>(glfwPointer);
+
+        input->scroll = yoffset < 0 ? Inputs::DOWN : Inputs::UP;
     }
 };
 

@@ -1,8 +1,9 @@
 #include "Player.h"
 
-Player::Player(const BlockRegistry& blockRegistry) :
+Player::Player(const BlockRegistry& _blockRegistry) :
+    blockRegistry(_blockRegistry),
     camera({8.5f, 18.5f, 8.5f}),
-    selectedMaterial(blockRegistry.getByName("core:oak_leaves"))
+    selectedMaterial(_blockRegistry.getByName("core:stone"))
 {
 }
 
@@ -32,6 +33,9 @@ void Player::handleInputs(const InputState& inputs, const Viewport& viewport, Wo
         this->selectedMaterial = block;
     }
 
+    if (inputs.scroll != Inputs::Scroll::NONE)
+        this->changeSelectedMaterial(inputs.scroll);
+
     if (inputs.isKeyPressed(Inputs::Keys::SPACE)) {
         viewport.toggleCursor(!this->camera.getMouseCapture());
         this->camera.toggleMouseCapture();
@@ -54,7 +58,7 @@ void Player::handleInputs(const InputState& inputs, const Viewport& viewport, Wo
 void Player::render() const
 {
     GUI::createImGuiFrame();
-    GUI::renderImGuiFrame(this->camera);
+    GUI::renderImGuiFrame(this->camera, this->blockRegistry.get(this->selectedMaterial).getName());
     this->gui.render();
 }
 
@@ -72,4 +76,13 @@ void Player::setSelectedMaterial(const Material newMaterial)
 Material Player::getSelectedMaterial() const
 {
     return this->selectedMaterial;
+}
+
+void Player::changeSelectedMaterial(const Inputs::Scroll dir)
+{
+    const auto allBlocks = this->blockRegistry.getAll();
+
+    this->selectedMaterial = (this->selectedMaterial + dir + allBlocks.size()) % allBlocks.size();
+    if (this->selectedMaterial == 0)
+        this->selectedMaterial = (this->selectedMaterial + dir + allBlocks.size()) % allBlocks.size();
 }

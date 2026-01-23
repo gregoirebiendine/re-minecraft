@@ -59,6 +59,8 @@ class BlockRegistry
         const BlockMeta& get(Material id) const;
         Material getByName(const std::string& name) const;
         bool isEqual(Material id, const std::string& name) const;
+
+        std::vector<Material> getAll() const;
 };
 
 #endif //RE_MINECRAFT_BLOCKREGISTRY_H
