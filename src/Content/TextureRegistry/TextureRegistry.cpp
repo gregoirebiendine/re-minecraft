@@ -12,6 +12,21 @@ TextureRegistry::TextureRegistry()
     this->registerTexture("oak_log", "oak_log.png");
     this->registerTexture("oak_log_top", "oak_log_top.png");
     this->registerTexture("oak_leaves", "oak_leaves.png");
+
+    this->registerTexture("coal_block", "coal_block.png");
+    this->registerTexture("coal_ore", "coal_ore.png");
+    this->registerTexture("iron_block", "iron_block.png");
+    this->registerTexture("iron_ore", "iron_ore.png");
+    this->registerTexture("gold_block", "gold_block.png");
+    this->registerTexture("gold_ore", "gold_ore.png");
+    this->registerTexture("redstone_block", "redstone_block.png");
+    this->registerTexture("redstone_ore", "redstone_ore.png");
+    this->registerTexture("lapis_block", "lapis_block.png");
+    this->registerTexture("lapis_ore", "lapis_ore.png");
+    this->registerTexture("diamond_block", "diamond_block.png");
+    this->registerTexture("diamond_ore", "diamond_ore.png");
+    this->registerTexture("emerald_block", "emerald_block.png");
+    this->registerTexture("emerald_ore", "emerald_ore.png");
 }
 
 TextureRegistry::~TextureRegistry()

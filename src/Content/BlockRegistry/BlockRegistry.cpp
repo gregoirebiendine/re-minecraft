@@ -89,6 +89,118 @@ BlockRegistry::BlockRegistry()
         0.1f,
         uniformBlockFaces("oak_leaves")
     });
+
+    this->registerBlock({
+        "core",
+        "coal_block",
+        false,
+        2.f,
+        uniformBlockFaces("coal_block")
+    });
+
+    this->registerBlock({
+        "core",
+        "coal_ore",
+        false,
+        2.f,
+        uniformBlockFaces("coal_ore")
+    });
+
+    this->registerBlock({
+        "core",
+        "iron_block",
+        false,
+        2.f,
+        uniformBlockFaces("iron_block")
+    });
+
+    this->registerBlock({
+        "core",
+        "iron_ore",
+        false,
+        2.f,
+        uniformBlockFaces("iron_ore")
+    });
+
+    this->registerBlock({
+        "core",
+        "gold_block",
+        false,
+        2.f,
+        uniformBlockFaces("gold_block")
+    });
+
+    this->registerBlock({
+        "core",
+        "gold_ore",
+        false,
+        2.f,
+        uniformBlockFaces("gold_ore")
+    });
+
+    this->registerBlock({
+        "core",
+        "redstone_block",
+        false,
+        2.f,
+        uniformBlockFaces("redstone_block")
+    });
+
+    this->registerBlock({
+        "core",
+        "redstone_ore",
+        false,
+        2.f,
+        uniformBlockFaces("redstone_ore")
+    });
+
+    this->registerBlock({
+        "core",
+        "lapis_block",
+        false,
+        2.f,
+        uniformBlockFaces("lapis_block")
+    });
+
+    this->registerBlock({
+        "core",
+        "lapis_ore",
+        false,
+        2.f,
+        uniformBlockFaces("lapis_ore")
+    });
+
+    this->registerBlock({
+        "core",
+        "diamond_block",
+        false,
+        2.f,
+        uniformBlockFaces("diamond_block")
+    });
+
+    this->registerBlock({
+        "core",
+        "diamond_ore",
+        false,
+        2.f,
+        uniformBlockFaces("diamond_ore")
+    });
+
+    this->registerBlock({
+        "core",
+        "emerald_block",
+        false,
+        2.f,
+        uniformBlockFaces("emerald_block")
+    });
+
+    this->registerBlock({
+        "core",
+        "emerald_ore",
+        false,
+        2.f,
+        uniformBlockFaces("emerald_ore")
+    });
 }
 
 Material BlockRegistry::registerBlock(const BlockMeta& meta)
