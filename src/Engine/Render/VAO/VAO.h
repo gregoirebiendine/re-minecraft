@@ -17,7 +17,7 @@ class VAO {
         VAO();
         ~VAO();
 
-        void storeBlockData(const std::vector<Vertex> &data) const;
+        void storeBlockData(const std::vector<PackedBlockVertex> &data) const;
         void storeGuiData(const std::vector<GuiVertex> &data) const;
         void storeOutlineData(const std::vector<GLfloat> &data) const;
 

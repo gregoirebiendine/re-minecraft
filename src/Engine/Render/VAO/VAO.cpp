@@ -10,20 +10,14 @@ VAO::~VAO()
     glDeleteVertexArrays(1, &this->ID);
 }
 
-void VAO::storeBlockData(const std::vector<Vertex> &data) const {
+void VAO::storeBlockData(const std::vector<PackedBlockVertex> &data) const {
     this->vbo.addData(data);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribIPointer(0, 3, GL_INT, sizeof(Vertex), static_cast<void *>( nullptr ));
+    glVertexAttribIPointer(0, 1, GL_UNSIGNED_INT, sizeof(PackedBlockVertex), reinterpret_cast<void*>(offsetof(PackedBlockVertex, data1)));
 
     glEnableVertexAttribArray(1);
-    glVertexAttribIPointer(1, 3, GL_INT, sizeof(Vertex), reinterpret_cast<void *>( offsetof(Vertex, normal) ));
-
-    glEnableVertexAttribArray(2);
-    glVertexAttribIPointer(2, 2, GL_INT, sizeof(Vertex), reinterpret_cast<void *>( offsetof(Vertex, uv) ));
-
-    glEnableVertexAttribArray(3);
-    glVertexAttribIPointer(3, 1, GL_UNSIGNED_INT, sizeof(Vertex), reinterpret_cast<void *>( offsetof(Vertex, texId) ));
+    glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, sizeof(PackedBlockVertex), reinterpret_cast<void*>(offsetof(PackedBlockVertex, data2)));
 
     this->vbo.unbind();
 }

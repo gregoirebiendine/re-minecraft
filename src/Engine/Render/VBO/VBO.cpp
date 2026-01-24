@@ -28,5 +28,5 @@ void VBO::unbind() const
 
 template void VBO::addData<GLfloat>(const std::vector<GLfloat> &v) const;
 template void VBO::addData<GLint>(const std::vector<GLint> &v) const;
-template void VBO::addData<Vertex>(const std::vector<Vertex> &v) const;
+template void VBO::addData<PackedBlockVertex>(const std::vector<PackedBlockVertex> &v) const;
 template void VBO::addData<GuiVertex>(const std::vector<GuiVertex> &v) const;

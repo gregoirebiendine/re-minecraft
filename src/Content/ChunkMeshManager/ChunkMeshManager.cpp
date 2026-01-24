@@ -114,11 +114,8 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
         if (isAirAtSnapshot(blockData, neighbors, x, y, z - 1)) {
             buildFaceMesh(
                 data,
-                {x,       y,       z},
-                {x,       1 + y,   z},
-                {1 + x,   1 + y,   z},
-                {1 + x,   y,       z},
-                {0, 0, -1},
+                {x, y, z},
+                NORTH,
                 textureRegistry.getByName(meta.getFaceTexture(NORTH))
             );
         }
@@ -127,11 +124,8 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
         if (isAirAtSnapshot(blockData, neighbors, x, y, z + 1)) {
             buildFaceMesh(
                 data,
-                {1 + x,   y,       1 + z},
-                {1 + x,   1 + y,   1 + z},
-                {x,       1 + y,   1 + z},
-                {x,       y,       1 + z},
-                {0, 0, 1},
+                {x, y, z},
+                SOUTH,
                 textureRegistry.getByName(meta.getFaceTexture(SOUTH))
             );
         }
@@ -139,52 +133,40 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
         // WEST face
         if (isAirAtSnapshot(blockData, neighbors, x - 1, y, z)) {
             buildFaceMesh(
-                data,
-                {x,       y,       1 + z},
-                {x,       1 + y,   1 + z},
-                {x,       1 + y,   z},
-                {x,       y,       z},
-                {-1, 0, 0},
-                textureRegistry.getByName(meta.getFaceTexture(WEST))
+                 data,
+                 {x, y, z},
+                 WEST,
+                 textureRegistry.getByName(meta.getFaceTexture(WEST))
             );
         }
 
         // EAST face
         if (isAirAtSnapshot(blockData, neighbors, x + 1, y, z)) {
-             buildFaceMesh(
-                data,
-                {1 + x,   y,       z},
-                {1 + x,   1 + y,   z},
-                {1 + x,   1 + y,   1 + z},
-                {1 + x,   y,       1 + z},
-                {1, 0, 0},
-                textureRegistry.getByName(meta.getFaceTexture(EAST))
+            buildFaceMesh(
+                 data,
+                 {x, y, z},
+                 EAST,
+                 textureRegistry.getByName(meta.getFaceTexture(EAST))
             );
         }
 
         // UP face
         if (isAirAtSnapshot(blockData, neighbors, x, y + 1, z)) {
             buildFaceMesh(
-                data,
-                {x,       1 + y,   z},
-                {x,       1 + y,   1 + z},
-                {1 + x,   1 + y,   1 + z},
-                {1 + x,   1 + y,   z},
-                {0, 1, 0},
-                textureRegistry.getByName(meta.getFaceTexture(UP))
+                 data,
+                 {x, y, z},
+                 UP,
+                 textureRegistry.getByName(meta.getFaceTexture(UP))
             );
         }
 
         // DOWN face
         if (isAirAtSnapshot(blockData, neighbors, x, y - 1, z)) {
             buildFaceMesh(
-                data,
-                {x,       y,       z},
-                {1 + x,   y,       z},
-                {1 + x,   y,       1 + z},
-                {x,       y,       1 + z},
-                {0, -1, 0},
-                textureRegistry.getByName(meta.getFaceTexture(DOWN))
+                 data,
+                 {x, y, z},
+                 DOWN,
+                 textureRegistry.getByName(meta.getFaceTexture(DOWN))
             );
         }
     }
@@ -247,14 +229,37 @@ bool ChunkMeshManager::isAirAtSnapshot(
     return true;
 }
 
-void ChunkMeshManager::buildFaceMesh(MeshData& data, const glm::ivec3 &v0, const glm::ivec3 &v1, const glm::ivec3 &v2, const glm::ivec3 &v3, const glm::ivec3 &normals, const uint16_t& texId)
+void ChunkMeshManager::buildFaceMesh(MeshData& mesh, const glm::ivec3& pos, const MaterialFace face, uint16_t texId, const uint8_t rotation)
 {
-    data.insert(data.end(), {
-        {v0, normals, {1, 0}, texId},
-        {v1, normals, {1, 1}, texId},
-        {v2, normals, {0, 1}, texId},
-        {v0, normals, {1, 0}, texId},
-        {v2, normals, {0, 1}, texId},
-        {v3, normals, {0, 0}, texId},
-    });
+    static constexpr uint8_t FACE_VERTEX_DATA[6][6][5] = {
+        // NORTH face (-Z)
+        {{0,0,0, 0,0}, {1,1,0, 1,1}, {1,0,0, 1,0}, {0,0,0, 0,0}, {0,1,0, 0,1}, {1,1,0, 1,1}},
+        // SOUTH face (+Z)
+        {{0,0,1, 1,0}, {1,0,1, 0,0}, {1,1,1, 0,1}, {0,0,1, 1,0}, {1,1,1, 0,1}, {0,1,1, 1,1}},
+        // WEST face (-X)
+        {{0,0,0, 1,0}, {0,0,1, 0,0}, {0,1,1, 0,1}, {0,0,0, 1,0}, {0,1,1, 0,1}, {0,1,0, 1,1}},
+        // EAST face (+X)
+        {{1,0,0, 0,0}, {1,1,1, 1,1}, {1,0,1, 1,0}, {1,0,0, 0,0}, {1,1,0, 0,1}, {1,1,1, 1,1}},
+        // UP face (+Y)
+        {{0,1,0, 1,0}, {0,1,1, 1,1}, {1,1,1, 0,1}, {0,1,0, 1,0}, {1,1,1, 0,1}, {1,1,0, 0,0}},
+        // DOWN face (-Y)
+        {{0,0,0, 1,1}, {1,0,1, 0,0}, {0,0,1, 1,0}, {0,0,0, 1,1}, {1,0,0, 0,1}, {1,0,1, 0,0}},
+    };
+
+    const auto x = static_cast<uint8_t>(pos.x);
+    const auto y = static_cast<uint8_t>(pos.y);
+    const auto z = static_cast<uint8_t>(pos.z);
+    const auto normalIndex = static_cast<uint8_t>(face);
+
+    for (int i = 0; i < 6; ++i) {
+        const auto& vd = FACE_VERTEX_DATA[face][i];
+
+        mesh.emplace_back(
+            x + vd[0], y + vd[1], z + vd[2],    // position
+            normalIndex,                        // normal
+            rotation,                           // rotation
+            vd[3], vd[4],                     // uv
+            texId                               // texture
+        );
+    }
 }

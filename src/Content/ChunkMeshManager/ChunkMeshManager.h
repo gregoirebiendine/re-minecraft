@@ -32,7 +32,7 @@ class ChunkMeshManager {
 
     private:
         static bool isAirAtSnapshot(const std::array<Material, Chunk::VOLUME>& blockData, const NeighborData neighbors[6], int x, int y, int z);
-        static void buildFaceMesh(MeshData& data, const glm::ivec3 &v0, const glm::ivec3 &v1, const glm::ivec3 &v2, const glm::ivec3 &v3, const glm::ivec3 &normals, const uint16_t& texId);
+        static void buildFaceMesh(MeshData& mesh, const glm::ivec3& pos, MaterialFace face, uint16_t texId, uint8_t rotation = 0);
 
         void buildMeshJob(const ChunkJob& job);
 

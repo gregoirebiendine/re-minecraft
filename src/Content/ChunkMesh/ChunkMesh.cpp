@@ -22,7 +22,6 @@ void ChunkMesh::upload(MeshData&& data)
 
 void ChunkMesh::swapBuffers()
 {
-    // Atomically swap front and back buffer indices
     const uint8_t current = frontBufferIndex.load(std::memory_order_acquire);
     frontBufferIndex.store(1 - current, std::memory_order_release);
 }

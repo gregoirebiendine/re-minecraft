@@ -10,7 +10,7 @@
 #include "Vertex.h"
 #include "VAO.h"
 
-using MeshData = std::vector<Vertex>;
+using MeshData = std::vector<PackedBlockVertex>;
 
 class ChunkMesh {
     public:
