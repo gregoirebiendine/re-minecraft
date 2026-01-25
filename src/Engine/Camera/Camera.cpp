@@ -129,7 +129,7 @@ void Camera::move(const glm::vec3 direction, const float deltaTime)
         this->position += direction.z * forward * SPEED * deltaTime;
 }
 
-void Camera::setFOV(const float _fov)
+void Camera::setFOV(const uint8_t _fov)
 {
     this->fov = _fov;
 }

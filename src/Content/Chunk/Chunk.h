@@ -17,6 +17,8 @@
 #include "ChunkState.h"
 #include "Utils.h"
 
+using BlockStorage = std::array<Material, 16*16*16>;
+
 class Chunk {
     public:
         static constexpr uint8_t SIZE = 16;
@@ -32,18 +34,18 @@ class Chunk {
         uint8_t acquireRead() const;
         void releaseRead() const;
 
-        [[nodiscard]] std::array<Material, VOLUME> getBlockSnapshot() const;
+        [[nodiscard]] BlockStorage getBlockSnapshot() const;
 
         [[nodiscard]] Material getBlock(uint8_t x, uint8_t y, uint8_t z) const;
         [[nodiscard]] bool isAir(uint8_t x, uint8_t y, uint8_t z) const;
 
-        void setBlock(uint8_t x, uint8_t y, uint8_t z, Material id);
-        void fill(glm::ivec3 from, glm::ivec3 to, Material id);
+        void setBlock(uint8_t x, uint8_t y, uint8_t z, Material mat);
+        void fill(glm::ivec3 from, glm::ivec3 to, Material mat);
 
         bool swapBuffers();
         [[nodiscard]] bool hasPendingChanges() const;
 
-        void setBlockDirect(uint8_t x, uint8_t y, uint8_t z, Material id);
+        void setBlockDirect(uint8_t x, uint8_t y, uint8_t z, Material mat);
         void finalizeGeneration();
 
         [[nodiscard]] glm::mat4 getChunkModel() const;
@@ -61,7 +63,7 @@ class Chunk {
     private:
         ChunkPos position;
 
-        std::array<Material, VOLUME> blockBuffers[2]{};
+        BlockStorage blockBuffers[2]{};
         std::atomic<uint8_t> bufferReadIndex{0};
         mutable std::atomic<uint32_t> bufferActiveReaders{0};
         std::atomic<bool> pendingChanges{false};

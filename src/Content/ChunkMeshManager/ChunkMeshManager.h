@@ -17,7 +17,7 @@ class World; // Forward declaration
 
 struct NeighborData {
     bool exists;
-    std::array<Material, Chunk::VOLUME> blocks;
+    BlockStorage blocks;
 };
 
 class ChunkMeshManager {
@@ -31,8 +31,9 @@ class ChunkMeshManager {
         const ChunkMesh& getMesh(const ChunkPos& pos) const;
 
     private:
-        static bool isAirAtSnapshot(const std::array<Material, Chunk::VOLUME>& blockData, const NeighborData neighbors[6], int x, int y, int z);
-        static void buildFaceMesh(MeshData& mesh, const glm::ivec3& pos, MaterialFace face, uint16_t texId, uint8_t rotation = 0);
+        static bool isAirAtSnapshot(const BlockStorage& blockData, const NeighborData neighbors[6], int x, int y, int z);
+        static void buildFaceMesh(MeshData& mesh, const glm::ivec3& pos, MaterialFace face, uint16_t texId, BlockRotation rotation);
+        static std::string getTextureFromRotation(const BlockMeta& meta, MaterialFace face, BlockRotation rotation);
 
         void buildMeshJob(const ChunkJob& job);
 

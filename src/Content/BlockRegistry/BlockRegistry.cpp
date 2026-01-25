@@ -1,13 +1,12 @@
 #include "BlockRegistry.h"
 
-#include <ranges>
-
 BlockRegistry::BlockRegistry()
 {
     this->registerBlock({
         "core",
         "air",
         true,
+        false,
         0.f,
         {}
     });
@@ -15,6 +14,7 @@ BlockRegistry::BlockRegistry()
     this->registerBlock({
         "core",
         "dirt",
+        false,
         false,
         1.f,
         uniformBlockFaces("dirt")
@@ -24,20 +24,22 @@ BlockRegistry::BlockRegistry()
         "core",
         "grass",
         false,
+        false,
         1.f,
         {
-            {MaterialFace::NORTH, "grass_block_side"},
-            {MaterialFace::SOUTH, "grass_block_side"},
-            {MaterialFace::WEST, "grass_block_side"},
-            {MaterialFace::EAST, "grass_block_side"},
-            {MaterialFace::UP, "grass_block_top"},
-            {MaterialFace::DOWN, "dirt"}
+            {NORTH, "grass_block_side"},
+            {SOUTH, "grass_block_side"},
+            {WEST, "grass_block_side"},
+            {EAST, "grass_block_side"},
+            {UP, "grass_block_top"},
+            {DOWN, "dirt"}
         }
     });
 
     this->registerBlock({
         "core",
         "moss",
+        false,
         false,
         1.f,
         uniformBlockFaces("grass_block_top")
@@ -47,6 +49,7 @@ BlockRegistry::BlockRegistry()
         "core",
         "cobble",
         false,
+        false,
         2.f,
         uniformBlockFaces("cobble")
     });
@@ -54,6 +57,7 @@ BlockRegistry::BlockRegistry()
     this->registerBlock({
         "core",
         "stone",
+        false,
         false,
         1.5f,
         uniformBlockFaces("stone")
@@ -63,6 +67,7 @@ BlockRegistry::BlockRegistry()
         "core",
         "oak_plank",
         false,
+        true,
         1.5f,
         uniformBlockFaces("oak_plank")
     });
@@ -71,14 +76,15 @@ BlockRegistry::BlockRegistry()
         "core",
         "oak_log",
         false,
+        true,
         1.5f,
         {
-            {MaterialFace::NORTH, "oak_log"},
-            {MaterialFace::SOUTH, "oak_log"},
-            {MaterialFace::WEST, "oak_log"},
-            {MaterialFace::EAST, "oak_log"},
-            {MaterialFace::UP, "oak_log_top"},
-            {MaterialFace::DOWN, "oak_log_top"}
+            {NORTH, "oak_log"},
+            {SOUTH, "oak_log"},
+            {WEST, "oak_log"},
+            {EAST, "oak_log"},
+            {UP, "oak_log_top"},
+            {DOWN, "oak_log_top"}
         }
     });
 
@@ -86,6 +92,7 @@ BlockRegistry::BlockRegistry()
         "core",
         "oak_leaves",
         true,
+        false,
         0.1f,
         uniformBlockFaces("oak_leaves")
     });
@@ -93,6 +100,7 @@ BlockRegistry::BlockRegistry()
     this->registerBlock({
         "core",
         "coal_block",
+        false,
         false,
         2.f,
         uniformBlockFaces("coal_block")
@@ -102,6 +110,7 @@ BlockRegistry::BlockRegistry()
         "core",
         "coal_ore",
         false,
+        false,
         2.f,
         uniformBlockFaces("coal_ore")
     });
@@ -109,6 +118,7 @@ BlockRegistry::BlockRegistry()
     this->registerBlock({
         "core",
         "iron_block",
+        false,
         false,
         2.f,
         uniformBlockFaces("iron_block")
@@ -118,6 +128,7 @@ BlockRegistry::BlockRegistry()
         "core",
         "iron_ore",
         false,
+        false,
         2.f,
         uniformBlockFaces("iron_ore")
     });
@@ -125,6 +136,7 @@ BlockRegistry::BlockRegistry()
     this->registerBlock({
         "core",
         "gold_block",
+        false,
         false,
         2.f,
         uniformBlockFaces("gold_block")
@@ -134,6 +146,7 @@ BlockRegistry::BlockRegistry()
         "core",
         "gold_ore",
         false,
+        false,
         2.f,
         uniformBlockFaces("gold_ore")
     });
@@ -141,6 +154,7 @@ BlockRegistry::BlockRegistry()
     this->registerBlock({
         "core",
         "redstone_block",
+        false,
         false,
         2.f,
         uniformBlockFaces("redstone_block")
@@ -150,6 +164,7 @@ BlockRegistry::BlockRegistry()
         "core",
         "redstone_ore",
         false,
+        false,
         2.f,
         uniformBlockFaces("redstone_ore")
     });
@@ -157,6 +172,7 @@ BlockRegistry::BlockRegistry()
     this->registerBlock({
         "core",
         "lapis_block",
+        false,
         false,
         2.f,
         uniformBlockFaces("lapis_block")
@@ -166,6 +182,7 @@ BlockRegistry::BlockRegistry()
         "core",
         "lapis_ore",
         false,
+        false,
         2.f,
         uniformBlockFaces("lapis_ore")
     });
@@ -173,6 +190,7 @@ BlockRegistry::BlockRegistry()
     this->registerBlock({
         "core",
         "diamond_block",
+        false,
         false,
         2.f,
         uniformBlockFaces("diamond_block")
@@ -182,6 +200,7 @@ BlockRegistry::BlockRegistry()
         "core",
         "diamond_ore",
         false,
+        false,
         2.f,
         uniformBlockFaces("diamond_ore")
     });
@@ -189,6 +208,7 @@ BlockRegistry::BlockRegistry()
     this->registerBlock({
         "core",
         "emerald_block",
+        false,
         false,
         2.f,
         uniformBlockFaces("emerald_block")
@@ -198,73 +218,73 @@ BlockRegistry::BlockRegistry()
         "core",
         "emerald_ore",
         false,
+        false,
         2.f,
         uniformBlockFaces("emerald_ore")
     });
 }
 
-Material BlockRegistry::registerBlock(const BlockMeta& meta)
+BlockId BlockRegistry::registerBlock(const BlockMeta& meta)
 {
     // Prevent duplication
-    auto it = this->nameToMaterialId.find(meta.getFullName());
-    if (it != this->nameToMaterialId.end()) {
+    auto it = this->nameToBlockId.find(meta.getFullName());
+    if (it != this->nameToBlockId.end()) {
         return it->second; // already registered
     }
 
     // Enforce max ID range
-    if (this->blocks.size() >= std::numeric_limits<Material>::max()) {
-        throw std::runtime_error("BlockRegistry overflow");
-    }
+    if (this->blocks.size() >= std::numeric_limits<BlockId>::max())
+        throw std::runtime_error("BlockRegistry overflow. Farfield has reached its maximum block storage.");
 
-    auto id = static_cast<Material>(blocks.size());
+    auto id = static_cast<BlockId>(blocks.size());
 
     this->blocks.push_back(meta);
-    this->nameToMaterialId.emplace(meta.getFullName(), id);
+    this->nameToBlockId.emplace(meta.getFullName(), id);
 
     return id;
 }
 
-const BlockMeta& BlockRegistry::get(const Material id) const
+const BlockMeta& BlockRegistry::get(const BlockId id) const
 {
     if (id >= this->blocks.size())
-        throw std::out_of_range("Invalid Material");
+        throw std::out_of_range("Out of range BlockID. This means this block id is not registered in the Engine");
     return this->blocks[id];
 }
 
-Material BlockRegistry::getByName(const std::string& name) const
+BlockId BlockRegistry::getByName(const std::string& name) const
 {
-    if (!this->nameToMaterialId.contains(name))
+    if (!this->nameToBlockId.contains(name))
         return 0;
-    return this->nameToMaterialId.at(name);
+    return this->nameToBlockId.at(name);
 }
 
-bool BlockRegistry::isEqual(const Material id, const std::string& name) const
+bool BlockRegistry::isEqual(const BlockId id, const std::string& name) const
 {
     if (id >= this->blocks.size())
-        throw std::out_of_range("Invalid Material");
+        throw std::out_of_range("Out of range BlockID. This means this block id is not registered in the Engine");
 
     return this->blocks[id].getFullName() == name;
 }
 
-std::vector<Material> BlockRegistry::getAll() const
+std::vector<BlockId> BlockRegistry::getAll() const
 {
-    std::vector<Material> materials;
+    std::vector<BlockId> allBlocks;
 
-    materials.reserve(this->nameToMaterialId.size());
-    for (const auto& id : this->nameToMaterialId | std::views::values)
-        materials.push_back(id);
-    return materials;
+    allBlocks.reserve(this->nameToBlockId.size());
+    for (const auto& id : this->nameToBlockId | std::views::values)
+        allBlocks.push_back(id);
+    return allBlocks;
 }
 
 // Statics
 BlockFaces BlockRegistry::uniformBlockFaces(std::string texture)
 {
     return {
-        {MaterialFace::NORTH, texture},
-        {MaterialFace::SOUTH, texture},
-        {MaterialFace::WEST, texture},
-        {MaterialFace::EAST, texture},
-        {MaterialFace::UP, texture},
-        {MaterialFace::DOWN, texture}
+        {NORTH, texture},
+        {SOUTH, texture},
+        {WEST, texture},
+        {EAST, texture},
+        {UP, texture},
+        {DOWN, texture}
     };
 }

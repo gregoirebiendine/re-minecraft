@@ -11,6 +11,7 @@ out vec3 currentPos;
 out vec3 currentNormal;
 out vec2 currentUvs;
 flat out uint currentTexIndex;
+flat out uint currentRotation;
 
 // Normal lookup table
 const vec3 NORMALS[6] = vec3[6](
@@ -46,8 +47,7 @@ void main()
     currentNormal = NORMALS[normalIndex];
     currentUvs = vec2(float(u), float(v));
     currentTexIndex = texId;
-//    currentRotation = rotation;
-//    currentAO = float(ao) / 15.0;
+    currentRotation = rotation;
 
     gl_Position = ProjectionMatrix * ViewMatrix * worldPos;
 }

@@ -39,7 +39,7 @@ bool World::isAir(const int wx, const int wy, const int wz)
     return this->blockRegistry.isEqual(this->getBlock(wx, wy, wz), "core:air");
 }
 
-void World::setBlock(const int wx, const int wy, const int wz, const Material id)
+void World::setBlock(const int wx, const int wy, const int wz, const Material mat)
 {
     const auto [cx, cy, cz] = ChunkPos::fromWorld(wx, wy, wz);
     const auto [x, y, z] = BlockPos::fromWorld(wx, wy, wz);
@@ -49,7 +49,7 @@ void World::setBlock(const int wx, const int wy, const int wz, const Material id
     if (!chunk || chunk->getState() != ChunkState::READY)
         return;
 
-    chunk->setBlock(x, y, z, id);
+    chunk->setBlock(x, y, z, mat);
     chunk->setDirty(true);
 
     this->chunkManager.rebuildNeighbors({cx, cy, cz});
@@ -57,16 +57,18 @@ void World::setBlock(const int wx, const int wy, const int wz, const Material id
 
 void World::setBlock(const int wx, const int wy, const int wz, const std::string& blockName)
 {
-    this->setBlock(wx, wy, wz, this->blockRegistry.getByName(blockName));
+    const BlockId id = this->blockRegistry.getByName(blockName);
+
+    this->setBlock(wx, wy, wz, BlockData::packBlockData(id, 0));
 }
 
-void World::fill(const glm::ivec3 from, const glm::ivec3 to, const Material id)
+void World::fill(const glm::ivec3 from, const glm::ivec3 to, const Material mat)
 {
     for (int z = from.z; z <= to.z; ++z)
         for (int y = from.y; y <= to.y; ++y)
             for (int x = from.x; x <= to.x; ++x)
             {
-                this->setBlock(x, y, z, id);
+                this->setBlock(x, y, z, mat);
             }
 }
 

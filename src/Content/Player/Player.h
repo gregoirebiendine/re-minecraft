@@ -15,7 +15,7 @@ class Player
     GUI gui;
     Camera camera;
 
-    Material selectedMaterial;
+    BlockId selectedBlockId;
     Raycast::Hit lastRaycast{};
 
     void changeSelectedMaterial(Inputs::Scroll dir);
@@ -30,8 +30,9 @@ class Player
         void render() const;
         void renderBlockOutline(const float& aspect) const;
 
-        void setSelectedMaterial(Material newMaterial);
-        [[nodiscard]] Material getSelectedMaterial() const;
+        void setSelectedBlockId(Material id);
+
+        void placeBlock(World& world) const;
 };
 
 

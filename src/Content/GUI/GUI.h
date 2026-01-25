@@ -16,6 +16,7 @@
 #include "Shader.h"
 #include "VAO.h"
 #include "OutlineVertices.h"
+#include "DirectionUtils.h"
 
 struct DigitalColor
 {
@@ -59,7 +60,6 @@ class GUI
 
     static float toScreenSpace(float v, float minIn, float maxIn);
     static float percent(float baseValue, float percentage);
-    static std::string forwardToCardinal(const glm::vec3& forwardVector);
 
     void createCrosshair(glm::ivec2 viewportSize);
     void createRectangle(float x, float y, float width, float height, DigitalColor color);
