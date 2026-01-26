@@ -11,7 +11,7 @@ class TerrainGenerator
 {
     public:
         static inline FastNoiseLite noise{3120};
-        static inline int baseHeight = 10;
+        static inline int baseHeight = 64;
         static inline int amplitude = 8;
 
         static void init();

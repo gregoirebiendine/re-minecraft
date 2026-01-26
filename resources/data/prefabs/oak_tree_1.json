@@ -1,0 +1,25 @@
+{
+  "rules": {
+    "density_per_chunk": 2,
+    "minimum_distance_between_prefab": 4,
+    "min_y_generation": 60,
+    "max_y_generation": 80,
+    "block_below": "grass"
+  },
+  "origin": [0,0,0],
+  "content": [
+    {
+      "command": "FILL",
+      "start": [0,0,0],
+      "stop": [0,4,0],
+      "block": "oak_log",
+      "rotation": 0
+    },
+    {
+      "command": "SINGLE",
+      "coords": [0,5,0],
+      "block": "oak_leaves",
+      "rotation": 0
+    }
+  ]
+}

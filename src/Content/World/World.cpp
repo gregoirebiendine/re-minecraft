@@ -15,10 +15,10 @@ World::World(BlockRegistry _blockRegistry, const TextureRegistry& _textureRegist
 
     TerrainGenerator::init();
 
-    constexpr ChunkPos center{0,0,0};
     for (int z = -4; z <= 4; ++z)
-        for (int x = -4; x <= 4; ++x)
-            this->chunkManager.requestChunk({center.x+x, 0, center.z+z});
+        for (int y = 0; y <= 5; ++y)
+            for (int x = -4; x <= 4; ++x)
+                this->chunkManager.requestChunk({x, y, z});
 }
 
 // World lifecycle

@@ -75,12 +75,14 @@ void ChunkManager::updateStreaming(const glm::vec3& cameraPos)
 
     wanted.reserve((2 * this->viewDistance + 1) * (2 * this->viewDistance + 1) * 5);
 
-    for (int z = -this->viewDistance; z <= this->viewDistance; ++z)
-        for (int y = 0; y <= 2; ++y)
+    for (int z = -this->viewDistance; z <= this->viewDistance; ++z) {
+        for (int y = -2; y <= 3; ++y) {
+            const int generatedY = cameraChunk.y + y;
+
             for (int x = -this->viewDistance; x <= this->viewDistance; ++x) {
                 ChunkPos pos {
                     cameraChunk.x + x,
-                    y,
+                    generatedY < 0 ? 0 : generatedY,
                     cameraChunk.z + z
                 };
 
@@ -89,6 +91,8 @@ void ChunkManager::updateStreaming(const glm::vec3& cameraPos)
                 if (!this->chunks.contains(pos))
                     this->requestChunk(pos);
             }
+        }
+    }
 
     for (auto it = chunks.begin(); it != chunks.end(); ) {
         Chunk& chunk = it->second;
