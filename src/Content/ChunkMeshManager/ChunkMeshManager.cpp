@@ -193,44 +193,58 @@ const ChunkMesh& ChunkMeshManager::getMesh(const ChunkPos &pos) const
     return this->meshes.at(pos);
 }
 
-// Statics
+bool ChunkMeshManager::isTransparentAtSnapshot(const BlockId blockId) const {
+    return this->world.getBlockRegistry().get(blockId).transparent;
+}
+
 bool ChunkMeshManager::isAirAtSnapshot(
     const BlockStorage& blockData,
     const NeighborData neighbors[6],
     const int x, const int y, const int z
-)
+) const
 {
     // Inside current chunk
-    if (x >= 0 && x < Chunk::SIZE &&
-        y >= 0 && y < Chunk::SIZE &&
-        z >= 0 && z < Chunk::SIZE
-    )
-        return BlockData::getBlockId(blockData[ChunkCoords::localCoordsToIndex(x, y, z)]) == 0;
+    if (x >= 0 && x < Chunk::SIZE && y >= 0 && y < Chunk::SIZE && z >= 0 && z < Chunk::SIZE) {
+        const BlockId blockId = BlockData::getBlockId(blockData[ChunkCoords::localCoordsToIndex(x, y, z)]);
+        return blockId == 0 || this->isTransparentAtSnapshot(blockId);
+    }
 
     // Check neighbors
     if (z < 0) {  // NORTH
-        if (!neighbors[0].exists) return true;
-        return BlockData::getBlockId(neighbors[0].blocks[ChunkCoords::localCoordsToIndex(x, y, z + Chunk::SIZE)]) == 0;
+        if (!neighbors[0].exists)
+            return true;
+        const BlockId blockId = BlockData::getBlockId(neighbors[0].blocks[ChunkCoords::localCoordsToIndex(x, y, z + Chunk::SIZE)]);
+        return blockId == 0 || this->isTransparentAtSnapshot(blockId);
     }
     if (z >= Chunk::SIZE) {  // SOUTH
-        if (!neighbors[1].exists) return true;
-        return BlockData::getBlockId(neighbors[1].blocks[ChunkCoords::localCoordsToIndex(x, y, z - Chunk::SIZE)]) == 0;
+        if (!neighbors[1].exists)
+            return true;
+        const BlockId blockId = BlockData::getBlockId(neighbors[1].blocks[ChunkCoords::localCoordsToIndex(x, y, z - Chunk::SIZE)]);
+        return blockId == 0 || this->isTransparentAtSnapshot(blockId);
     }
     if (x >= Chunk::SIZE) {  // EAST
-        if (!neighbors[2].exists) return true;
-        return BlockData::getBlockId(neighbors[2].blocks[ChunkCoords::localCoordsToIndex(x - Chunk::SIZE, y, z)]) == 0;
+        if (!neighbors[2].exists)
+            return true;
+        const BlockId blockId = BlockData::getBlockId(neighbors[2].blocks[ChunkCoords::localCoordsToIndex(x - Chunk::SIZE, y, z)]);
+        return blockId == 0 || this->isTransparentAtSnapshot(blockId);
     }
     if (x < 0) {  // WEST
-        if (!neighbors[3].exists) return true;
-        return BlockData::getBlockId(neighbors[3].blocks[ChunkCoords::localCoordsToIndex(x + Chunk::SIZE, y, z)]) == 0;
+        if (!neighbors[3].exists)
+            return true;
+        const BlockId blockId = BlockData::getBlockId(neighbors[3].blocks[ChunkCoords::localCoordsToIndex(x + Chunk::SIZE, y, z)]);
+        return blockId == 0 || this->isTransparentAtSnapshot(blockId);
     }
     if (y >= Chunk::SIZE) {  // UP
-        if (!neighbors[4].exists) return true;
-        return BlockData::getBlockId(neighbors[4].blocks[ChunkCoords::localCoordsToIndex(x, y - Chunk::SIZE, z)]) == 0;
+        if (!neighbors[4].exists)
+            return true;
+        const BlockId blockId = BlockData::getBlockId(neighbors[4].blocks[ChunkCoords::localCoordsToIndex(x, y - Chunk::SIZE, z)]);
+        return blockId == 0 || this->isTransparentAtSnapshot(blockId);
     }
     if (y < 0) {  // DOWN
-        if (!neighbors[5].exists) return true;
-        return BlockData::getBlockId(neighbors[5].blocks[ChunkCoords::localCoordsToIndex(x, y + Chunk::SIZE, z)]) == 0;
+        if (!neighbors[5].exists)
+            return true;
+        const BlockId blockId = BlockData::getBlockId(neighbors[5].blocks[ChunkCoords::localCoordsToIndex(x, y + Chunk::SIZE, z)]);
+        return blockId == 0 || this->isTransparentAtSnapshot(blockId);
     }
     return true;
 }

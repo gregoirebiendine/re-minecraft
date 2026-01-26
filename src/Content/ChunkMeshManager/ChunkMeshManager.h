@@ -31,11 +31,12 @@ class ChunkMeshManager {
         const ChunkMesh& getMesh(const ChunkPos& pos) const;
 
     private:
-        static bool isAirAtSnapshot(const BlockStorage& blockData, const NeighborData neighbors[6], int x, int y, int z);
         static void buildFaceMesh(MeshData& mesh, const glm::ivec3& pos, MaterialFace face, uint16_t texId, BlockRotation rotation);
         static std::string getTextureFromRotation(const BlockMeta& meta, MaterialFace face, BlockRotation rotation);
 
         void buildMeshJob(const ChunkJob& job);
+        bool isTransparentAtSnapshot(BlockId blockId) const;
+        bool isAirAtSnapshot(const BlockStorage& blockData, const NeighborData neighbors[6], int x, int y, int z) const;
 
         World& world;
         ThreadPool<ChunkJob> workers;

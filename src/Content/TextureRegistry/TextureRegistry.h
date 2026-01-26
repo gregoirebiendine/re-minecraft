@@ -14,6 +14,7 @@
 #include <stbi/stb_image.h>
 
 namespace fs = std::filesystem;
+
 using TextureId = unsigned short;
 
 class TextureRegistry

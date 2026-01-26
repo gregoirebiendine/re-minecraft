@@ -109,7 +109,7 @@ void GUI::render() const
     this->guiVao.unbind();
 
     glEnable(GL_DEPTH_TEST);
-    glDisable( GL_BLEND);
+    glDisable(GL_BLEND);
 }
 
 void GUI::renderBlockOutline(const Camera& camera, const float& aspect, const glm::vec3& cubePos) const

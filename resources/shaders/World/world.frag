@@ -48,5 +48,9 @@ void main()
     vec3 lightDirection = normalize(lightPos - currentPos);
     float diffuse = max(dot(normal, lightDirection), 0.0f);
 
-    FragColor = texture(Textures, vec3(texCoords, currentTexIndex)) * vec4(0.9f,0.9f,0.9f,1.f) * (diffuse + ambient);
+    // Discard full transparency
+    vec4 texColor = texture(Textures, vec3(texCoords, currentTexIndex));
+    if (texColor.a < 0.1)
+        discard;
+    FragColor = texColor * vec4(0.9f,0.9f,0.9f,1.f) * (diffuse + ambient);
 }

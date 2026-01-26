@@ -3,7 +3,7 @@
 Player::Player(const BlockRegistry& _blockRegistry) :
     blockRegistry(_blockRegistry),
     camera({8.5f, 18.5f, 8.5f}),
-    selectedBlockId(_blockRegistry.getByName("core:stone"))
+    selectedBlockId(_blockRegistry.getByName("core:oak_leaves"))
 {
 }
 
