@@ -28,10 +28,15 @@ Raycast::Hit Camera::raycast(World& world) const
         lastBlock = blockPos;
 
         if (world.getBlock(blockPos.x, blockPos.y, blockPos.z)) {
+            const glm::ivec3 previousPos = glm::floor(origin + dir * (t - Raycast::STEP));
+            const glm::ivec3 diff = blockPos - previousPos;
+            const MaterialFace hitFace = Raycast::calculateHitFace(diff);
+
             return {
                 true,
+                hitFace,
                 blockPos,
-                glm::floor(origin + dir * (t - Raycast::STEP))
+                previousPos
             };
         }
 
@@ -40,6 +45,7 @@ Raycast::Hit Camera::raycast(World& world) const
 
     return {
         false,
+        UP,
         lastBlock,
         lastBlock
     };

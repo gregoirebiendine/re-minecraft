@@ -87,14 +87,27 @@ void Player::changeSelectedMaterial(const Inputs::Scroll dir)
 void Player::placeBlock(World& world) const
 {
     const auto& selectedBlockMeta = this->blockRegistry.get(this->selectedBlockId);
-    auto packedMaterial = BlockData::packBlockData(this->selectedBlockId, 0);
+    BlockRotation rotation = 0;
 
-    if (selectedBlockMeta.directional) {
-        const auto playerFacing = DirectionUtils::getHorizontalFacing(this->camera.getRotation().x);
-        const auto blockFacing = DirectionUtils::getOppositeFacing(playerFacing);
+    switch (selectedBlockMeta.rotation) {
+        case RotationType::NONE:
+            rotation = 0;
+            break;
 
-        packedMaterial = BlockData::packBlockData(selectedBlockId, blockFacing);
+        case RotationType::HORIZONTAL:
+        {
+            const auto playerFacing = DirectionUtils::getHorizontalFacing(
+                this->camera.getForwardVector()
+            );
+            rotation = DirectionUtils::getOppositeFacing(playerFacing);
+        }
+            break;
+
+        case RotationType::AXIS:
+            rotation = DirectionUtils::getAxisFromHitFace(this->lastRaycast.hitFace);
+            break;
     }
 
+    const auto packedMaterial = BlockData::packBlockData(selectedBlockId, rotation);
     world.setBlock(this->lastRaycast.previousPos.x, this->lastRaycast.previousPos.y, this->lastRaycast.previousPos.z, packedMaterial);
 }

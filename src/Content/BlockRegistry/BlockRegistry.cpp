@@ -6,8 +6,8 @@ BlockRegistry::BlockRegistry()
         "core",
         "air",
         true,
-        false,
         0.f,
+        RotationType::NONE,
         {}
     });
 
@@ -15,8 +15,8 @@ BlockRegistry::BlockRegistry()
         "core",
         "dirt",
         false,
-        false,
         1.f,
+        RotationType::NONE,
         uniformBlockFaces("dirt")
     });
 
@@ -24,8 +24,8 @@ BlockRegistry::BlockRegistry()
         "core",
         "grass",
         false,
-        false,
         1.f,
+        RotationType::NONE,
         {
             {NORTH, "grass_block_side"},
             {SOUTH, "grass_block_side"},
@@ -40,8 +40,8 @@ BlockRegistry::BlockRegistry()
         "core",
         "moss",
         false,
-        false,
         1.f,
+        RotationType::NONE,
         uniformBlockFaces("grass_block_top")
     });
 
@@ -49,8 +49,8 @@ BlockRegistry::BlockRegistry()
         "core",
         "cobble",
         false,
-        false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("cobble")
     });
 
@@ -58,8 +58,8 @@ BlockRegistry::BlockRegistry()
         "core",
         "stone",
         false,
-        false,
         1.5f,
+        RotationType::NONE,
         uniformBlockFaces("stone")
     });
 
@@ -67,8 +67,8 @@ BlockRegistry::BlockRegistry()
         "core",
         "oak_plank",
         false,
-        true,
         1.5f,
+        RotationType::NONE,
         uniformBlockFaces("oak_plank")
     });
 
@@ -76,8 +76,8 @@ BlockRegistry::BlockRegistry()
         "core",
         "oak_log",
         false,
-        true,
         1.5f,
+        RotationType::AXIS,
         {
             {NORTH, "oak_log"},
             {SOUTH, "oak_log"},
@@ -92,8 +92,8 @@ BlockRegistry::BlockRegistry()
         "core",
         "oak_leaves",
         true,
-        false,
         0.1f,
+        RotationType::NONE,
         uniformBlockFaces("oak_leaves")
     });
 
@@ -101,8 +101,8 @@ BlockRegistry::BlockRegistry()
         "core",
         "coal_block",
         false,
-        false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("coal_block")
     });
 
@@ -110,8 +110,8 @@ BlockRegistry::BlockRegistry()
         "core",
         "coal_ore",
         false,
-        false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("coal_ore")
     });
 
@@ -119,8 +119,8 @@ BlockRegistry::BlockRegistry()
         "core",
         "iron_block",
         false,
-        false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("iron_block")
     });
 
@@ -128,8 +128,8 @@ BlockRegistry::BlockRegistry()
         "core",
         "iron_ore",
         false,
-        false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("iron_ore")
     });
 
@@ -137,8 +137,8 @@ BlockRegistry::BlockRegistry()
         "core",
         "gold_block",
         false,
-        false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("gold_block")
     });
 
@@ -146,8 +146,8 @@ BlockRegistry::BlockRegistry()
         "core",
         "gold_ore",
         false,
-        false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("gold_ore")
     });
 
@@ -155,8 +155,8 @@ BlockRegistry::BlockRegistry()
         "core",
         "redstone_block",
         false,
-        false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("redstone_block")
     });
 
@@ -164,8 +164,8 @@ BlockRegistry::BlockRegistry()
         "core",
         "redstone_ore",
         false,
-        false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("redstone_ore")
     });
 
@@ -173,8 +173,8 @@ BlockRegistry::BlockRegistry()
         "core",
         "lapis_block",
         false,
-        false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("lapis_block")
     });
 
@@ -182,8 +182,8 @@ BlockRegistry::BlockRegistry()
         "core",
         "lapis_ore",
         false,
-        false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("lapis_ore")
     });
 
@@ -191,8 +191,8 @@ BlockRegistry::BlockRegistry()
         "core",
         "diamond_block",
         false,
-        false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("diamond_block")
     });
 
@@ -200,8 +200,8 @@ BlockRegistry::BlockRegistry()
         "core",
         "diamond_ore",
         false,
-        false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("diamond_ore")
     });
 
@@ -209,8 +209,8 @@ BlockRegistry::BlockRegistry()
         "core",
         "emerald_block",
         false,
-        false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("emerald_block")
     });
 
@@ -218,9 +218,25 @@ BlockRegistry::BlockRegistry()
         "core",
         "emerald_ore",
         false,
-        false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("emerald_ore")
+    });
+
+    this->registerBlock({
+        "core",
+        "furnace",
+        false,
+        1.f,
+        RotationType::HORIZONTAL,
+        {
+            {NORTH, "furnace_front"},
+            {SOUTH, "furnace_side"},
+            {WEST, "furnace_side"},
+            {EAST, "furnace_side"},
+            {UP, "furnace_top"},
+            {DOWN, "furnace_top"}
+        }
     });
 }
 

@@ -52,6 +52,37 @@ namespace BlockData
         return FACE_REMAP[rotation][face];
     }
 
+    inline MaterialFace remapFaceForAxisRotation(const MaterialFace face, const BlockRotation rotation)
+    {
+        // Rotation 4 = Y-axis (vertical, no remapping needed)
+        if (rotation == 4)
+            return face;
+
+        // Rotation 5 = Z-axis (log pointing N/S)
+        if (rotation == 5)
+            switch (face)
+            {
+                case UP:    return SOUTH;
+                case DOWN:  return NORTH;
+                case NORTH: return DOWN;
+                case SOUTH: return UP;
+                default:    return face;
+            }
+
+        // Rotation 6 = X-axis (log pointing E/W)
+        if (rotation == 6)
+            switch (face)
+            {
+                case UP:    return EAST;
+                case DOWN:  return WEST;
+                case EAST:  return DOWN;
+                case WEST:  return UP;
+                default:    return face;
+            }
+
+        return face;
+    }
+
 }
 
 

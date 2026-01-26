@@ -27,6 +27,10 @@ TextureRegistry::TextureRegistry()
     this->registerTexture("diamond_ore", "diamond_ore.png");
     this->registerTexture("emerald_block", "emerald_block.png");
     this->registerTexture("emerald_ore", "emerald_ore.png");
+
+    this->registerTexture("furnace_front", "furnace_front.png");
+    this->registerTexture("furnace_side", "furnace_side.png");
+    this->registerTexture("furnace_top", "furnace_top.png");
 }
 
 TextureRegistry::~TextureRegistry()

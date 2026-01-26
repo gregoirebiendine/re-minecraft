@@ -272,7 +272,9 @@ void ChunkMeshManager::buildFaceMesh(MeshData& mesh, const glm::ivec3& pos, cons
 
 std::string ChunkMeshManager::getTextureFromRotation(const BlockMeta& meta, const MaterialFace face, const BlockRotation rotation)
 {
-    if (meta.directional)
+    if (meta.rotation == RotationType::NONE)
+        return meta.getFaceTexture(face);
+    if (meta.rotation == RotationType::HORIZONTAL)
         return meta.getFaceTexture(BlockData::remapFaceForRotation(face, rotation));
-    return meta.getFaceTexture(face);
+    return meta.getFaceTexture(BlockData::remapFaceForAxisRotation(face, rotation));
 }

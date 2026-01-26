@@ -21,20 +21,13 @@ namespace DirectionUtils
         return (f.z > 0) ? "SOUTH" : "NORTH";
     }
 
-    inline MaterialFace getHorizontalFacing(const float yaw)
+    inline MaterialFace getHorizontalFacing(const glm::vec3 forwardVector)
     {
-        float normalizedYaw = yaw;
+        const auto horizontal = glm::normalize(glm::vec3{forwardVector.x, 0.f, forwardVector.z});
 
-        if (normalizedYaw < 0)
-            normalizedYaw += 360;
-
-        if (normalizedYaw >= 315 || normalizedYaw < 45)
-            return SOUTH;
-        if (normalizedYaw >= 45 && normalizedYaw < 135)
-            return WEST;
-        if (normalizedYaw >= 135 && normalizedYaw < 225)
-            return NORTH;
-        return EAST;
+        if (abs(horizontal.x) > abs(horizontal.z))
+            return horizontal.x > 0 ? EAST : WEST;
+        return horizontal.z > 0 ? SOUTH : NORTH;
     }
 
     inline MaterialFace getOppositeFacing(const MaterialFace facing)
@@ -50,6 +43,24 @@ namespace DirectionUtils
                 return EAST;
             case EAST:
                 return WEST;
+        }
+    }
+
+    inline BlockRotation getAxisFromHitFace(const MaterialFace hitFace)
+    {
+        // Returns 4-6 to skip UV rotation in shader (rotation < 4 check)
+        switch (hitFace)
+        {
+            default:
+            case UP:
+            case DOWN:
+                return 4;  // Y-axis (vertical)
+            case NORTH:
+            case SOUTH:
+                return 5;  // Z-axis (horizontal, pointing N/S)
+            case EAST:
+            case WEST:
+                return 6;  // X-axis (horizontal, pointing E/W)
         }
     }
 }
