@@ -25,6 +25,7 @@ list(APPEND SOURCES
 set(
     HEADERS
     ${CMAKE_SOURCE_DIR}/lib
+    ${CMAKE_SOURCE_DIR}/lib/json
     ${CMAKE_SOURCE_DIR}/lib/imgui
     ${CMAKE_SOURCE_DIR}/lib/fastnoiselite
     ${CMAKE_SOURCE_DIR}/src/Engine

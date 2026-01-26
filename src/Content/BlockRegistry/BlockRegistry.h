@@ -1,16 +1,21 @@
 #ifndef RE_MINECRAFT_BLOCKREGISTRY_H
 #define RE_MINECRAFT_BLOCKREGISTRY_H
 
+#include <fstream>
 #include <memory>
 #include <vector>
 #include <unordered_map>
 #include <map>
+#include <vector>
 #include <ranges>
 #include <limits>
+
+#include <json.hpp>
 
 #include "Material.h"
 #include "TextureRegistry.h"
 
+using json = nlohmann::json;
 using BlockFaces = std::map<MaterialFace, std::string>;
 
 enum class RotationType : uint8_t {
@@ -18,6 +23,12 @@ enum class RotationType : uint8_t {
     HORIZONTAL,      // Rotate on Y-axis only (furnace, chest)
     AXIS             // Rotate based on placement face (logs, pillars)
 };
+
+NLOHMANN_JSON_SERIALIZE_ENUM(RotationType, {
+    {RotationType::NONE, "NONE"},
+    {RotationType::HORIZONTAL, "HORIZONTAL"},
+    {RotationType::AXIS, "AXIS"},
+})
 
 struct BlockMeta
 {
@@ -64,6 +75,8 @@ class BlockRegistry
         BlockRegistry();
 
         BlockId registerBlock(const BlockMeta& meta);
+        void registerBlocksFromFile(const std::string& registerNamespace);
+
         const BlockMeta& get(BlockId id) const;
         BlockId getByName(const std::string& name) const;
         bool isEqual(BlockId id, const std::string& name) const;

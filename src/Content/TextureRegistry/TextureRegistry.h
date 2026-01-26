@@ -1,11 +1,13 @@
 #ifndef RE_MINECRAFT_TEXTUREREGISTRY_H
 #define RE_MINECRAFT_TEXTUREREGISTRY_H
 
+#include <unordered_map>
 #include <stdexcept>
 #include <vector>
 #include <iostream>
 #include <filesystem>
-#include <unordered_map>
+#include <iomanip>
+#include <utility>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -27,9 +29,10 @@ class TextureRegistry
         TextureRegistry();
         ~TextureRegistry();
 
-        void createTextures();
-
         TextureId registerTexture(const std::string& name, const std::string& path);
+        void registerTextureFromFolder(const std::string& folderPath);
+
+        void createTextures();
         const std::string& get(TextureId id) const;
         TextureId getByName(const std::string& name) const;
 

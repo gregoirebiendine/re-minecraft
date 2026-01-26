@@ -1,0 +1,167 @@
+{
+  "blocks": [
+    {
+      "name": "dirt",
+      "transparent": false,
+      "hardness": 1.0,
+      "rotation": "NONE",
+      "textures": ["dirt"]
+    },
+    {
+      "name": "grass",
+      "transparent": false,
+      "hardness": 1.0,
+      "rotation": "NONE",
+      "textures": ["grass_block_side","grass_block_side","grass_block_side","grass_block_side","grass_block_top","dirt"]
+    },
+    {
+      "name": "moss",
+      "transparent": false,
+      "hardness": 1.0,
+      "rotation": "NONE",
+      "textures": ["grass_block_top"]
+    },
+    {
+      "name": "cobble",
+      "transparent": false,
+      "hardness": 2.0,
+      "rotation": "NONE",
+      "textures": ["cobble"]
+    },
+    {
+      "name": "stone",
+      "transparent": false,
+      "hardness": 2.0,
+      "rotation": "NONE",
+      "textures": ["stone"]
+    },
+    {
+      "name": "oak_plank",
+      "transparent": false,
+      "hardness": 1.5,
+      "rotation": "NONE",
+      "textures": ["oak_plank"]
+    },
+    {
+      "name": "oak_log",
+      "transparent": false,
+      "hardness": 1.75,
+      "rotation": "AXIS",
+      "textures": ["oak_log","oak_log","oak_log","oak_log","oak_log_top","oak_log_top"]
+    },
+    {
+      "name": "oak_leaves",
+      "transparent": true,
+      "hardness": 0.5,
+      "rotation": "NONE",
+      "textures": ["oak_leaves"]
+    },
+
+    {
+      "name": "coal_block",
+      "transparent": false,
+      "hardness": 2.25,
+      "rotation": "NONE",
+      "textures": ["coal_block"]
+    },
+    {
+      "name": "coal_ore",
+      "transparent": false,
+      "hardness": 2.25,
+      "rotation": "NONE",
+      "textures": ["coal_ore"]
+    },
+    {
+      "name": "iron_block",
+      "transparent": false,
+      "hardness": 2.25,
+      "rotation": "NONE",
+      "textures": ["iron_block"]
+    },
+    {
+      "name": "iron_ore",
+      "transparent": false,
+      "hardness": 2.25,
+      "rotation": "NONE",
+      "textures": ["iron_ore"]
+    },
+    {
+      "name": "gold_block",
+      "transparent": false,
+      "hardness": 2.50,
+      "rotation": "NONE",
+      "textures": ["gold_block"]
+    },
+    {
+      "name": "gold_ore",
+      "transparent": false,
+      "hardness": 2.50,
+      "rotation": "NONE",
+      "textures": ["gold_ore"]
+    },
+    {
+      "name": "redstone_block",
+      "transparent": false,
+      "hardness": 2.75,
+      "rotation": "NONE",
+      "textures": ["redstone_block"]
+    },
+    {
+      "name": "redstone_ore",
+      "transparent": false,
+      "hardness": 2.75,
+      "rotation": "NONE",
+      "textures": ["redstone_ore"]
+    },
+    {
+      "name": "lapis_block",
+      "transparent": false,
+      "hardness": 3,
+      "rotation": "NONE",
+      "textures": ["lapis_block"]
+    },
+    {
+      "name": "lapis_ore",
+      "transparent": false,
+      "hardness": 3,
+      "rotation": "NONE",
+      "textures": ["lapis_ore"]
+    },
+    {
+      "name": "diamond_block",
+      "transparent": false,
+      "hardness": 3.5,
+      "rotation": "NONE",
+      "textures": ["diamond_block"]
+    },
+    {
+      "name": "diamond_ore",
+      "transparent": false,
+      "hardness": 3.5,
+      "rotation": "NONE",
+      "textures": ["diamond_ore"]
+    },
+    {
+      "name": "emerald_block",
+      "transparent": false,
+      "hardness": 4,
+      "rotation": "NONE",
+      "textures": ["emerald_block"]
+    },
+    {
+      "name": "emerald_ore",
+      "transparent": false,
+      "hardness": 4,
+      "rotation": "NONE",
+      "textures": ["emerald_ore"]
+    },
+
+    {
+      "name": "furnace",
+      "transparent": false,
+      "hardness": 1,
+      "rotation": "HORIZONTAL",
+      "textures": ["furnace_front","furnace_side","furnace_side","furnace_side","furnace_top","furnace_top"]
+    }
+  ]
+}

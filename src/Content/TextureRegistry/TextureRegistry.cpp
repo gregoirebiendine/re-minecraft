@@ -2,35 +2,7 @@
 
 TextureRegistry::TextureRegistry()
 {
-    this->registerTexture(MISSING, "missing.png");
-    this->registerTexture("dirt", "dirt.png");
-    this->registerTexture("grass_block_side", "grass_block_side.png");
-    this->registerTexture("grass_block_top", "grass_block_top.png");
-    this->registerTexture("cobble", "cobble.png");
-    this->registerTexture("stone", "stone.png");
-    this->registerTexture("oak_plank", "oak_plank.png");
-    this->registerTexture("oak_log", "oak_log.png");
-    this->registerTexture("oak_log_top", "oak_log_top.png");
-    this->registerTexture("oak_leaves", "oak_leaves.png");
-
-    this->registerTexture("coal_block", "coal_block.png");
-    this->registerTexture("coal_ore", "coal_ore.png");
-    this->registerTexture("iron_block", "iron_block.png");
-    this->registerTexture("iron_ore", "iron_ore.png");
-    this->registerTexture("gold_block", "gold_block.png");
-    this->registerTexture("gold_ore", "gold_ore.png");
-    this->registerTexture("redstone_block", "redstone_block.png");
-    this->registerTexture("redstone_ore", "redstone_ore.png");
-    this->registerTexture("lapis_block", "lapis_block.png");
-    this->registerTexture("lapis_ore", "lapis_ore.png");
-    this->registerTexture("diamond_block", "diamond_block.png");
-    this->registerTexture("diamond_ore", "diamond_ore.png");
-    this->registerTexture("emerald_block", "emerald_block.png");
-    this->registerTexture("emerald_ore", "emerald_ore.png");
-
-    this->registerTexture("furnace_front", "furnace_front.png");
-    this->registerTexture("furnace_side", "furnace_side.png");
-    this->registerTexture("furnace_top", "furnace_top.png");
+    this->registerTextureFromFolder("/resources/textures/");
 }
 
 TextureRegistry::~TextureRegistry()
@@ -40,8 +12,6 @@ TextureRegistry::~TextureRegistry()
 
 void TextureRegistry::createTextures()
 {
-    const auto texturesFolder = fs::current_path().parent_path().string().append("/resources/textures/");
-
     // Create OpenGL texture
     glGenTextures(1, &this->ID);
     glBindTexture(GL_TEXTURE_2D_ARRAY, this->ID);
@@ -51,10 +21,10 @@ void TextureRegistry::createTextures()
 
     int w, h, channels;
     for (int i = 0; i < static_cast<int>(this->textures.size()); i++) {
-        stbi_uc* tex = stbi_load((texturesFolder + this->textures[i]).c_str(), &w, &h, &channels, 0);
+        stbi_uc* tex = stbi_load(this->textures[i].c_str(), &w, &h, &channels, 0);
 
         if (!tex)
-            throw std::runtime_error("Error loading texture : " + this->textures[i]);
+            throw std::runtime_error("stbi_load failed on texture : " + this->textures[i]);
         if (w != 32 || h != 32)
             throw std::runtime_error("Texture " + this->textures[i] + " is not 32 pixel wide");
 
@@ -90,6 +60,21 @@ TextureId TextureRegistry::registerTexture(const std::string& name, const std::s
     this->nameToTextureId.emplace(name, id);
 
     return id;
+}
+
+void TextureRegistry::registerTextureFromFolder(const std::string &folderPath)
+{
+    const auto texturesFolder = fs::current_path().parent_path().string().append(folderPath);
+
+    for (const auto& entry : fs::directory_iterator(texturesFolder)) {
+        const auto& path = entry.path();
+        const auto texName = path.filename().replace_extension();
+
+        if (texName == "missing")
+            this->registerTexture(MISSING, path.string());
+        else
+            this->registerTexture(texName.string(), path.string());
+    }
 }
 
 const std::string& TextureRegistry::get(const TextureId id) const

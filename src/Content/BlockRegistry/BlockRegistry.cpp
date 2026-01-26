@@ -2,242 +2,8 @@
 
 BlockRegistry::BlockRegistry()
 {
-    this->registerBlock({
-        "core",
-        "air",
-        true,
-        0.f,
-        RotationType::NONE,
-        {}
-    });
-
-    this->registerBlock({
-        "core",
-        "dirt",
-        false,
-        1.f,
-        RotationType::NONE,
-        uniformBlockFaces("dirt")
-    });
-
-    this->registerBlock({
-        "core",
-        "grass",
-        false,
-        1.f,
-        RotationType::NONE,
-        {
-            {NORTH, "grass_block_side"},
-            {SOUTH, "grass_block_side"},
-            {WEST, "grass_block_side"},
-            {EAST, "grass_block_side"},
-            {UP, "grass_block_top"},
-            {DOWN, "dirt"}
-        }
-    });
-
-    this->registerBlock({
-        "core",
-        "moss",
-        false,
-        1.f,
-        RotationType::NONE,
-        uniformBlockFaces("grass_block_top")
-    });
-
-    this->registerBlock({
-        "core",
-        "cobble",
-        false,
-        2.f,
-        RotationType::NONE,
-        uniformBlockFaces("cobble")
-    });
-
-    this->registerBlock({
-        "core",
-        "stone",
-        false,
-        1.5f,
-        RotationType::NONE,
-        uniformBlockFaces("stone")
-    });
-
-    this->registerBlock({
-        "core",
-        "oak_plank",
-        false,
-        1.5f,
-        RotationType::NONE,
-        uniformBlockFaces("oak_plank")
-    });
-
-    this->registerBlock({
-        "core",
-        "oak_log",
-        false,
-        1.5f,
-        RotationType::AXIS,
-        {
-            {NORTH, "oak_log"},
-            {SOUTH, "oak_log"},
-            {WEST, "oak_log"},
-            {EAST, "oak_log"},
-            {UP, "oak_log_top"},
-            {DOWN, "oak_log_top"}
-        }
-    });
-
-    this->registerBlock({
-        "core",
-        "oak_leaves",
-        true,
-        0.1f,
-        RotationType::NONE,
-        uniformBlockFaces("oak_leaves")
-    });
-
-    this->registerBlock({
-        "core",
-        "coal_block",
-        false,
-        2.f,
-        RotationType::NONE,
-        uniformBlockFaces("coal_block")
-    });
-
-    this->registerBlock({
-        "core",
-        "coal_ore",
-        false,
-        2.f,
-        RotationType::NONE,
-        uniformBlockFaces("coal_ore")
-    });
-
-    this->registerBlock({
-        "core",
-        "iron_block",
-        false,
-        2.f,
-        RotationType::NONE,
-        uniformBlockFaces("iron_block")
-    });
-
-    this->registerBlock({
-        "core",
-        "iron_ore",
-        false,
-        2.f,
-        RotationType::NONE,
-        uniformBlockFaces("iron_ore")
-    });
-
-    this->registerBlock({
-        "core",
-        "gold_block",
-        false,
-        2.f,
-        RotationType::NONE,
-        uniformBlockFaces("gold_block")
-    });
-
-    this->registerBlock({
-        "core",
-        "gold_ore",
-        false,
-        2.f,
-        RotationType::NONE,
-        uniformBlockFaces("gold_ore")
-    });
-
-    this->registerBlock({
-        "core",
-        "redstone_block",
-        false,
-        2.f,
-        RotationType::NONE,
-        uniformBlockFaces("redstone_block")
-    });
-
-    this->registerBlock({
-        "core",
-        "redstone_ore",
-        false,
-        2.f,
-        RotationType::NONE,
-        uniformBlockFaces("redstone_ore")
-    });
-
-    this->registerBlock({
-        "core",
-        "lapis_block",
-        false,
-        2.f,
-        RotationType::NONE,
-        uniformBlockFaces("lapis_block")
-    });
-
-    this->registerBlock({
-        "core",
-        "lapis_ore",
-        false,
-        2.f,
-        RotationType::NONE,
-        uniformBlockFaces("lapis_ore")
-    });
-
-    this->registerBlock({
-        "core",
-        "diamond_block",
-        false,
-        2.f,
-        RotationType::NONE,
-        uniformBlockFaces("diamond_block")
-    });
-
-    this->registerBlock({
-        "core",
-        "diamond_ore",
-        false,
-        2.f,
-        RotationType::NONE,
-        uniformBlockFaces("diamond_ore")
-    });
-
-    this->registerBlock({
-        "core",
-        "emerald_block",
-        false,
-        2.f,
-        RotationType::NONE,
-        uniformBlockFaces("emerald_block")
-    });
-
-    this->registerBlock({
-        "core",
-        "emerald_ore",
-        false,
-        2.f,
-        RotationType::NONE,
-        uniformBlockFaces("emerald_ore")
-    });
-
-    this->registerBlock({
-        "core",
-        "furnace",
-        false,
-        1.f,
-        RotationType::HORIZONTAL,
-        {
-            {NORTH, "furnace_front"},
-            {SOUTH, "furnace_side"},
-            {WEST, "furnace_side"},
-            {EAST, "furnace_side"},
-            {UP, "furnace_top"},
-            {DOWN, "furnace_top"}
-        }
-    });
+    this->registerBlock({"core","air",true,0.f,RotationType::NONE,{}});
+    this->registerBlocksFromFile("core");
 }
 
 BlockId BlockRegistry::registerBlock(const BlockMeta& meta)
@@ -258,6 +24,47 @@ BlockId BlockRegistry::registerBlock(const BlockMeta& meta)
     this->nameToBlockId.emplace(meta.getFullName(), id);
 
     return id;
+}
+
+void BlockRegistry::registerBlocksFromFile(const std::string& registerNamespace)
+{
+    const auto blocksFile = fs::current_path().parent_path().string().append("/resources/data/blocks/blocks.json");
+
+    std::ifstream file(blocksFile);
+    json data = json::parse(file);
+
+    if (data.is_null() || !data.contains("blocks") || data["blocks"].empty())
+        throw std::runtime_error("[BlockRegistry] Loaded file isn't valid : " + blocksFile);
+
+    for (const auto& block : data["blocks"]) {
+        if (!block.contains("textures") || block["textures"].empty())
+            throw std::runtime_error("[BlockRegistry] Block definition requires an array of textures : " + block["name"].get<std::string>());
+
+        const std::vector<std::string> extractedTextures = block["textures"];
+        BlockFaces blockFaces{};
+
+        if (extractedTextures.size() == 1)
+            blockFaces = uniformBlockFaces(extractedTextures[0]);
+        else if (extractedTextures.size() == 6) {
+            blockFaces = {
+                {NORTH, extractedTextures[0]},
+                {SOUTH, extractedTextures[1]},
+                {WEST, extractedTextures[2]},
+                {EAST, extractedTextures[3]},
+                {UP, extractedTextures[4]},
+                {DOWN, extractedTextures[5]},
+            };
+        }
+
+        this->registerBlock({
+            registerNamespace,
+            block["name"].get<std::string>(),
+            block["transparent"].get<bool>(),
+            block["hardness"].get<float>(),
+            block["rotation"].get<RotationType>(),
+            blockFaces
+        });
+    }
 }
 
 const BlockMeta& BlockRegistry::get(const BlockId id) const
