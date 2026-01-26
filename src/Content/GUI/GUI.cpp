@@ -140,7 +140,7 @@ void GUI::createImGuiFrame()
 void GUI::renderImGuiFrame(const Camera& camera, const std::string& selectedBlockName)
 {
     const auto cameraPos = camera.getPosition();
-    const auto facing = forwardToCardinal(camera.getForwardVector());
+    const auto facing = DirectionUtils::forwardVectorToCardinal(camera.getForwardVector());
     const ChunkPos cp{
         static_cast<int>(cameraPos.x) / 16,
         static_cast<int>(cameraPos.y) / 16,
@@ -168,18 +168,4 @@ float GUI::toScreenSpace(const float v, const float minIn, const float maxIn)
 float GUI::percent(const float baseValue, const float percentage)
 {
     return baseValue * (percentage/100.0f);
-}
-
-std::string GUI::forwardToCardinal(const glm::vec3& forwardVector)
-{
-    const glm::vec3 f = glm::normalize(forwardVector);
-    const float ax = abs(f.x);
-    const float ay = abs(f.y);
-    const float az = abs(f.z);
-
-    if (ax > ay && ax > az)
-        return (f.x > 0) ? "EAST" : "WEST";
-    if (ay > az)
-        return (f.y > 0) ? "UP" : "DOWN";
-    return (f.z > 0) ? "SOUTH" : "NORTH";
 }

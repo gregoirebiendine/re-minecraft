@@ -3,7 +3,7 @@
 Player::Player(const BlockRegistry& _blockRegistry) :
     blockRegistry(_blockRegistry),
     camera({8.5f, 18.5f, 8.5f}),
-    selectedMaterial(_blockRegistry.getByName("core:stone"))
+    selectedBlockId(_blockRegistry.getByName("core:stone"))
 {
 }
 
@@ -26,12 +26,14 @@ void Player::handleInputs(const InputState& inputs, const Viewport& viewport, Wo
         world.setBlock(this->lastRaycast.pos.x, this->lastRaycast.pos.y, this->lastRaycast.pos.z, "core:air");
 
     if (inputs.isMouseButtonPressed(Inputs::Mouse::RIGHT) && this->lastRaycast.hit)
-        world.setBlock(this->lastRaycast.previousPos.x, this->lastRaycast.previousPos.y, this->lastRaycast.previousPos.z, this->selectedMaterial);
+        this->placeBlock(world);
 
-    if (inputs.isMouseButtonPressed(Inputs::Mouse::MIDDLE) && this->lastRaycast.hit) {
-        const Material block = world.getBlock(this->lastRaycast.pos.x, this->lastRaycast.pos.y, this->lastRaycast.pos.z);
-        this->selectedMaterial = block;
+    if (inputs.isMouseButtonPressed(Inputs::Mouse::MIDDLE) && this->lastRaycast.hit)
+    {
+        const Material mat = world.getBlock(this->lastRaycast.pos.x, this->lastRaycast.pos.y, this->lastRaycast.pos.z);
+        this->selectedBlockId = BlockData::getBlockId(mat);
     }
+
 
     if (inputs.scroll != Inputs::Scroll::NONE)
         this->changeSelectedMaterial(inputs.scroll);
@@ -58,7 +60,7 @@ void Player::handleInputs(const InputState& inputs, const Viewport& viewport, Wo
 void Player::render() const
 {
     GUI::createImGuiFrame();
-    GUI::renderImGuiFrame(this->camera, this->blockRegistry.get(this->selectedMaterial).getName());
+    GUI::renderImGuiFrame(this->camera, this->blockRegistry.get(this->selectedBlockId).getName());
     this->gui.render();
 }
 
@@ -68,21 +70,44 @@ void Player::renderBlockOutline(const float& aspect) const
         this->gui.renderBlockOutline(this->camera, aspect, this->lastRaycast.pos);
 }
 
-void Player::setSelectedMaterial(const Material newMaterial)
+void Player::setSelectedBlockId(const BlockId id)
 {
-    this->selectedMaterial = newMaterial;
-}
-
-Material Player::getSelectedMaterial() const
-{
-    return this->selectedMaterial;
+    this->selectedBlockId = id;
 }
 
 void Player::changeSelectedMaterial(const Inputs::Scroll dir)
 {
     const auto allBlocks = this->blockRegistry.getAll();
 
-    this->selectedMaterial = (this->selectedMaterial + dir + allBlocks.size()) % allBlocks.size();
-    if (this->selectedMaterial == 0)
-        this->selectedMaterial = (this->selectedMaterial + dir + allBlocks.size()) % allBlocks.size();
+    this->selectedBlockId = (this->selectedBlockId + dir + allBlocks.size()) % allBlocks.size();
+    if (this->selectedBlockId == 0)
+        this->selectedBlockId = (this->selectedBlockId + dir + allBlocks.size()) % allBlocks.size();
+}
+
+void Player::placeBlock(World& world) const
+{
+    const auto& selectedBlockMeta = this->blockRegistry.get(this->selectedBlockId);
+    BlockRotation rotation = 0;
+
+    switch (selectedBlockMeta.rotation) {
+        case RotationType::NONE:
+            rotation = 0;
+            break;
+
+        case RotationType::HORIZONTAL:
+        {
+            const auto playerFacing = DirectionUtils::getHorizontalFacing(
+                this->camera.getForwardVector()
+            );
+            rotation = DirectionUtils::getOppositeFacing(playerFacing);
+        }
+            break;
+
+        case RotationType::AXIS:
+            rotation = DirectionUtils::getAxisFromHitFace(this->lastRaycast.hitFace);
+            break;
+    }
+
+    const auto packedMaterial = BlockData::packBlockData(selectedBlockId, rotation);
+    world.setBlock(this->lastRaycast.previousPos.x, this->lastRaycast.previousPos.y, this->lastRaycast.previousPos.z, packedMaterial);
 }

@@ -15,6 +15,7 @@
 #include "Shader.h"
 #include "World.h"
 #include "Raycast.h"
+#include "Material.h"
 
 class Camera {
     static constexpr float SPEED = 8.f;
@@ -47,7 +48,7 @@ class Camera {
         [[nodiscard]] bool getMouseCapture() const;
         void toggleMouseCapture();
 
-        void setFOV(float _fov);
+        void setFOV(uint8_t _fov);
         void setPosition(glm::vec3 newPos);
         [[nodiscard]] glm::vec3 getPosition() const;
         [[nodiscard]] glm::vec2 getRotation() const;

@@ -88,27 +88,28 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
     const auto [north, south, east, west, up, down] = world.getChunkManager().getNeighbors(job.pos);
 
     NeighborData neighbors[6];
-    neighbors[0] = { north != nullptr, north ? north->getBlockSnapshot() : std::array<Material, Chunk::VOLUME>{} };
-    neighbors[1] = { south != nullptr, south ? south->getBlockSnapshot() : std::array<Material, Chunk::VOLUME>{} };
-    neighbors[2] = { east  != nullptr, east  ? east->getBlockSnapshot()  : std::array<Material, Chunk::VOLUME>{} };
-    neighbors[3] = { west  != nullptr, west  ? west->getBlockSnapshot()  : std::array<Material, Chunk::VOLUME>{} };
-    neighbors[4] = { up    != nullptr, up    ? up->getBlockSnapshot()    : std::array<Material, Chunk::VOLUME>{} };
-    neighbors[5] = { down  != nullptr, down  ? down->getBlockSnapshot()  : std::array<Material, Chunk::VOLUME>{} };
+    neighbors[0] = { north != nullptr, north ? north->getBlockSnapshot() : BlockStorage{} };
+    neighbors[1] = { south != nullptr, south ? south->getBlockSnapshot() : BlockStorage{} };
+    neighbors[2] = { east  != nullptr, east  ? east->getBlockSnapshot()  : BlockStorage{} };
+    neighbors[3] = { west  != nullptr, west  ? west->getBlockSnapshot()  : BlockStorage{} };
+    neighbors[4] = { up    != nullptr, up    ? up->getBlockSnapshot()    : BlockStorage{} };
+    neighbors[5] = { down  != nullptr, down  ? down->getBlockSnapshot()  : BlockStorage{} };
 
 
-    const auto& textureRegistry = world.getTextureRegistry();
+    const auto& textureRegistry = this->world.getTextureRegistry();
 
     MeshData data;
     data.reserve(36 * Chunk::VOLUME);
 
     for (int i = 0; i < Chunk::VOLUME; i++) {
         auto [x, y, z] = ChunkCoords::indexToLocalCoords(i);
-        const Material mat = blockData[i];
+        const BlockId blockId = BlockData::getBlockId(blockData[i]);
 
-        if (mat == 0) // Skip AIR
+        if (blockId == 0) // Skip AIR
             continue;
 
-        const BlockMeta& meta = world.getBlockRegistry().get(mat);
+        const BlockMeta& meta = world.getBlockRegistry().get(blockId);
+        const BlockRotation rotation = BlockData::getRotation(blockData[i]);
 
         // NORTH face
         if (isAirAtSnapshot(blockData, neighbors, x, y, z - 1)) {
@@ -116,7 +117,8 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
                 data,
                 {x, y, z},
                 NORTH,
-                textureRegistry.getByName(meta.getFaceTexture(NORTH))
+                textureRegistry.getByName(getTextureFromRotation(meta, NORTH, rotation)),
+                rotation
             );
         }
 
@@ -126,7 +128,8 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
                 data,
                 {x, y, z},
                 SOUTH,
-                textureRegistry.getByName(meta.getFaceTexture(SOUTH))
+                textureRegistry.getByName(getTextureFromRotation(meta, SOUTH, rotation)),
+                rotation
             );
         }
 
@@ -136,7 +139,8 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
                  data,
                  {x, y, z},
                  WEST,
-                 textureRegistry.getByName(meta.getFaceTexture(WEST))
+                 textureRegistry.getByName(getTextureFromRotation(meta, WEST, rotation)),
+                 rotation
             );
         }
 
@@ -146,7 +150,8 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
                  data,
                  {x, y, z},
                  EAST,
-                 textureRegistry.getByName(meta.getFaceTexture(EAST))
+                 textureRegistry.getByName(getTextureFromRotation(meta, EAST, rotation)),
+                 rotation
             );
         }
 
@@ -156,7 +161,8 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
                  data,
                  {x, y, z},
                  UP,
-                 textureRegistry.getByName(meta.getFaceTexture(UP))
+                 textureRegistry.getByName(getTextureFromRotation(meta, UP, rotation)),
+                 rotation
             );
         }
 
@@ -166,7 +172,8 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
                  data,
                  {x, y, z},
                  DOWN,
-                 textureRegistry.getByName(meta.getFaceTexture(DOWN))
+                 textureRegistry.getByName(getTextureFromRotation(meta, DOWN, rotation)),
+                 rotation
             );
         }
     }
@@ -188,7 +195,7 @@ const ChunkMesh& ChunkMeshManager::getMesh(const ChunkPos &pos) const
 
 // Statics
 bool ChunkMeshManager::isAirAtSnapshot(
-    const std::array<Material, Chunk::VOLUME>& blockData,
+    const BlockStorage& blockData,
     const NeighborData neighbors[6],
     const int x, const int y, const int z
 )
@@ -198,38 +205,37 @@ bool ChunkMeshManager::isAirAtSnapshot(
         y >= 0 && y < Chunk::SIZE &&
         z >= 0 && z < Chunk::SIZE
     )
-        return blockData[ChunkCoords::localCoordsToIndex(x, y, z)] == 0;
+        return BlockData::getBlockId(blockData[ChunkCoords::localCoordsToIndex(x, y, z)]) == 0;
 
     // Check neighbors
     if (z < 0) {  // NORTH
         if (!neighbors[0].exists) return true;
-        return neighbors[0].blocks[ChunkCoords::localCoordsToIndex(x, y, z + Chunk::SIZE)] == 0;
+        return BlockData::getBlockId(neighbors[0].blocks[ChunkCoords::localCoordsToIndex(x, y, z + Chunk::SIZE)]) == 0;
     }
     if (z >= Chunk::SIZE) {  // SOUTH
         if (!neighbors[1].exists) return true;
-        return neighbors[1].blocks[ChunkCoords::localCoordsToIndex(x, y, z - Chunk::SIZE)] == 0;
+        return BlockData::getBlockId(neighbors[1].blocks[ChunkCoords::localCoordsToIndex(x, y, z - Chunk::SIZE)]) == 0;
     }
     if (x >= Chunk::SIZE) {  // EAST
         if (!neighbors[2].exists) return true;
-        return neighbors[2].blocks[ChunkCoords::localCoordsToIndex(x - Chunk::SIZE, y, z)] == 0;
+        return BlockData::getBlockId(neighbors[2].blocks[ChunkCoords::localCoordsToIndex(x - Chunk::SIZE, y, z)]) == 0;
     }
     if (x < 0) {  // WEST
         if (!neighbors[3].exists) return true;
-        return neighbors[3].blocks[ChunkCoords::localCoordsToIndex(x + Chunk::SIZE, y, z)] == 0;
+        return BlockData::getBlockId(neighbors[3].blocks[ChunkCoords::localCoordsToIndex(x + Chunk::SIZE, y, z)]) == 0;
     }
     if (y >= Chunk::SIZE) {  // UP
         if (!neighbors[4].exists) return true;
-        return neighbors[4].blocks[ChunkCoords::localCoordsToIndex(x, y - Chunk::SIZE, z)] == 0;
+        return BlockData::getBlockId(neighbors[4].blocks[ChunkCoords::localCoordsToIndex(x, y - Chunk::SIZE, z)]) == 0;
     }
     if (y < 0) {  // DOWN
         if (!neighbors[5].exists) return true;
-        return neighbors[5].blocks[ChunkCoords::localCoordsToIndex(x, y + Chunk::SIZE, z)] == 0;
+        return BlockData::getBlockId(neighbors[5].blocks[ChunkCoords::localCoordsToIndex(x, y + Chunk::SIZE, z)]) == 0;
     }
-
     return true;
 }
 
-void ChunkMeshManager::buildFaceMesh(MeshData& mesh, const glm::ivec3& pos, const MaterialFace face, uint16_t texId, const uint8_t rotation)
+void ChunkMeshManager::buildFaceMesh(MeshData& mesh, const glm::ivec3& pos, const MaterialFace face, uint16_t texId, const BlockRotation rotation)
 {
     static constexpr uint8_t FACE_VERTEX_DATA[6][6][5] = {
         // NORTH face (-Z)
@@ -262,4 +268,13 @@ void ChunkMeshManager::buildFaceMesh(MeshData& mesh, const glm::ivec3& pos, cons
             texId                               // texture
         );
     }
+}
+
+std::string ChunkMeshManager::getTextureFromRotation(const BlockMeta& meta, const MaterialFace face, const BlockRotation rotation)
+{
+    if (meta.rotation == RotationType::NONE)
+        return meta.getFaceTexture(face);
+    if (meta.rotation == RotationType::HORIZONTAL)
+        return meta.getFaceTexture(BlockData::remapFaceForRotation(face, rotation));
+    return meta.getFaceTexture(BlockData::remapFaceForAxisRotation(face, rotation));
 }

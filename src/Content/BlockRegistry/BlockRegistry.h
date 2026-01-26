@@ -5,6 +5,7 @@
 #include <vector>
 #include <unordered_map>
 #include <map>
+#include <ranges>
 #include <limits>
 
 #include "Material.h"
@@ -12,12 +13,19 @@
 
 using BlockFaces = std::map<MaterialFace, std::string>;
 
+enum class RotationType : uint8_t {
+    NONE,            // No rotation (dirt, stone, etc.)
+    HORIZONTAL,      // Rotate on Y-axis only (furnace, chest)
+    AXIS             // Rotate based on placement face (logs, pillars)
+};
+
 struct BlockMeta
 {
     std::string registerNamespace; // "core", "mod_name", etc
     std::string blockName; // "air", "dirt", "cobble", etc
     bool transparent;
     float hardness;
+    RotationType rotation;
     BlockFaces blockFaces;
 
     [[nodiscard]] std::string getFullName() const
@@ -48,19 +56,19 @@ struct BlockMeta
 class BlockRegistry
 {
     std::vector<BlockMeta> blocks;
-    std::unordered_map<std::string, Material> nameToMaterialId;
+    std::unordered_map<std::string, BlockId> nameToBlockId;
 
     static BlockFaces uniformBlockFaces(std::string texture);
 
     public:
         BlockRegistry();
 
-        Material registerBlock(const BlockMeta& meta);
-        const BlockMeta& get(Material id) const;
-        Material getByName(const std::string& name) const;
-        bool isEqual(Material id, const std::string& name) const;
+        BlockId registerBlock(const BlockMeta& meta);
+        const BlockMeta& get(BlockId id) const;
+        BlockId getByName(const std::string& name) const;
+        bool isEqual(BlockId id, const std::string& name) const;
 
-        std::vector<Material> getAll() const;
+        std::vector<BlockId> getAll() const;
 };
 
 #endif //RE_MINECRAFT_BLOCKREGISTRY_H

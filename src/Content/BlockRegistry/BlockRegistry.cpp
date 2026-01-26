@@ -1,7 +1,5 @@
 #include "BlockRegistry.h"
 
-#include <ranges>
-
 BlockRegistry::BlockRegistry()
 {
     this->registerBlock({
@@ -9,6 +7,7 @@ BlockRegistry::BlockRegistry()
         "air",
         true,
         0.f,
+        RotationType::NONE,
         {}
     });
 
@@ -17,6 +16,7 @@ BlockRegistry::BlockRegistry()
         "dirt",
         false,
         1.f,
+        RotationType::NONE,
         uniformBlockFaces("dirt")
     });
 
@@ -25,13 +25,14 @@ BlockRegistry::BlockRegistry()
         "grass",
         false,
         1.f,
+        RotationType::NONE,
         {
-            {MaterialFace::NORTH, "grass_block_side"},
-            {MaterialFace::SOUTH, "grass_block_side"},
-            {MaterialFace::WEST, "grass_block_side"},
-            {MaterialFace::EAST, "grass_block_side"},
-            {MaterialFace::UP, "grass_block_top"},
-            {MaterialFace::DOWN, "dirt"}
+            {NORTH, "grass_block_side"},
+            {SOUTH, "grass_block_side"},
+            {WEST, "grass_block_side"},
+            {EAST, "grass_block_side"},
+            {UP, "grass_block_top"},
+            {DOWN, "dirt"}
         }
     });
 
@@ -40,6 +41,7 @@ BlockRegistry::BlockRegistry()
         "moss",
         false,
         1.f,
+        RotationType::NONE,
         uniformBlockFaces("grass_block_top")
     });
 
@@ -48,6 +50,7 @@ BlockRegistry::BlockRegistry()
         "cobble",
         false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("cobble")
     });
 
@@ -56,6 +59,7 @@ BlockRegistry::BlockRegistry()
         "stone",
         false,
         1.5f,
+        RotationType::NONE,
         uniformBlockFaces("stone")
     });
 
@@ -64,6 +68,7 @@ BlockRegistry::BlockRegistry()
         "oak_plank",
         false,
         1.5f,
+        RotationType::NONE,
         uniformBlockFaces("oak_plank")
     });
 
@@ -72,13 +77,14 @@ BlockRegistry::BlockRegistry()
         "oak_log",
         false,
         1.5f,
+        RotationType::AXIS,
         {
-            {MaterialFace::NORTH, "oak_log"},
-            {MaterialFace::SOUTH, "oak_log"},
-            {MaterialFace::WEST, "oak_log"},
-            {MaterialFace::EAST, "oak_log"},
-            {MaterialFace::UP, "oak_log_top"},
-            {MaterialFace::DOWN, "oak_log_top"}
+            {NORTH, "oak_log"},
+            {SOUTH, "oak_log"},
+            {WEST, "oak_log"},
+            {EAST, "oak_log"},
+            {UP, "oak_log_top"},
+            {DOWN, "oak_log_top"}
         }
     });
 
@@ -87,6 +93,7 @@ BlockRegistry::BlockRegistry()
         "oak_leaves",
         true,
         0.1f,
+        RotationType::NONE,
         uniformBlockFaces("oak_leaves")
     });
 
@@ -95,6 +102,7 @@ BlockRegistry::BlockRegistry()
         "coal_block",
         false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("coal_block")
     });
 
@@ -103,6 +111,7 @@ BlockRegistry::BlockRegistry()
         "coal_ore",
         false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("coal_ore")
     });
 
@@ -111,6 +120,7 @@ BlockRegistry::BlockRegistry()
         "iron_block",
         false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("iron_block")
     });
 
@@ -119,6 +129,7 @@ BlockRegistry::BlockRegistry()
         "iron_ore",
         false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("iron_ore")
     });
 
@@ -127,6 +138,7 @@ BlockRegistry::BlockRegistry()
         "gold_block",
         false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("gold_block")
     });
 
@@ -135,6 +147,7 @@ BlockRegistry::BlockRegistry()
         "gold_ore",
         false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("gold_ore")
     });
 
@@ -143,6 +156,7 @@ BlockRegistry::BlockRegistry()
         "redstone_block",
         false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("redstone_block")
     });
 
@@ -151,6 +165,7 @@ BlockRegistry::BlockRegistry()
         "redstone_ore",
         false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("redstone_ore")
     });
 
@@ -159,6 +174,7 @@ BlockRegistry::BlockRegistry()
         "lapis_block",
         false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("lapis_block")
     });
 
@@ -167,6 +183,7 @@ BlockRegistry::BlockRegistry()
         "lapis_ore",
         false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("lapis_ore")
     });
 
@@ -175,6 +192,7 @@ BlockRegistry::BlockRegistry()
         "diamond_block",
         false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("diamond_block")
     });
 
@@ -183,6 +201,7 @@ BlockRegistry::BlockRegistry()
         "diamond_ore",
         false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("diamond_ore")
     });
 
@@ -191,6 +210,7 @@ BlockRegistry::BlockRegistry()
         "emerald_block",
         false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("emerald_block")
     });
 
@@ -199,72 +219,88 @@ BlockRegistry::BlockRegistry()
         "emerald_ore",
         false,
         2.f,
+        RotationType::NONE,
         uniformBlockFaces("emerald_ore")
+    });
+
+    this->registerBlock({
+        "core",
+        "furnace",
+        false,
+        1.f,
+        RotationType::HORIZONTAL,
+        {
+            {NORTH, "furnace_front"},
+            {SOUTH, "furnace_side"},
+            {WEST, "furnace_side"},
+            {EAST, "furnace_side"},
+            {UP, "furnace_top"},
+            {DOWN, "furnace_top"}
+        }
     });
 }
 
-Material BlockRegistry::registerBlock(const BlockMeta& meta)
+BlockId BlockRegistry::registerBlock(const BlockMeta& meta)
 {
     // Prevent duplication
-    auto it = this->nameToMaterialId.find(meta.getFullName());
-    if (it != this->nameToMaterialId.end()) {
+    auto it = this->nameToBlockId.find(meta.getFullName());
+    if (it != this->nameToBlockId.end()) {
         return it->second; // already registered
     }
 
     // Enforce max ID range
-    if (this->blocks.size() >= std::numeric_limits<Material>::max()) {
-        throw std::runtime_error("BlockRegistry overflow");
-    }
+    if (this->blocks.size() >= std::numeric_limits<BlockId>::max())
+        throw std::runtime_error("BlockRegistry overflow. Farfield has reached its maximum block storage.");
 
-    auto id = static_cast<Material>(blocks.size());
+    auto id = static_cast<BlockId>(blocks.size());
 
     this->blocks.push_back(meta);
-    this->nameToMaterialId.emplace(meta.getFullName(), id);
+    this->nameToBlockId.emplace(meta.getFullName(), id);
 
     return id;
 }
 
-const BlockMeta& BlockRegistry::get(const Material id) const
+const BlockMeta& BlockRegistry::get(const BlockId id) const
 {
     if (id >= this->blocks.size())
-        throw std::out_of_range("Invalid Material");
+        throw std::out_of_range("Out of range BlockID. This means this block id is not registered in the Engine");
     return this->blocks[id];
 }
 
-Material BlockRegistry::getByName(const std::string& name) const
+BlockId BlockRegistry::getByName(const std::string& name) const
 {
-    if (!this->nameToMaterialId.contains(name))
+    if (!this->nameToBlockId.contains(name))
         return 0;
-    return this->nameToMaterialId.at(name);
+    return this->nameToBlockId.at(name);
 }
 
-bool BlockRegistry::isEqual(const Material id, const std::string& name) const
+bool BlockRegistry::isEqual(const BlockId id, const std::string& name) const
 {
     if (id >= this->blocks.size())
-        throw std::out_of_range("Invalid Material");
+        throw std::out_of_range("Out of range BlockID. This means this block id is not registered in the Engine");
 
     return this->blocks[id].getFullName() == name;
 }
 
-std::vector<Material> BlockRegistry::getAll() const
+std::vector<BlockId> BlockRegistry::getAll() const
 {
-    std::vector<Material> materials;
+    std::vector<BlockId> allBlocks;
 
-    materials.reserve(this->nameToMaterialId.size());
-    for (const auto& id : this->nameToMaterialId | std::views::values)
-        materials.push_back(id);
-    return materials;
+    allBlocks.reserve(this->nameToBlockId.size());
+    for (const auto& id : this->nameToBlockId | std::views::values)
+        allBlocks.push_back(id);
+    return allBlocks;
 }
 
 // Statics
 BlockFaces BlockRegistry::uniformBlockFaces(std::string texture)
 {
     return {
-        {MaterialFace::NORTH, texture},
-        {MaterialFace::SOUTH, texture},
-        {MaterialFace::WEST, texture},
-        {MaterialFace::EAST, texture},
-        {MaterialFace::UP, texture},
-        {MaterialFace::DOWN, texture}
+        {NORTH, texture},
+        {SOUTH, texture},
+        {WEST, texture},
+        {EAST, texture},
+        {UP, texture},
+        {DOWN, texture}
     };
 }
