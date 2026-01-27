@@ -27,18 +27,19 @@ void ChunkMeshManager::requestRebuild(Chunk& chunk, const float distance)
 
 void ChunkMeshManager::scheduleMeshing(const glm::vec3& cameraPos)
 {
+    auto lock = world.getChunkManager().acquireReadLock();
     for (auto&[pos, chunk] : world.getChunkManager().getChunks()) {
-        const bool needsFirstMesh = chunk.getState() == ChunkState::GENERATED;
-        const bool needsRemesh = chunk.getState() == ChunkState::READY && chunk.isDirty();
+        const bool needsFirstMesh = chunk->getState() == ChunkState::GENERATED;
+        const bool needsRemesh = chunk->getState() == ChunkState::READY && chunk->isDirty();
 
         if (!needsFirstMesh && !needsRemesh)
             continue;
 
         if (needsFirstMesh)
-            chunk.setState(ChunkState::MESHING);
+            chunk->setState(ChunkState::MESHING);
 
-        chunk.bumpGenerationID();
-        chunk.setDirty(false);
+        chunk->bumpGenerationID();
+        chunk->setDirty(false);
 
         const auto center = glm::vec3(
             pos.x * Chunk::SIZE + Chunk::SIZE / 2.0f,
@@ -49,7 +50,7 @@ void ChunkMeshManager::scheduleMeshing(const glm::vec3& cameraPos)
         workers.enqueue({
             pos,
             glm::distance(cameraPos, center),
-            chunk.getGenerationID()
+            chunk->getGenerationID()
         });
     }
 }

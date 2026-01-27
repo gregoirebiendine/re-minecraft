@@ -23,7 +23,7 @@ class World {
     ChunkMeshManager meshManager;
 
     public:
-        explicit World(BlockRegistry _blockRegistry, const TextureRegistry& _textureRegistry);
+        explicit World(const BlockRegistry& _blockRegistry, const TextureRegistry& _textureRegistry);
 
         const BlockRegistry& getBlockRegistry() const;
         const TextureRegistry& getTextureRegistry() const;

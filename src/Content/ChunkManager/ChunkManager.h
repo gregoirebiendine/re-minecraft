@@ -10,6 +10,7 @@
 #include <ranges>
 #include <iostream>
 #include <utility>
+#include <shared_mutex>
 
 #include <glm/glm.hpp>
 
@@ -20,7 +21,7 @@
 #include "ChunkNeighbors.h"
 #include "Frustum.h"
 
-using ChunkMap = std::unordered_map<ChunkPos, Chunk, ChunkPosHash>;
+using ChunkMap = std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash>;
 
 struct ChunkJob {
     ChunkPos pos;
@@ -33,10 +34,14 @@ struct ChunkJob {
 };
 
 class ChunkManager {
-    std::unordered_map<ChunkPos, Chunk, ChunkPosHash> chunks;
+    const BlockRegistry& blockRegistry;
+
+    std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash> chunks;
+    mutable std::shared_mutex chunksMutex;
     ThreadPool<ChunkJob> workers;
-    BlockRegistry blockRegistry;
+
     Frustum frustum{};
+    TerrainGenerator terrainGenerator;
 
     uint8_t viewDistance{8};
     uint8_t unloadDistance{10};
@@ -44,8 +49,9 @@ class ChunkManager {
     void generateJob(const ChunkJob& job);
 
     public:
-        explicit ChunkManager(BlockRegistry _blockRegistry);
+        explicit ChunkManager(const BlockRegistry& _blockRegistry);
 
+        [[nodiscard]] std::shared_lock<std::shared_mutex> acquireReadLock() const;
         [[nodiscard]] ChunkMap& getChunks();
         [[nodiscard]] Chunk* getChunk(int cx, int cy, int cz);
         [[nodiscard]] std::vector<Chunk*> getRenderableChunks();

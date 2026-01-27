@@ -88,6 +88,23 @@ void Chunk::fill(const glm::ivec3 from, const glm::ivec3 to, const Material mat)
     this->pendingChanges.store(true, std::memory_order_release);
 }
 
+void Chunk::setBlockDirect(const uint8_t x, const uint8_t y, const uint8_t z, const Material mat)
+{
+    this->blockBuffers[0][ChunkCoords::localCoordsToIndex(x, y, z)] = mat;
+}
+
+void Chunk::fillDirect(const glm::ivec3 from, const glm::ivec3 to, const Material mat)
+{
+    for (int z = from.z; z <= to.z; ++z) {
+        for (int y = from.y; y <= to.y; ++y) {
+            for (int x = from.x; x <= to.x; ++x) {
+                this->setBlockDirect(x, y, z, mat);
+            }
+        }
+    }
+}
+
+
 bool Chunk::swapBuffers()
 {
     if (!pendingChanges.load(std::memory_order_acquire))
@@ -112,13 +129,6 @@ bool Chunk::swapBuffers()
 bool Chunk::hasPendingChanges() const
 {
     return pendingChanges.load(std::memory_order_acquire);
-}
-
-
-
-void Chunk::setBlockDirect(const uint8_t x, const uint8_t y, const uint8_t z, const Material mat)
-{
-    this->blockBuffers[0][ChunkCoords::localCoordsToIndex(x, y, z)] = mat;
 }
 
 void Chunk::finalizeGeneration()
