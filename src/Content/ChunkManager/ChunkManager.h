@@ -15,6 +15,7 @@
 #include <glm/glm.hpp>
 
 #include "TerrainGenerator.h"
+#include "PrefabRegistry.h"
 #include "ThreadPool.h"
 #include "ChunkPos.h"
 #include "Chunk.h"
@@ -49,7 +50,7 @@ class ChunkManager {
     void generateJob(const ChunkJob& job);
 
     public:
-        explicit ChunkManager(const BlockRegistry& _blockRegistry);
+        explicit ChunkManager(const BlockRegistry& _blockRegistry, const PrefabRegistry& _prefabRegistry);
 
         [[nodiscard]] std::shared_lock<std::shared_mutex> acquireReadLock() const;
         [[nodiscard]] ChunkMap& getChunks();

@@ -1,9 +1,9 @@
 #include "ChunkManager.h"
 
-ChunkManager::ChunkManager(const BlockRegistry& _blockRegistry) :
+ChunkManager::ChunkManager(const BlockRegistry& _blockRegistry, const PrefabRegistry& _prefabRegistry) :
     blockRegistry(_blockRegistry),
     workers(std::thread::hardware_concurrency()),
-    terrainGenerator(_blockRegistry)
+    terrainGenerator(_blockRegistry, _prefabRegistry)
 {
     workers.setWorker([this](const ChunkJob &job) {
         generateJob(job);

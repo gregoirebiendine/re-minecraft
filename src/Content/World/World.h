@@ -10,6 +10,7 @@
 
 #include "BlockRegistry.h"
 #include "TextureRegistry.h"
+#include "PrefabRegistry.h"
 #include "ChunkManager.h"
 #include "ChunkMeshManager.h"
 #include "Shader.h"
@@ -23,7 +24,7 @@ class World {
     ChunkMeshManager meshManager;
 
     public:
-        explicit World(const BlockRegistry& _blockRegistry, const TextureRegistry& _textureRegistry);
+        explicit World(const BlockRegistry& _blockRegistry, const TextureRegistry& _textureRegistry, const PrefabRegistry& _prefabRegistry);
 
         const BlockRegistry& getBlockRegistry() const;
         const TextureRegistry& getTextureRegistry() const;

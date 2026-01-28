@@ -1,6 +1,7 @@
 #include "Engine.h"
 
-Engine::Engine()
+Engine::Engine() :
+    prefabRegistry(blockRegistry)
 {
     #ifdef _WIN32
     this->frameTimer = CreateWaitableTimerExW(
@@ -19,7 +20,7 @@ Engine::Engine()
     // Instantiate members
     this->textureRegistry.createTextures();
     this->player = std::make_unique<Player>(this->blockRegistry);
-    this->world = std::make_unique<World>(this->blockRegistry, this->textureRegistry);
+    this->world = std::make_unique<World>(this->blockRegistry, this->textureRegistry, this->prefabRegistry);
 
     // Apply settings to classes
     const auto settings = this->viewport.getSettings();
