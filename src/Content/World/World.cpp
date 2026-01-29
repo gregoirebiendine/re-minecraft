@@ -4,8 +4,8 @@ World::World(const BlockRegistry& _blockRegistry, const TextureRegistry& _textur
     blockRegistry(_blockRegistry),
     textureRegistry(_textureRegistry),
     shader(
-    "../resources/shaders/World/world.vert",
-    "../resources/shaders/World/world.frag"
+        "../resources/shaders/World/world.vert",
+        "../resources/shaders/World/world.frag"
     ),
     chunkManager(_blockRegistry, _prefabRegistry),
     meshManager(*this)

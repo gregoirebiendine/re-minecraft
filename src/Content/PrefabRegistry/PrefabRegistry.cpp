@@ -87,6 +87,14 @@ const PrefabMeta& PrefabRegistry::get(const PrefabId id) const
     return this->prefabs[id];
 }
 
+const PrefabMeta &PrefabRegistry::get(const std::string &name) const {
+    const auto it = this->nameToPrefabId.find(name);
+
+    if (it == this->nameToPrefabId.end())
+        throw std::runtime_error("[PrefabRegistry] PrefabId does not exist.");
+    return this->prefabs[it->second];
+}
+
 PrefabId PrefabRegistry::getByName(const std::string& name) const
 {
     if (!this->nameToPrefabId.contains(name))

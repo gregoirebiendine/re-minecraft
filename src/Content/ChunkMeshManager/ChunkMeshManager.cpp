@@ -29,7 +29,7 @@ void ChunkMeshManager::scheduleMeshing(const glm::vec3& cameraPos)
 {
     auto lock = world.getChunkManager().acquireReadLock();
     for (auto&[pos, chunk] : world.getChunkManager().getChunks()) {
-        const bool needsFirstMesh = chunk->getState() == ChunkState::GENERATED;
+        const bool needsFirstMesh = chunk->getState() == ChunkState::DECOR_DONE;
         const bool needsRemesh = chunk->getState() == ChunkState::READY && chunk->isDirty();
 
         if (!needsFirstMesh && !needsRemesh)

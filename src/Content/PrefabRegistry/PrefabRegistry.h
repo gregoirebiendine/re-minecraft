@@ -36,12 +36,13 @@ class PrefabRegistry
     std::vector<PrefabMeta> prefabs;
     std::unordered_map<std::string, PrefabId> nameToPrefabId;
 
+    PrefabId registerPrefab(const std::string& prefabFile);
+
     public:
         explicit PrefabRegistry(const BlockRegistry& _blockRegistry);
 
-        PrefabId registerPrefab(const std::string& prefabFile);
-
         const PrefabMeta& get(PrefabId id) const;
+        const PrefabMeta& get(const std::string& name) const;
         PrefabId getByName(const std::string& name) const;
 };
 

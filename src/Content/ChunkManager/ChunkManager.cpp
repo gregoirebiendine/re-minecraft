@@ -2,11 +2,16 @@
 
 ChunkManager::ChunkManager(const BlockRegistry& _blockRegistry, const PrefabRegistry& _prefabRegistry) :
     blockRegistry(_blockRegistry),
-    workers(std::thread::hardware_concurrency()),
+    terrainWorkers(std::thread::hardware_concurrency()),
+    decorationWorkers(std::thread::hardware_concurrency()),
     terrainGenerator(_blockRegistry, _prefabRegistry)
 {
-    workers.setWorker([this](const ChunkJob &job) {
-        generateJob(job);
+    this->terrainWorkers.setWorker([this](const ChunkJob &job) {
+        terrainJob(job);
+    });
+
+    this->decorationWorkers.setWorker([this](const ChunkJob &job) {
+        decorationJob(job);
     });
 }
 
@@ -26,25 +31,100 @@ void ChunkManager::requestChunk(const ChunkPos& pos)
     Chunk& chunk = *it->second;
 
     chunk.bumpGenerationID();
-    chunk.setState(ChunkState::GENERATING);
+    chunk.setState(ChunkState::TERRAIN_PENDING);
 
-    workers.enqueue({pos, 0.f, chunk.getGenerationID()});
+    this->terrainWorkers.enqueue({pos, static_cast<float>(pos.y), chunk.getGenerationID()});
 }
 
-void ChunkManager::generateJob(const ChunkJob& job)
+void ChunkManager::terrainJob(const ChunkJob& job)
 {
     Chunk* chunk = getChunk(job.pos.x, job.pos.y, job.pos.z);
 
+    if (!chunk || chunk->getGenerationID() != job.generationID)
+        return;
+
+    chunk->setState(ChunkState::TERRAIN_GENERATING);
+    this->terrainGenerator.generate(*chunk);
+    chunk->setState(ChunkState::TERRAIN_DONE);
+
+    // Queue neighbors for decoration
+    for (int dy = -1; dy <= 1; dy++) {
+        for (int dz = -1; dz <= 1; dz++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                this->tryQueueDecoration({job.pos.x + dx, job.pos.y + dy, job.pos.z + dz});
+            }
+        }
+    }
+}
+
+void ChunkManager::decorationJob(const ChunkJob& job)
+{
+    Chunk* chunk = this->getChunk(job.pos.x, job.pos.y, job.pos.z);
+
+    if (!chunk || chunk->getGenerationID() != job.generationID)
+        return;
+
+    if (!tryAcquireDecorationLock(job.pos)) {
+        chunk->setState(ChunkState::TERRAIN_DONE);
+        tryQueueDecoration(job.pos);
+        return;
+    }
+
+    chunk->setState(ChunkState::DECOR_GENERATING);
+
+    NeighborAccess neighbors(job.pos, [this](const ChunkPos& p) {
+        return this->getChunk(p.x, p.y, p.z);
+    });
+
+    if (!neighbors.allNeighborsReady()) {
+        chunk->setState(ChunkState::TERRAIN_DONE);
+        releaseDecorationLock(job.pos);
+        return;
+    }
+
+    this->terrainGenerator.decorate(*chunk, neighbors);
+    chunk->setState(ChunkState::DECOR_DONE);
+
+    releaseDecorationLock(job.pos);
+
+    chunk->finalizeGeneration();
+}
+
+void ChunkManager::tryQueueDecoration(const ChunkPos& pos)
+{
+    Chunk* chunk = this->getChunk(pos.x, pos.y, pos.z);
+
     if (!chunk)
         return;
-
-    if (chunk->getGenerationID() != job.generationID)
+    if (chunk->getState() != ChunkState::TERRAIN_DONE)
         return;
 
-    this->terrainGenerator.generate(*chunk);
+    if (this->canDecorate(pos)) {
+        chunk->setState(ChunkState::DECOR_PENDING);
+        this->decorationWorkers.enqueue({pos, static_cast<float>(pos.y), chunk->getGenerationID()});
+    }
+}
 
-    chunk->setState(ChunkState::GENERATED);
-    this->rebuildNeighbors(job.pos);
+bool ChunkManager::canDecorate(const ChunkPos& pos)
+{
+    for (int dy = -1; dy <= 1; dy++) {
+        for (int dz = -1; dz <= 1; dz++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                const int neighborY = pos.y + dy;
+                const Chunk* neighbor = this->getChunk(pos.x + dx, neighborY, pos.z + dz);
+
+                if (!neighbor) {
+                    if (neighborY >= 0)
+                        return false;
+                    continue;
+                }
+
+                if (!hasTerrainComplete(neighbor->getState()))
+                    return false;
+            }
+        }
+    }
+    return true;
 }
 
 Chunk* ChunkManager::getChunk(const int cx, const int cy, const int cz)
@@ -67,8 +147,8 @@ void ChunkManager::rebuildNeighbors(const ChunkPos& pos)
 
         if (n->getState() == ChunkState::READY)
             n->setDirty(true);
-        else if (n->getState() >= ChunkState::GENERATED)
-            n->setState(ChunkState::GENERATED);
+        else if (n->getState() >= ChunkState::DECOR_DONE)
+            n->setState(ChunkState::DECOR_DONE);
     }
 }
 
@@ -85,9 +165,8 @@ void ChunkManager::updateStreaming(const glm::vec3& cameraPos)
 
     wanted.reserve((2 * this->viewDistance + 1) * (2 * this->viewDistance + 1) * 5);
 
-    // First pass: collect wanted positions (no lock needed for local set)
     for (int z = -this->viewDistance; z <= this->viewDistance; ++z) {
-        for (int y = -2; y <= 3; ++y) {
+        for (int y = -3; y <= 3; ++y) {
             const int generatedY = cameraChunk.y + y;
 
             for (int x = -this->viewDistance; x <= this->viewDistance; ++x) {
@@ -102,12 +181,12 @@ void ChunkManager::updateStreaming(const glm::vec3& cameraPos)
         }
     }
 
-    // Request new chunks (requestChunk handles its own locking)
+    // Request new chunks
     for (const ChunkPos& pos : wanted) {
         requestChunk(pos);
     }
 
-    // Unload distant chunks (needs exclusive lock)
+    // Unload distant chunks
     {
         std::unique_lock lock(chunksMutex);
         for (auto it = chunks.begin(); it != chunks.end(); ) {
@@ -129,35 +208,6 @@ void ChunkManager::updateStreaming(const glm::vec3& cameraPos)
         }
     }
 
-    // Schedule generation for unloaded chunks
-    {
-        std::shared_lock lock(chunksMutex);
-        for (const ChunkPos pos : wanted) {
-            const auto it = chunks.find(pos);
-            if (it == chunks.end())
-                continue;
-
-            Chunk* chunk = it->second.get();
-
-            if (chunk->getState() != ChunkState::UNLOADED)
-                continue;
-
-            chunk->setState(ChunkState::GENERATING);
-            chunk->bumpGenerationID();
-
-            const auto center = glm::vec3(
-                pos.x * Chunk::SIZE + Chunk::SIZE / 2.0f,
-                pos.y * Chunk::SIZE + Chunk::SIZE / 2.0f,
-                pos.z * Chunk::SIZE + Chunk::SIZE / 2.0f
-            );
-
-            workers.enqueue({
-                pos,
-                glm::distance(cameraPos, center),
-                chunk->getGenerationID()
-            });
-        }
-    }
 }
 
 std::vector<Chunk *> ChunkManager::getRenderableChunks()
@@ -201,4 +251,44 @@ ChunkNeighbors ChunkManager::getNeighbors(const ChunkPos& cp)
         this->getChunk(cp.x, cp.y + 1, cp.z),
         this->getChunk(cp.x, cp.y - 1, cp.z),
     };
+}
+
+bool ChunkManager::tryAcquireDecorationLock(const ChunkPos& pos)
+{
+    std::lock_guard lock(decorationLockMutex);
+
+    // Check if any chunk in 3x3x3 region is already locked
+    for (int dy = -1; dy <= 1; dy++) {
+        for (int dz = -1; dz <= 1; dz++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                ChunkPos check = {pos.x + dx, pos.y + dy, pos.z + dz};
+                if (decorationLocks.contains(check)) {
+                    return false;  // Conflict with another decoration job
+                }
+            }
+        }
+    }
+
+    // Lock all chunks in region
+    for (int dy = -1; dy <= 1; dy++) {
+        for (int dz = -1; dz <= 1; dz++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                decorationLocks.insert({pos.x + dx, pos.y + dy, pos.z + dz});
+            }
+        }
+    }
+    return true;
+}
+
+void ChunkManager::releaseDecorationLock(const ChunkPos& pos)
+{
+    std::lock_guard lock(decorationLockMutex);
+
+    for (int dy = -1; dy <= 1; dy++) {
+        for (int dz = -1; dz <= 1; dz++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                decorationLocks.erase({pos.x + dx, pos.y + dy, pos.z + dz});
+            }
+        }
+    }
 }

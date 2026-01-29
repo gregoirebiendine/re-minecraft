@@ -50,6 +50,7 @@ set(
     ${CMAKE_SOURCE_DIR}/src/Content/BlockRegistry
     ${CMAKE_SOURCE_DIR}/src/Content/TextureRegistry
     ${CMAKE_SOURCE_DIR}/src/Content/PrefabRegistry
+    ${CMAKE_SOURCE_DIR}/src/Content/NeighborAccess
     ${CMAKE_SOURCE_DIR}/src/Content/GUI
     ${CMAKE_SOURCE_DIR}/src/Content/Player
 )

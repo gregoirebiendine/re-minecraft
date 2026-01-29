@@ -1,6 +1,7 @@
 #ifndef RE_MINECRAFT_UTILS_H
 #define RE_MINECRAFT_UTILS_H
 
+#include <random>
 #include "ChunkPos.h"
 
 namespace ChunkCoords
