@@ -24,13 +24,13 @@ PrefabId PrefabRegistry::registerPrefab(const std::string& prefabFile)
         throw std::runtime_error("[PrefabRegistry] Farfield has reached its maximum Prefab storage.");
 
     // Check JSON format
-    if (data.is_null() || !data.contains("rules") || !data.contains("content"))
+    if (data.is_null() || !data.contains("block_below") || !data.contains("content"))
         throw std::runtime_error("[PrefabRegistry] Loaded file isn't valid : " + prefabFile);
 
     // Parse rules
     PrefabMeta meta{
-        data["rules"]["density_per_chunk"].get<int>(),
-        this->blockRegistry.getByName(data["rules"]["block_below"].get<std::string>()),
+        3,
+        this->blockRegistry.getByName(data["block_below"].get<std::string>()),
         {}
     };
 
@@ -38,28 +38,21 @@ PrefabId PrefabRegistry::registerPrefab(const std::string& prefabFile)
     for (const auto& content : data["content"])
     {
         const auto blockName = content["block"].get<std::string>();
+        const auto rotation = content["rotation"].get<int>();
+        const auto mat = BlockData::packBlockData( this->blockRegistry.getByName(blockName), rotation);
 
         if (!content.contains("command"))
         {
             const auto [x,y,z] = content["position"].get<std::array<short, 3>>();
 
             meta.blocks.push_back({
-                x, y, z,
-                BlockData::packBlockData(
-                    this->blockRegistry.getByName(blockName),
-                    content["rotation"].get<int>()
-                )
+                x, y, z, mat
             });
         }
         else if (content["command"].get<std::string>() == "FILL")
         {
             const auto [x1,y1,z1] = content["start"].get<std::array<short, 3>>();
             const auto [x2,y2,z2] = content["stop"].get<std::array<short, 3>>();
-
-            const Material mat = BlockData::packBlockData(
-                this->blockRegistry.getByName(blockName),
-                content["rotation"].get<int>()
-            );
 
             if (x1 > x2 || y1 > y2 || z1 > z2)
                 throw std::runtime_error("[PrefabRegistry] Invalid FILL command, coords are not in the right order : " + blockName);
@@ -68,6 +61,24 @@ PrefabId PrefabRegistry::registerPrefab(const std::string& prefabFile)
                 for (short y = y1; y <= y2; y++)
                     for (short x = x1; x <= x2; x++)
                         meta.blocks.push_back({x, y, z, mat});
+        }
+        else if (content["command"].get<std::string>() == "FILL_RANGE")
+        {
+            const auto ranges = content["ranges"].get<std::vector<std::array<std::array<short, 3>, 2>>>();
+
+            for (const auto& range : ranges)
+            {
+                const auto [x1,y1,z1] = range[0];
+                const auto [x2,y2,z2] = range[1];
+
+                if (x1 > x2 || y1 > y2 || z1 > z2)
+                    throw std::runtime_error("[PrefabRegistry] Invalid FILL command, coords are not in the right order : " + blockName);
+
+                for (short z = z1; z <= z2; z++)
+                    for (short y = y1; y <= y2; y++)
+                        for (short x = x1; x <= x2; x++)
+                            meta.blocks.push_back({x, y, z, mat});
+            }
         }
     }
 

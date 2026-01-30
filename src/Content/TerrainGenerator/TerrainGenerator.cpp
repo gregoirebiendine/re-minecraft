@@ -40,8 +40,6 @@ void TerrainGenerator::generate(Chunk& chunk) const
             }
         }
     }
-
-    // chunk.finalizeGeneration();
 }
 
 void TerrainGenerator::decorate(const Chunk& chunk, NeighborAccess& neighbors) const
