@@ -65,6 +65,8 @@ void BlockRegistry::registerBlocksFromFile(const std::string& registerNamespace)
             blockFaces
         });
     }
+
+    file.close();
 }
 
 const BlockMeta& BlockRegistry::get(const BlockId id) const

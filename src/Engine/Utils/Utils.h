@@ -1,6 +1,7 @@
 #ifndef RE_MINECRAFT_UTILS_H
 #define RE_MINECRAFT_UTILS_H
 
+#include <random>
 #include "ChunkPos.h"
 
 namespace ChunkCoords
@@ -21,6 +22,18 @@ namespace ChunkCoords
     inline int localCoordsToIndex(const uint8_t lx, const uint8_t ly, const uint8_t lz)
     {
         return lx + ChunkSize * (ly + ChunkSize * lz);
+    }
+}
+
+namespace Maths
+{
+    inline int randomInt(const int min, const int max)
+    {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> distrib(min, max);
+
+        return distrib(gen);
     }
 }
 

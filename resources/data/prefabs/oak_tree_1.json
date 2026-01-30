@@ -1,24 +1,25 @@
 {
-  "rules": {
-    "density_per_chunk": 2,
-    "minimum_distance_between_prefab": 4,
-    "min_y_generation": 60,
-    "max_y_generation": 80,
-    "block_below": "grass"
-  },
-  "origin": [0,0,0],
+  "block_below": "core:grass",
   "content": [
     {
       "command": "FILL",
+      "block": "core:oak_log",
+      "rotation": 0,
       "start": [0,0,0],
-      "stop": [0,4,0],
-      "block": "oak_log",
-      "rotation": 0
+      "stop": [0,3,0]
     },
     {
-      "command": "SINGLE",
-      "coords": [0,5,0],
-      "block": "oak_leaves",
+      "command": "FILL_RANGE",
+      "block": "core:oak_leaves",
+      "rotation": 0,
+      "ranges": [
+        [[-2,4,-2], [2,4,2]],
+        [[-1,5,-1], [1,5,1]]
+      ]
+    },
+    {
+      "position": [0,6,0],
+      "block": "core:oak_leaves",
       "rotation": 0
     }
   ]

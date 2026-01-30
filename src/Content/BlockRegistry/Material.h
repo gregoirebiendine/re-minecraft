@@ -1,14 +1,13 @@
 #ifndef RE_MINECRAFT_MATERIAL_H
 #define RE_MINECRAFT_MATERIAL_H
-#include "BlockRegistry.h"
 
 constexpr int ROTATION_SHIFT = 13;
 constexpr int BLOCK_ID_MASK = 0x1FFF;
 constexpr int ROTATION_MASK = 0x7;
 
-using Material = uint16_t;
-using BlockId = uint16_t;
-using BlockRotation = uint8_t;
+using Material = uint16_t;      // 16bits
+using BlockId = uint16_t;       // 16bits
+using BlockRotation = uint8_t;  // 8bits
 
 enum MaterialFace : unsigned char
 {
@@ -84,6 +83,5 @@ namespace BlockData
     }
 
 }
-
 
 #endif //RE_MINECRAFT_MATERIAL_H

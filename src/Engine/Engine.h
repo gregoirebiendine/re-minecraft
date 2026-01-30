@@ -18,6 +18,7 @@
 #include "InputState.h"
 #include "BlockRegistry.h"
 #include "TextureRegistry.h"
+#include "PrefabRegistry.h"
 #include "World.h"
 #include "Player.h"
 
@@ -31,8 +32,10 @@ class Engine {
 
     Viewport viewport;
     InputState inputs;
+    
     BlockRegistry blockRegistry;
     TextureRegistry textureRegistry;
+    PrefabRegistry prefabRegistry;
 
     std::unique_ptr<Player> player;
     std::unique_ptr<World> world;

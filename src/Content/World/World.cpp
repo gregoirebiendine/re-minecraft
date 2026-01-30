@@ -1,19 +1,17 @@
 #include "World.h"
 
-World::World(BlockRegistry _blockRegistry, const TextureRegistry& _textureRegistry) :
-    blockRegistry(std::move(_blockRegistry)),
+World::World(const BlockRegistry& _blockRegistry, const TextureRegistry& _textureRegistry, const PrefabRegistry& _prefabRegistry) :
+    blockRegistry(_blockRegistry),
     textureRegistry(_textureRegistry),
     shader(
-    "../resources/shaders/World/world.vert",
-    "../resources/shaders/World/world.frag"
+        "../resources/shaders/World/world.vert",
+        "../resources/shaders/World/world.frag"
     ),
-    chunkManager(blockRegistry),
+    chunkManager(_blockRegistry, _prefabRegistry),
     meshManager(*this)
 {
     this->shader.use();
     this->shader.setUniformInt("Textures", 0);
-
-    TerrainGenerator::init();
 
     for (int z = -4; z <= 4; ++z)
         for (int y = 0; y <= 5; ++y)
@@ -75,9 +73,12 @@ void World::fill(const glm::ivec3 from, const glm::ivec3 to, const Material mat)
 // Updates
 void World::update(const glm::vec3& cameraPos, const glm::mat4& vpMatrix)
 {
-    for (auto& chunk : chunkManager.getChunks() | std::views::values) {
-        if (chunk.hasPendingChanges())
-            chunk.swapBuffers();
+    {
+        auto lock = chunkManager.acquireReadLock();
+        for (auto& chunk : chunkManager.getChunks() | std::views::values) {
+            if (chunk->hasPendingChanges())
+                chunk->swapBuffers();
+        }
     }
 
     this->chunkManager.updateStreaming(cameraPos);

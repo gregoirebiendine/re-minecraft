@@ -42,10 +42,11 @@ class Chunk {
         void setBlock(uint8_t x, uint8_t y, uint8_t z, Material mat);
         void fill(glm::ivec3 from, glm::ivec3 to, Material mat);
 
+        void setBlockDirect(uint8_t x, uint8_t y, uint8_t z, Material mat);
+        void fillDirect(glm::ivec3 from, glm::ivec3 to, Material mat);
+
         bool swapBuffers();
         [[nodiscard]] bool hasPendingChanges() const;
-
-        void setBlockDirect(uint8_t x, uint8_t y, uint8_t z, Material mat);
         void finalizeGeneration();
 
         [[nodiscard]] glm::mat4 getChunkModel() const;
