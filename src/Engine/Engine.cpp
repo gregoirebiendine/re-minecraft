@@ -19,8 +19,8 @@ Engine::Engine() :
 
     // Instantiate members
     this->textureRegistry.createTextures();
-    this->player = std::make_unique<Player>(this->blockRegistry);
     this->world = std::make_unique<World>(this->blockRegistry, this->textureRegistry, this->prefabRegistry);
+    this->player = std::make_unique<Player>(*this->world);
 
     // Apply settings to classes
     const auto settings = this->viewport.getSettings();
@@ -56,7 +56,7 @@ void Engine::loop()
 
         // INPUTS
         Viewport::pollEvents();
-        this->player->handleInputs(this->inputs, this->viewport, *this->world, frameTime);
+        this->player->handleInputs(this->inputs, this->viewport, frameTime);
         this->inputs.clear();
 
         // UPDATES
@@ -71,7 +71,7 @@ void Engine::loop()
 
         // FPS CAP
         auto frameEnd = Clock::now();
-        double elapsed = std::chrono::duration_cast<Duration>(frameEnd - frameStart).count();
+        const double elapsed = std::chrono::duration_cast<Duration>(frameEnd - frameStart).count();
 
         if (!this->viewport.useVSync() && elapsed < targetFrameTime)
             this->preciseWait(targetFrameTime - elapsed);
@@ -113,6 +113,7 @@ void Engine::update() const
     const auto vpMatrix = this->player->getCamera().setViewMatrix(this->world->getShader(), this->viewport.getAspectRatio());
 
     this->world->update(this->player->getCamera().getPosition(), vpMatrix);
+    this->player->update(1); // FIXME: should not be 1
 }
 
 void Engine::render() const

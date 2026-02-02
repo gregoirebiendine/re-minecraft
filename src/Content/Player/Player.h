@@ -3,14 +3,16 @@
 
 #include "GUI.h"
 #include "Camera.h"
-#include "BlockRegistry.h"
 #include "InputState.h"
 #include "World.h"
 #include "Viewport.h"
 
 class Player
 {
-    const BlockRegistry& blockRegistry;
+    World& world;
+
+    glm::vec3 position;
+    glm::vec3 velocity;
 
     GUI gui;
     Camera camera;
@@ -19,20 +21,23 @@ class Player
     Raycast::Hit lastRaycast{};
 
     void changeSelectedMaterial(Inputs::Scroll dir);
+    void placeBlock() const;
 
     public:
-        explicit Player(const BlockRegistry& _blockRegistry);
+        explicit Player(World& _world);
 
         Camera &getCamera();
         GUI& getGUI();
 
-        void handleInputs(const InputState& inputs, const Viewport& viewport, World& world, double deltaTime);
+        void update(double deltaTime);
         void render() const;
+        void handleInputs(const InputState& inputs, const Viewport& viewport, double deltaTime);
         void renderBlockOutline(const float& aspect) const;
 
         void setSelectedBlockId(Material id);
 
-        void placeBlock(World& world) const;
+        void move(glm::vec3 direction, float deltaTime);
+        void setPosition(glm::vec3 _pos);
 };
 
 

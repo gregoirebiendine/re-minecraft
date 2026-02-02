@@ -1,9 +1,10 @@
 #include "Player.h"
 
-Player::Player(const BlockRegistry& _blockRegistry) :
-    blockRegistry(_blockRegistry),
-    camera({8.5f, 80.5f, 8.5f}),
-    selectedBlockId(_blockRegistry.getByName("core:oak_leaves"))
+Player::Player(World& _world) :
+    world(_world),
+    position(8.5f, 80.5f, 8.5f),
+    camera(position),
+    selectedBlockId(_world.getBlockRegistry().getByName("core:oak_leaves"))
 {
 }
 
@@ -17,16 +18,39 @@ GUI& Player::getGUI()
     return this->gui;
 }
 
-void Player::handleInputs(const InputState& inputs, const Viewport& viewport, World& world, const double deltaTime)
+void Player::update(const double deltaTime)
+{
+    // Raycast below player to detect blocks
+    const auto downRaycast = Raycast::cast(this->world, this->position, {0, -1, 0}, 2.f);
+
+    if (downRaycast.hit)
+        return;
+
+    glm::vec3 pos{this->position};
+
+    pos.y = pos.y - 0.1f * static_cast<float>(deltaTime);
+    this->position = pos;
+    this->camera.setPosition(pos);
+
+}
+
+void Player::render() const
+{
+    GUI::createImGuiFrame();
+    GUI::renderImGuiFrame(this->camera, this->world.getBlockRegistry().get(this->selectedBlockId).getName());
+    this->gui.render();
+}
+
+void Player::handleInputs(const InputState& inputs, const Viewport& viewport, const double deltaTime)
 {
     this->camera.moveCamera(inputs.mouseX, inputs.mouseY, deltaTime);
-    this->lastRaycast = this->camera.raycast(world);
+    this->lastRaycast = Raycast::cast(this->world, this->camera.getPosition(), this->camera.getForwardVector());
 
     if (inputs.isMouseButtonPressed(Inputs::Mouse::LEFT) && this->lastRaycast.hit)
-        world.setBlock(this->lastRaycast.pos.x, this->lastRaycast.pos.y, this->lastRaycast.pos.z, "core:air");
+        this->world.setBlock(this->lastRaycast.pos.x, this->lastRaycast.pos.y, this->lastRaycast.pos.z, "core:air");
 
     if (inputs.isMouseButtonPressed(Inputs::Mouse::RIGHT) && this->lastRaycast.hit)
-        this->placeBlock(world);
+        this->placeBlock();
 
     if (inputs.isMouseButtonPressed(Inputs::Mouse::MIDDLE) && this->lastRaycast.hit)
     {
@@ -34,34 +58,27 @@ void Player::handleInputs(const InputState& inputs, const Viewport& viewport, Wo
         this->selectedBlockId = BlockData::getBlockId(mat);
     }
 
-
     if (inputs.scroll != Inputs::Scroll::NONE)
         this->changeSelectedMaterial(inputs.scroll);
 
-    if (inputs.isKeyPressed(Inputs::Keys::SPACE)) {
+    if (inputs.isKeyPressed(Inputs::Keys::P)) {
         viewport.toggleCursor(!this->camera.getMouseCapture());
         this->camera.toggleMouseCapture();
     }
 
     if (inputs.isKeyDown(Inputs::Keys::W))
-        this->camera.move({0,0,1}, static_cast<float>(deltaTime));
+        this->move({0,0,1}, static_cast<float>(deltaTime));
     if (inputs.isKeyDown(Inputs::Keys::S))
-        this->camera.move({0,0,-1}, static_cast<float>(deltaTime));
+        this->move({0,0,-1}, static_cast<float>(deltaTime));
     if (inputs.isKeyDown(Inputs::Keys::A))
-        this->camera.move({-1,0,0}, static_cast<float>(deltaTime));
+        this->move({-1,0,0}, static_cast<float>(deltaTime));
     if (inputs.isKeyDown(Inputs::Keys::D))
-        this->camera.move({1,0,0}, static_cast<float>(deltaTime));
-    if (inputs.isKeyDown(Inputs::Keys::Q))
-        this->camera.move({0,1,0}, static_cast<float>(deltaTime));
-    if (inputs.isKeyDown(Inputs::Keys::E))
-        this->camera.move({0,-1,0}, static_cast<float>(deltaTime));
-}
+        this->move({1,0,0}, static_cast<float>(deltaTime));
 
-void Player::render() const
-{
-    GUI::createImGuiFrame();
-    GUI::renderImGuiFrame(this->camera, this->blockRegistry.get(this->selectedBlockId).getName());
-    this->gui.render();
+    // if (inputs.isKeyDown(Inputs::Keys::Q))
+    //     this->camera.move({0,1,0}, static_cast<float>(deltaTime));
+    // if (inputs.isKeyDown(Inputs::Keys::E))
+    //     this->camera.move({0,-1,0}, static_cast<float>(deltaTime));
 }
 
 void Player::renderBlockOutline(const float& aspect) const
@@ -77,16 +94,16 @@ void Player::setSelectedBlockId(const BlockId id)
 
 void Player::changeSelectedMaterial(const Inputs::Scroll dir)
 {
-    const auto allBlocks = this->blockRegistry.getAll();
+    const auto allBlocks = this->world.getBlockRegistry().getAll();
 
-    this->selectedBlockId = (this->selectedBlockId + dir + allBlocks.size()) % allBlocks.size();
+    this->selectedBlockId = (this->selectedBlockId + std::to_underlying(dir) + allBlocks.size()) % allBlocks.size();
     if (this->selectedBlockId == 0)
-        this->selectedBlockId = (this->selectedBlockId + dir + allBlocks.size()) % allBlocks.size();
+        this->selectedBlockId = (this->selectedBlockId + std::to_underlying(dir) + allBlocks.size()) % allBlocks.size();
 }
 
-void Player::placeBlock(World& world) const
+void Player::placeBlock() const
 {
-    const auto& selectedBlockMeta = this->blockRegistry.get(this->selectedBlockId);
+    const auto& selectedBlockMeta = this->world.getBlockRegistry().get(this->selectedBlockId);
     BlockRotation rotation = 0;
 
     switch (selectedBlockMeta.rotation) {
@@ -110,4 +127,29 @@ void Player::placeBlock(World& world) const
 
     const auto packedMaterial = BlockData::packBlockData(selectedBlockId, rotation);
     world.setBlock(this->lastRaycast.previousPos.x, this->lastRaycast.previousPos.y, this->lastRaycast.previousPos.z, packedMaterial);
+}
+
+void Player::move(const glm::vec3 direction, const float deltaTime)
+{
+    constexpr float MAX_SPEED = 8.f;
+    const glm::vec3 forward = this->camera.getForwardVector();
+    const glm::vec3 linearForward = glm::normalize(glm::vec3{forward.x, 0, forward.z});
+    const glm::vec3 right = glm::normalize(glm::cross(linearForward, {0,1,0}));
+
+    glm::vec3 tmpPos{this->position};
+
+    if (direction.x != 0)
+        tmpPos += direction.x * right * MAX_SPEED * deltaTime;
+    if (direction.y != 0)
+        tmpPos += direction.y * glm::vec3{0, 1, 0} * MAX_SPEED * deltaTime;
+    if (direction.z != 0)
+        tmpPos += direction.z * linearForward * MAX_SPEED * deltaTime;
+
+    this->setPosition(tmpPos);
+}
+
+void Player::setPosition(const glm::vec3 _pos)
+{
+    this->position = _pos;
+    this->camera.setPosition(_pos);
 }

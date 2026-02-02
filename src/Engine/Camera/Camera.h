@@ -36,9 +36,7 @@ class Camera {
         explicit Camera(glm::vec3 _position);
 
         void moveCamera(double mouseX, double mouseY, double deltaTime);
-        void move(glm::vec3 direction, float deltaTime);
 
-        [[nodiscard]] Raycast::Hit raycast(World& world) const;
         [[nodiscard]] glm::mat4 setViewMatrix(const Shader& shader, const float& aspect) const;
 
         [[nodiscard]] glm::vec3 getForwardVector() const;

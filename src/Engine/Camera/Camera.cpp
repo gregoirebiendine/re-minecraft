@@ -1,54 +1,8 @@
 
 #include "Camera.h"
 
-Camera::Camera(const glm::vec3 _position) :
-    position(_position)
+Camera::Camera(const glm::vec3 _position) : position(_position)
 {
-    // Empty
-}
-
-Raycast::Hit Camera::raycast(World& world) const
-{
-    const glm::vec3 origin = this->getPosition();
-    const glm::vec3 dir = this->getForwardVector();
-
-    glm::vec3 pos = origin;
-    glm::ivec3 lastBlock(-1);
-
-    float t = 0.f;
-    while (t < Raycast::MAX_DISTANCE) {
-        pos = origin + dir * t;
-        glm::ivec3 blockPos = glm::floor(pos);
-
-        if (blockPos == lastBlock) {
-            t += Raycast::STEP;
-            continue;
-        }
-
-        lastBlock = blockPos;
-
-        if (world.getBlock(blockPos.x, blockPos.y, blockPos.z)) {
-            const glm::ivec3 previousPos = glm::floor(origin + dir * (t - Raycast::STEP));
-            const glm::ivec3 diff = blockPos - previousPos;
-            const MaterialFace hitFace = Raycast::calculateHitFace(diff);
-
-            return {
-                true,
-                hitFace,
-                blockPos,
-                previousPos
-            };
-        }
-
-        t += Raycast::STEP;
-    }
-
-    return {
-        false,
-        UP,
-        lastBlock,
-        lastBlock
-    };
 }
 
 bool Camera::getMouseCapture() const
@@ -122,18 +76,18 @@ void Camera::moveCamera(const double mouseX, const double mouseY, const double d
     lastY = mouseY;
 }
 
-void Camera::move(const glm::vec3 direction, const float deltaTime)
-{
-    const glm::vec3 forward = this->getForwardVector();
-    const glm::vec3 right = glm::normalize(glm::cross(forward, {0,1,0}));
-
-    if (direction.x != 0)
-        this->position += direction.x * right * SPEED * deltaTime;
-    if (direction.y != 0)
-        this->position += direction.y * glm::vec3{0, 1, 0} * SPEED * deltaTime;
-    if (direction.z != 0)
-        this->position += direction.z * forward * SPEED * deltaTime;
-}
+// void Camera::move(const glm::vec3 direction, const float deltaTime)
+// {
+//     const glm::vec3 forward = this->getForwardVector();
+//     const glm::vec3 right = glm::normalize(glm::cross(forward, {0,1,0}));
+//
+//     if (direction.x != 0)
+//         this->position += direction.x * right * SPEED * deltaTime;
+//     if (direction.y != 0)
+//         this->position += direction.y * glm::vec3{0, 1, 0} * SPEED * deltaTime;
+//     if (direction.z != 0)
+//         this->position += direction.z * forward * SPEED * deltaTime;
+// }
 
 void Camera::setFOV(const uint8_t _fov)
 {

@@ -83,7 +83,6 @@ void World::update(const glm::vec3& cameraPos, const glm::mat4& vpMatrix)
 
     this->chunkManager.updateStreaming(cameraPos);
     this->chunkManager.updateFrustum(vpMatrix);
-
     this->meshManager.scheduleMeshing(cameraPos);
     this->meshManager.update();
 }

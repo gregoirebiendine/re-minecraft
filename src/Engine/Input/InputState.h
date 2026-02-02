@@ -1,11 +1,14 @@
 #ifndef RE_MINECRAFT_INPUTSTATE_H
 #define RE_MINECRAFT_INPUTSTATE_H
 
+#include <utility>
+#include <algorithm>
+
 #include <GLFW/glfw3.h>
 
 namespace Inputs
 {
-    enum Keys : char
+    enum class Keys : uint16_t
     {
         SPACE = GLFW_KEY_SPACE,
         W = GLFW_KEY_W,
@@ -13,17 +16,18 @@ namespace Inputs
         A = GLFW_KEY_A,
         D = GLFW_KEY_D,
         Q = GLFW_KEY_Q,
-        E = GLFW_KEY_E
+        E = GLFW_KEY_E,
+        P = GLFW_KEY_P
     };
 
-    enum Mouse : char
+    enum class Mouse : uint8_t
     {
         LEFT = GLFW_MOUSE_BUTTON_LEFT,
         RIGHT = GLFW_MOUSE_BUTTON_RIGHT,
         MIDDLE = GLFW_MOUSE_BUTTON_MIDDLE
     };
 
-    enum Scroll : short
+    enum class Scroll : signed char
     {
         NONE = 0,
         UP = 1,
@@ -45,13 +49,13 @@ struct InputState
     double mouseY{};
     Inputs::Scroll scroll{Inputs::Scroll::NONE};
 
-    [[nodiscard]] bool isKeyDown(const int key) const { return keyDown[key]; };
-    [[nodiscard]] bool isKeyPressed(const int key) const { return keyPressed[key]; };
-    [[nodiscard]] bool isKeyReleased(const int key) const { return keyReleased[key]; };
+    [[nodiscard]] bool isKeyDown(const Inputs::Keys key) const { return keyDown[std::to_underlying(key)]; };
+    [[nodiscard]] bool isKeyPressed(const Inputs::Keys key) const { return keyPressed[std::to_underlying(key)]; };
+    [[nodiscard]] bool isKeyReleased(const Inputs::Keys key) const { return keyReleased[std::to_underlying(key)]; };
 
-    [[nodiscard]] bool isMouseButtonDown(const int button) const { return mouseDown[button]; };
-    [[nodiscard]] bool isMouseButtonPressed(const int button) const { return mousePressed[button]; };
-    [[nodiscard]] bool isMouseButtonReleased(const int button) const { return mouseReleased[button]; };
+    [[nodiscard]] bool isMouseButtonDown(const Inputs::Mouse button) const { return mouseDown[std::to_underlying(button)]; };
+    [[nodiscard]] bool isMouseButtonPressed(const Inputs::Mouse button) const { return mousePressed[std::to_underlying(button)]; };
+    [[nodiscard]] bool isMouseButtonReleased(const Inputs::Mouse button) const { return mouseReleased[std::to_underlying(button)]; };
 
     void clear()
     {
@@ -123,7 +127,7 @@ struct InputState
 
         auto* input = static_cast<InputState*>(glfwPointer);
 
-        input->scroll = yoffset < 0 ? Inputs::DOWN : Inputs::UP;
+        input->scroll = yoffset < 0 ? Inputs::Scroll::DOWN : Inputs::Scroll::UP;
     }
 };
 

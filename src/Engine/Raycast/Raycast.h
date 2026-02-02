@@ -11,18 +11,9 @@ namespace Raycast
 
     struct Hit {
         bool hit = false;
-        MaterialFace hitFace;
-        glm::ivec3 pos;
-        glm::ivec3 previousPos;
-
-        bool operator==(const Hit& other) const
-        {
-            if (this->hit != other.hit)
-                return false;
-            if (!this->hit)
-                return true;
-            return this->pos == other.pos && this->previousPos == other.previousPos;
-        }
+        MaterialFace hitFace = UP;
+        glm::ivec3 pos{};
+        glm::ivec3 previousPos{};
     };
 
     inline MaterialFace calculateHitFace(const glm::ivec3& diff)
@@ -35,6 +26,40 @@ namespace Raycast
         if (diff.z == -1) return SOUTH;
 
         return UP;
+    }
+
+    inline Hit cast(World& world, const glm::vec3 origin, const glm::vec3 dir, const float dist = MAX_DISTANCE)
+    {
+        glm::ivec3 lastBlock(-1);
+        float t = 0.f;
+
+        while (t < dist) {
+            glm::ivec3 blockPos = glm::floor(origin + dir * t);
+
+            if (blockPos == lastBlock) {
+                t += STEP;
+                continue;
+            }
+
+            lastBlock = blockPos;
+
+            if (world.getBlock(blockPos.x, blockPos.y, blockPos.z)) {
+                const glm::ivec3 previousPos = glm::floor(origin + dir * (t - STEP));
+                const glm::ivec3 diff = blockPos - previousPos;
+                const MaterialFace hitFace = Raycast::calculateHitFace(diff);
+
+                return {
+                    true,
+                    hitFace,
+                    blockPos,
+                    previousPos
+                };
+            }
+
+            t += STEP;
+        }
+
+        return {};
     }
 }
 
