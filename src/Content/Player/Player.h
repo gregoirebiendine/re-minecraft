@@ -9,10 +9,17 @@
 
 class Player
 {
+    static constexpr float GRAVITY = 1.125f * Viewport::dt;         // Gravity per tick
+    static constexpr float JUMP_FORCE = 0.1875f;                    // Initial jump velocity
+    static constexpr float ACCELERATION = 2.f * Viewport::dt;       // Horizontal acceleration
+    static constexpr float MAX_SPEED = 4.f * Viewport::dt;          // Max horizontal speed
+    static constexpr float FRICTION = 0.80f;                        // Horizontal drag (80%)
+
     World& world;
 
     glm::vec3 position;
-    glm::vec3 velocity;
+    glm::vec3 velocity{};
+    glm::vec3 inputDirection{};
 
     GUI gui;
     Camera camera;
@@ -29,14 +36,14 @@ class Player
         Camera &getCamera();
         GUI& getGUI();
 
-        void update(double deltaTime);
+        void update();
         void render() const;
         void handleInputs(const InputState& inputs, const Viewport& viewport, double deltaTime);
         void renderBlockOutline(const float& aspect) const;
 
         void setSelectedBlockId(Material id);
 
-        void move(glm::vec3 direction, float deltaTime);
+        void applyHorizontalMovement();
         void setPosition(glm::vec3 _pos);
 };
 

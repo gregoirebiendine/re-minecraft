@@ -113,7 +113,7 @@ void Engine::update() const
     const auto vpMatrix = this->player->getCamera().setViewMatrix(this->world->getShader(), this->viewport.getAspectRatio());
 
     this->world->update(this->player->getCamera().getPosition(), vpMatrix);
-    this->player->update(1); // FIXME: should not be 1
+    this->player->update();
 }
 
 void Engine::render() const
