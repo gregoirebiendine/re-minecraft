@@ -6,29 +6,39 @@
 #include "InputState.h"
 #include "World.h"
 #include "Viewport.h"
+#include "CollisionBox.h"
 
 class Player
 {
-    static constexpr float GRAVITY = 1.125f * Viewport::dt;         // Gravity per tick
-    static constexpr float JUMP_FORCE = 0.1875f;                    // Initial jump velocity
-    static constexpr float ACCELERATION = 2.f * Viewport::dt;       // Horizontal acceleration
-    static constexpr float MAX_SPEED = 4.f * Viewport::dt;          // Max horizontal speed
-    static constexpr float FRICTION = 0.80f;                        // Horizontal drag (80%)
+    static constexpr float GRAVITY = 0.015f;        // Gravity per tick
+    static constexpr float JUMP_FORCE = 0.18f;      // Initial jump velocity
+    static constexpr float ACCELERATION = 0.04f;    // Horizontal acceleration
+    static constexpr float MAX_SPEED = 0.075f;      // Max horizontal speed
+    static constexpr float FRICTION = 0.8f;         // Horizontal drag (80%)
+
+    static constexpr float EYE_LEVEL = 1.75f;       // Blocks above feet
+    static constexpr int JUMP_BUFFER = 5;           // Frames to remember jump input
+
 
     World& world;
 
-    glm::vec3 position;
+    glm::vec3 position{};
     glm::vec3 velocity{};
     glm::vec3 inputDirection{};
 
     GUI gui;
     Camera camera;
+    CollisionBox collisionBox;
 
     BlockId selectedBlockId;
     Raycast::Hit lastRaycast{};
 
+    bool isGrounded = false;
+    int jumpBufferFrames = 0;
+
     void changeSelectedMaterial(Inputs::Scroll dir);
     void placeBlock() const;
+    void updateCameraPosition();
 
     public:
         explicit Player(World& _world);

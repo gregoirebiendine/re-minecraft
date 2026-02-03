@@ -1,9 +1,4 @@
-
 #include "Camera.h"
-
-Camera::Camera(const glm::vec3 _position) : position(_position)
-{
-}
 
 bool Camera::getMouseCapture() const
 {
@@ -75,19 +70,6 @@ void Camera::moveCamera(const double mouseX, const double mouseY, const double d
     lastX = mouseX;
     lastY = mouseY;
 }
-
-// void Camera::move(const glm::vec3 direction, const float deltaTime)
-// {
-//     const glm::vec3 forward = this->getForwardVector();
-//     const glm::vec3 right = glm::normalize(glm::cross(forward, {0,1,0}));
-//
-//     if (direction.x != 0)
-//         this->position += direction.x * right * SPEED * deltaTime;
-//     if (direction.y != 0)
-//         this->position += direction.y * glm::vec3{0, 1, 0} * SPEED * deltaTime;
-//     if (direction.z != 0)
-//         this->position += direction.z * forward * SPEED * deltaTime;
-// }
 
 void Camera::setFOV(const uint8_t _fov)
 {

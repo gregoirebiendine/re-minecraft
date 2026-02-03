@@ -74,7 +74,7 @@ class GUI
         void renderBlockOutline(const Camera& camera, const float& aspect, const glm::vec3& cubePos) const;
 
         static void createImGuiFrame();
-        static void renderImGuiFrame(const Camera& camera, const std::string& selectedBlockName);
+        static void renderImGuiFrame(glm::vec3 pos, glm::vec3 forward, const std::string& selectedBlockName);
 };
 
 #endif //RE_MINECRAFT_GUI_H

@@ -41,6 +41,7 @@ set(
     ${CMAKE_SOURCE_DIR}/src/Engine/ThreadPool
     ${CMAKE_SOURCE_DIR}/src/Engine/Utils
     ${CMAKE_SOURCE_DIR}/src/Engine/Settings
+    ${CMAKE_SOURCE_DIR}/src/Engine/CollisionBox
     ${CMAKE_SOURCE_DIR}/src/Content/ChunkMesh
     ${CMAKE_SOURCE_DIR}/src/Content/ChunkMeshManager
     ${CMAKE_SOURCE_DIR}/src/Content/Chunk

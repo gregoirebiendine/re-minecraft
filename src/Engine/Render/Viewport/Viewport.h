@@ -25,7 +25,7 @@ class Viewport
     static const GLFWvidmode *getVideoMode();
 
     public:
-        static constexpr double dt = 0.0166;
+        static constexpr double dt = 1.f / 60.f; // 60Hz
 
         void initWindow(InputState* inputs);
         void initViewport() const;

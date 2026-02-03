@@ -21,7 +21,7 @@ class Camera {
     static constexpr float SPEED = 8.f;
     static constexpr float SENSITIVITY = 5.f;
 
-    glm::vec3 position;
+    glm::vec3 position{};
     uint8_t fov = 90;
     float yaw = -90.0f;
     float pitch = 0.0f;
@@ -32,9 +32,6 @@ class Camera {
     bool firstMouse = true;
 
     public:
-
-        explicit Camera(glm::vec3 _position);
-
         void moveCamera(double mouseX, double mouseY, double deltaTime);
 
         [[nodiscard]] glm::mat4 setViewMatrix(const Shader& shader, const float& aspect) const;

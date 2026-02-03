@@ -137,19 +137,18 @@ void GUI::createImGuiFrame()
     ImGui::NewFrame();
 }
 
-void GUI::renderImGuiFrame(const Camera& camera, const std::string& selectedBlockName)
+void GUI::renderImGuiFrame(const glm::vec3 pos, const glm::vec3 forward, const std::string& selectedBlockName)
 {
-    const auto cameraPos = camera.getPosition();
-    const auto facing = DirectionUtils::forwardVectorToCardinal(camera.getForwardVector());
+    const auto facing = DirectionUtils::forwardVectorToCardinal(forward);
     const ChunkPos cp{
-        static_cast<int>(cameraPos.x) / 16,
-        static_cast<int>(cameraPos.y) / 16,
-        static_cast<int>(cameraPos.z) / 16
+        static_cast<int>(pos.x) / 16,
+        static_cast<int>(pos.y) / 16,
+        static_cast<int>(pos.z) / 16
     };
 
     ImGui::Begin("Debug");
     ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
-    ImGui::Text("Position : %.2f, %.2f, %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
+    ImGui::Text("Position : %.2f, %.2f, %.2f", pos.x, pos.y, pos.z);
     ImGui::Text("Chunk : %d, %d, %d", cp.x, cp.y, cp.z);
     ImGui::Text("Facing : %s", facing.c_str());
     ImGui::Text("Selected block : %s", selectedBlockName.c_str());

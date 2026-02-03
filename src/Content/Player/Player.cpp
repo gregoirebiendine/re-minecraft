@@ -2,10 +2,11 @@
 
 Player::Player(World& _world) :
     world(_world),
-    position(8.5f, 80.5f, 8.5f),
-    camera(position),
-    selectedBlockId(_world.getBlockRegistry().getByName("core:oak_leaves"))
+    position({8.5f, 71.f, 8.5f}),
+    collisionBox(position, 0.6f, 1.8f),
+    selectedBlockId(_world.getBlockRegistry().getByName("core:oak_plank"))
 {
+    this->updateCameraPosition();
 }
 
 Camera& Player::getCamera()
@@ -20,34 +21,34 @@ GUI& Player::getGUI()
 
 void Player::update()
 {
-    const auto downRaycast = Raycast::cast(this->world, this->position, {0, -1, 0}, 2.1f);
-    const bool isGrounded = downRaycast.hit;
-
-    if (!isGrounded)
+    if (!this->isGrounded)
     {
-        this->velocity.y -= GRAVITY;                                        // Gravity
-        this->velocity.y = glm::max(this->velocity.y, -(GRAVITY * 8));  // Terminal velocity
-    } else {
-        if (this->velocity.y < 0.f) {
-            this->velocity.y = 0.f;
-            this->position.y = static_cast<float>(downRaycast.previousPos.y + 2);  // Snap to top of block
-        }
-
-        if (this->inputDirection.y > 0.f)
-            this->velocity.y = JUMP_FORCE;
+        this->velocity.y -= GRAVITY;
+        this->velocity.y = glm::max(this->velocity.y, -(GRAVITY * 18));
     }
 
-    this->inputDirection.y = 0.f;
+    // Check buffered jump
+    if (this->isGrounded && this->jumpBufferFrames > 0)
+    {
+        this->velocity.y = JUMP_FORCE;
+        this->jumpBufferFrames = 0;
+    }
+
+    // Decrement buffer
+    if (this->jumpBufferFrames > 0)
+        this->jumpBufferFrames--;
+
     this->applyHorizontalMovement();
 
-    this->position += this->velocity;
-    this->camera.setPosition(this->position);
+    this->isGrounded = this->collisionBox.resolveCollisions(this->position, this->velocity, this->world);
+
+    this->updateCameraPosition();
 }
 
 void Player::render() const
 {
     GUI::createImGuiFrame();
-    GUI::renderImGuiFrame(this->camera, this->world.getBlockRegistry().get(this->selectedBlockId).getName());
+    GUI::renderImGuiFrame(this->position, this->camera.getForwardVector(), this->world.getBlockRegistry().get(this->selectedBlockId).getName());
     this->gui.render();
 }
 
@@ -89,8 +90,9 @@ void Player::handleInputs(const InputState& inputs, const Viewport& viewport, co
     if (inputs.isKeyDown(Inputs::Keys::A)) this->inputDirection.x -= 1.f;
     if (inputs.isKeyDown(Inputs::Keys::D)) this->inputDirection.x += 1.f;
 
-    // Jump
-    if (inputs.isKeyPressed(Inputs::Keys::SPACE)) this->inputDirection.y = 1.f;
+    // Jump - buffer the input
+    if (inputs.isKeyPressed(Inputs::Keys::SPACE))
+        this->jumpBufferFrames = JUMP_BUFFER;
 }
 
 void Player::applyHorizontalMovement()
@@ -171,5 +173,10 @@ void Player::placeBlock() const
 void Player::setPosition(const glm::vec3 _pos)
 {
     this->position = _pos;
-    this->camera.setPosition(_pos);
+    this->updateCameraPosition();
+}
+
+void Player::updateCameraPosition()
+{
+    this->camera.setPosition({this->position.x, this->position.y + EYE_LEVEL, this->position.z});
 }
