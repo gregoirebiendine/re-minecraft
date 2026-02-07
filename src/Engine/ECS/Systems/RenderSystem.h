@@ -13,7 +13,7 @@ namespace ECS
         std::shared_ptr<EntityMeshData> mesh;
     };
 
-    class RenderSystem : public ISystem
+    class RenderSystem : public IRenderSystem
     {
         Shader shader;
 
@@ -37,25 +37,18 @@ namespace ECS
                 shader.setProjectionMatrix(projection);
             }
 
-            void update([[maybe_unused]] Handler& handler, [[maybe_unused]] float dt) override
+            void render(Handler& handler) override
             {
-            }
-
-            void render(Handler& handler) const
-            {
-                this->shader.use();
-
                 auto view = handler.query<Position, MeshRefComponent>();
 
+                this->shader.use();
                 view.forEach([&]([[maybe_unused]] EntityId id, const Position& pos, const MeshRefComponent& ref)
                 {
                     if (!ref.mesh)
                         return;
 
                     const glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
-
                     this->shader.setModelMatrix(model);
-
                     ref.mesh->render();
                 });
             }

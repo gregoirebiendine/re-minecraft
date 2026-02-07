@@ -119,9 +119,17 @@ namespace ECS
             virtual void update(Handler& handler, float deltaTime) = 0;
     };
 
+    class IRenderSystem
+    {
+        public:
+            virtual ~IRenderSystem() = default;
+            virtual void render(Handler& handler) = 0;
+    };
+
     class SystemScheduler
     {
         std::vector<std::unique_ptr<ISystem>> systems;
+        std::vector<std::unique_ptr<IRenderSystem>> renderSystems;
 
         public:
             template<typename T, typename... Args>
@@ -129,7 +137,12 @@ namespace ECS
             {
                 auto system = std::make_unique<T>(std::forward<Args>(args)...);
                 auto* ptr = system.get();
-                systems.push_back(std::move(system));
+
+                if constexpr (std::is_base_of_v<ISystem, T>)
+                    systems.push_back(std::move(system));
+                else if constexpr (std::is_base_of_v<IRenderSystem, T>)
+                    renderSystems.push_back(std::move(system));
+
                 return *ptr;
             }
 
@@ -137,18 +150,26 @@ namespace ECS
             T& getSystem()
             {
                 for (const auto& system : systems)
-                {
                     if (auto* ptr = dynamic_cast<T*>(system.get()))
                         return *ptr;
-                }
 
-                throw std::runtime_error("System not registered");
+                for (const auto& system : renderSystems)
+                    if (auto* ptr = dynamic_cast<T*>(system.get()))
+                        return *ptr;
+
+                throw std::runtime_error("[Farfield::ECS] System not registered");
             }
 
-            void update(Handler& world, const float dt) const
+            void update(Handler& handler, const float dt) const
             {
                 for (const auto& system : systems)
-                    system->update(world, dt);
+                    system->update(handler, dt);
+            }
+
+            void render(Handler& handler) const
+            {
+                for (const auto& system : renderSystems)
+                    system->render(handler);
             }
     };
 }

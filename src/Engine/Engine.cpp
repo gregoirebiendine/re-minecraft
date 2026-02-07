@@ -67,7 +67,6 @@ void Engine::loop()
         }
 
         // RENDERING
-        // const double alpha = accumulator / dt;
         this->render();
 
         // FPS CAP
