@@ -37,7 +37,11 @@ namespace ECS
                 shader.setProjectionMatrix(projection);
             }
 
-            void update(Handler& handler, [[maybe_unused]] float dt) override
+            void update([[maybe_unused]] Handler& handler, [[maybe_unused]] float dt) override
+            {
+            }
+
+            void render(Handler& handler) const
             {
                 this->shader.use();
 
@@ -51,7 +55,6 @@ namespace ECS
                     const glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
 
                     this->shader.setModelMatrix(model);
-                    // this->shader.setUniformInt("texLayer", static_cast<int>(tex.textureId));
 
                     ref.mesh->render();
                 });

@@ -35,6 +35,9 @@ class World {
     ECS::SystemScheduler scheduler;
     std::vector<ECS::Entity> entities;
 
+    glm::mat4 cachedProjection{1.0f};
+    glm::mat4 cachedView{1.0f};
+
     public:
         explicit World(
             const BlockRegistry& _blockRegistry,

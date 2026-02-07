@@ -112,12 +112,11 @@ void World::update(const Camera& camera, const float aspect, const glm::mat4& vp
     this->meshManager.scheduleMeshing(cameraPosition);
     this->meshManager.update();
 
-    // Update render shader
-    const auto& render = this->scheduler.getSystem<ECS::RenderSystem>();
-    render.setProjectionMatrix(camera.getProjectionMatrix(aspect));
-    render.setViewMatrix(camera.getViewMatrix());
+    // Cache camera matrices for render()
+    this->cachedProjection = camera.getProjectionMatrix(aspect);
+    this->cachedView = camera.getViewMatrix();
 
-    // Update ECS
+    // Update ECS (movement only, rendering happens in render())
     this->scheduler.update(this->ecs, Viewport::dt);
 }
 
@@ -131,6 +130,12 @@ void World::render()
         this->shader.setModelMatrix(chunk->getChunkModel());
         mesh.render();
     }
+
+    // Render entities
+    const auto& renderSystem = this->scheduler.getSystem<ECS::RenderSystem>();
+    renderSystem.setProjectionMatrix(this->cachedProjection);
+    renderSystem.setViewMatrix(this->cachedView);
+    renderSystem.render(this->ecs);
 }
 
 
