@@ -1,18 +1,13 @@
 #ifndef RE_MINECRAFT_RENDERSYSTEM_H
 #define RE_MINECRAFT_RENDERSYSTEM_H
 
-#include "EntityMeshData.h"
 #include "Shader.h"
-#include "ECS/System.h"
-#include "ECS/Systems/MovementSystem.h"
+#include "EntityMeshData.h"
+#include "ECS/ISystem.h"
+#include "Components/MeshRefComponent.h"
 
 namespace ECS
 {
-    struct MeshRefComponent
-    {
-        std::shared_ptr<EntityMeshData> mesh;
-    };
-
     class RenderSystem : public IRenderSystem
     {
         Shader shader;

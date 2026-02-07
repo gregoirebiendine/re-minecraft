@@ -10,8 +10,8 @@
 #include <ranges>
 #include <stdexcept>
 
-#include "ECS/Entity.h"
-#include "ECS/Component.h"
+#include "ECS/IEntity.h"
+#include "ECS/IComponent.h"
 
 namespace ECS
 {
@@ -43,12 +43,12 @@ namespace ECS
                 return *static_cast<ComponentPool<T>*>(it->second.get());
             }
 
-            Entity createEntity()
+            IEntity createEntity()
             {
                 return entityManager.create();
             }
 
-            void destroyEntity(const Entity entity)
+            void destroyEntity(const IEntity entity)
             {
                 if (!entityManager.isAlive(entity))
                     return;
@@ -60,7 +60,7 @@ namespace ECS
             }
 
             template<typename T>
-            T& addComponent(Entity entity, const T& component)
+            T& addComponent(IEntity entity, const T& component)
             {
                 auto& pool = getPool<T>();
 
@@ -68,21 +68,21 @@ namespace ECS
             }
 
             template<typename T>
-            void removeComponent(const Entity entity)
+            void removeComponent(const IEntity entity)
             {
                 auto& pool = getPool<T>();
                 pool.remove(entity.id);
             }
 
             template<typename T>
-            T& getComponent(const Entity entity)
+            T& getComponent(const IEntity entity)
             {
                 auto& pool = getPool<T>();
                 return pool.get(entity.id);
             }
 
             template<typename T>
-            bool hasComponent(const Entity entity) const
+            bool hasComponent(const IEntity entity) const
             {
                 const std::uint32_t type_id = ComponentTypeRegistry::getTypeId<T>();
 
@@ -112,10 +112,10 @@ namespace ECS
             }
     };
 
-    class ISystem
+    class IISystem
     {
         public:
-            virtual ~ISystem() = default;
+            virtual ~IISystem() = default;
             virtual void update(Handler& handler, float deltaTime) = 0;
     };
 
@@ -128,7 +128,7 @@ namespace ECS
 
     class SystemScheduler
     {
-        std::vector<std::unique_ptr<ISystem>> systems;
+        std::vector<std::unique_ptr<IISystem>> systems;
         std::vector<std::unique_ptr<IRenderSystem>> renderSystems;
 
         public:
@@ -138,7 +138,7 @@ namespace ECS
                 auto system = std::make_unique<T>(std::forward<Args>(args)...);
                 auto* ptr = system.get();
 
-                if constexpr (std::is_base_of_v<ISystem, T>)
+                if constexpr (std::is_base_of_v<IISystem, T>)
                     systems.push_back(std::move(system));
                 else if constexpr (std::is_base_of_v<IRenderSystem, T>)
                     renderSystems.push_back(std::move(system));

@@ -1,4 +1,8 @@
 #include "World.h"
+#include "Viewport.h"
+#include "Systems/MovementSystem.h"
+#include "Systems/RenderSystem.h"
+#include "Components/MeshRefComponent.h"
 
 World::World(
     const BlockRegistry& _blockRegistry,

@@ -16,9 +16,7 @@
 #include "ChunkManager.h"
 #include "ChunkMeshManager.h"
 #include "Shader.h"
-#include "Viewport.h"
-#include "ECS/Systems/MovementSystem.h"
-#include "ECS/Systems/RenderSystem.h"
+#include "ECS/ISystem.h"
 
 class World {
     static constexpr int MAX_ENTITY = 100;
@@ -32,8 +30,8 @@ class World {
     ChunkMeshManager meshManager;
 
     ECS::Handler ecs{MAX_ENTITY};
-    ECS::SystemScheduler scheduler;
-    std::vector<ECS::Entity> entities;
+    ECS::SystemScheduler scheduler{};
+    std::vector<ECS::IEntity> entities{};
 
     public:
         explicit World(

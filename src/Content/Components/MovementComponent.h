@@ -1,9 +1,8 @@
-#ifndef RE_MINECRAFT_MOVEMENTSYSTEM_H
-#define RE_MINECRAFT_MOVEMENTSYSTEM_H
+#ifndef RE_MINECRAFT_MOVEMENTCOMPONENT_H
+#define RE_MINECRAFT_MOVEMENTCOMPONENT_H
 
 #include <ostream>
 #include <glm/glm.hpp>
-#include "ECS/System.h"
 
 namespace ECS
 {
@@ -25,20 +24,6 @@ namespace ECS
         {
             return os << "(" << vel.x << ", " << vel.y << ", " << vel.z << ")";
         }
-    };
-
-    class MovementSystem : public ISystem
-    {
-        public:
-            void update(Handler& handler, float dt) override
-            {
-                auto view = handler.query<Position, Velocity>();
-
-                view.forEach([dt]([[maybe_unused]] EntityId id, Position& pos, const Velocity& vel)
-                {
-                    pos += vel * dt;
-                });
-            }
     };
 }
 

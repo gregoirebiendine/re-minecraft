@@ -30,35 +30,37 @@ set(
     ${CMAKE_SOURCE_DIR}/lib/json
     ${CMAKE_SOURCE_DIR}/lib/imgui
     ${CMAKE_SOURCE_DIR}/lib/fastnoiselite
+
     ${CMAKE_SOURCE_DIR}/src/Engine
     ${CMAKE_SOURCE_DIR}/src/Engine/Camera
+    ${CMAKE_SOURCE_DIR}/src/Engine/CollisionBox
     ${CMAKE_SOURCE_DIR}/src/Engine/Input
     ${CMAKE_SOURCE_DIR}/src/Engine/Raycast
-    ${CMAKE_SOURCE_DIR}/src/Engine/ConcurrentQueue
+    ${CMAKE_SOURCE_DIR}/src/Engine/Render/Frustum
+    ${CMAKE_SOURCE_DIR}/src/Engine/Render/Shader
     ${CMAKE_SOURCE_DIR}/src/Engine/Render/VAO
     ${CMAKE_SOURCE_DIR}/src/Engine/Render/VBO
-    ${CMAKE_SOURCE_DIR}/src/Engine/Render/Shader
     ${CMAKE_SOURCE_DIR}/src/Engine/Render/Viewport
-    ${CMAKE_SOURCE_DIR}/src/Engine/Render/Frustum
+    ${CMAKE_SOURCE_DIR}/src/Engine/Settings
     ${CMAKE_SOURCE_DIR}/src/Engine/ThreadPool
     ${CMAKE_SOURCE_DIR}/src/Engine/Utils
-    ${CMAKE_SOURCE_DIR}/src/Engine/Settings
-    ${CMAKE_SOURCE_DIR}/src/Engine/CollisionBox
-    ${CMAKE_SOURCE_DIR}/src/Content/ChunkMesh
-    ${CMAKE_SOURCE_DIR}/src/Content/ChunkMeshManager
-    ${CMAKE_SOURCE_DIR}/src/Content/Chunk
-    ${CMAKE_SOURCE_DIR}/src/Content/ChunkManager/
-    ${CMAKE_SOURCE_DIR}/src/Content/World
-    ${CMAKE_SOURCE_DIR}/src/Content/TerrainGenerator
-    ${CMAKE_SOURCE_DIR}/src/Content/BlockRegistry
-    ${CMAKE_SOURCE_DIR}/src/Content/TextureRegistry
-    ${CMAKE_SOURCE_DIR}/src/Content/PrefabRegistry
-    ${CMAKE_SOURCE_DIR}/src/Content/MeshRegistry
-    ${CMAKE_SOURCE_DIR}/src/Content/NeighborAccess
+
+    ${CMAKE_SOURCE_DIR}/src/Content/
+    ${CMAKE_SOURCE_DIR}/src/Content/Chunks/Chunk
+    ${CMAKE_SOURCE_DIR}/src/Content/Chunks/ChunkManager
+    ${CMAKE_SOURCE_DIR}/src/Content/Chunks/ChunkMesh
+    ${CMAKE_SOURCE_DIR}/src/Content/Chunks/ChunkMeshManager
     ${CMAKE_SOURCE_DIR}/src/Content/GUI
-    ${CMAKE_SOURCE_DIR}/src/Content/Player
     ${CMAKE_SOURCE_DIR}/src/Content/Meshes
     ${CMAKE_SOURCE_DIR}/src/Content/Meshes/EntityMeshData
+    ${CMAKE_SOURCE_DIR}/src/Content/NeighborAccess
+    ${CMAKE_SOURCE_DIR}/src/Content/Player
+    ${CMAKE_SOURCE_DIR}/src/Content/TerrainGenerator
+    ${CMAKE_SOURCE_DIR}/src/Content/World
+    ${CMAKE_SOURCE_DIR}/src/Content/Registries/BlockRegistry
+    ${CMAKE_SOURCE_DIR}/src/Content/Registries/TextureRegistry
+    ${CMAKE_SOURCE_DIR}/src/Content/Registries/PrefabRegistry
+    ${CMAKE_SOURCE_DIR}/src/Content/Registries/MeshRegistry
 )
 
 #add_subdirectory(lib/flint) # Comment for now as the lib won't compile on Windows

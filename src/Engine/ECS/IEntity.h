@@ -16,14 +16,14 @@ namespace ECS
     inline static constexpr Index INVALID_INDEX = std::numeric_limits<Index>::max();
     inline static constexpr EntityId INVALID_ENTITY_ID = std::numeric_limits<EntityId>::max();
 
-    struct Entity
+    struct IEntity
     {
         std::uint32_t id = INVALID_ENTITY_ID;
         std::uint32_t generation = 0;
 
-        static Entity makeEntity(const std::uint32_t id, const std::uint32_t generation)
+        static IEntity makeEntity(const std::uint32_t id, const std::uint32_t generation)
         {
-            return Entity{id, generation};
+            return IEntity{id, generation};
         }
     };
 
@@ -113,21 +113,21 @@ namespace ECS
         public:
             EntityManager() = default;
 
-            Entity create()
+            IEntity create()
             {
                 if (!freeList.empty())
                 {
                     std::uint32_t id = freeList.back();
                     freeList.pop_back();
-                    return Entity::makeEntity(id, generations[id]);
+                    return IEntity::makeEntity(id, generations[id]);
                 }
 
                 const std::uint32_t id = nextId++;
                 generations.push_back(0);
-                return Entity::makeEntity(id, 0);
+                return IEntity::makeEntity(id, 0);
             }
 
-            bool destroy(const Entity entity)
+            bool destroy(const IEntity entity)
             {
                 if (!this->isAlive(entity))
                     return false;
@@ -138,7 +138,7 @@ namespace ECS
                 return true;
             }
 
-            bool isAlive(const Entity entity) const
+            bool isAlive(const IEntity entity) const
             {
                 if (entity.id >= generations.size())
                     return false;

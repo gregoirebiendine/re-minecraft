@@ -8,7 +8,7 @@
 #include <limits>
 #include <ranges>
 
-#include "ECS/Entity.h"
+#include "ECS/IEntity.h"
 
 namespace ECS
 {
