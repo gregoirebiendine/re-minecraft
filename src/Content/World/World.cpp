@@ -13,10 +13,7 @@ World::World(
     blockRegistry(_blockRegistry),
     textureRegistry(_textureRegistry),
     meshRegistry(_meshRegistry),
-    shader(
-        "../resources/shaders/World/world.vert",
-        "../resources/shaders/World/world.frag"
-    ),
+    shader("/resources/shaders/World/"),
     chunkManager(_blockRegistry, _prefabRegistry),
     meshManager(*this)
 {
@@ -117,7 +114,7 @@ void World::update(const Camera& camera, const float aspect, const glm::mat4& vp
     this->meshManager.update();
 
     // Update render system
-    const auto& renderSystem = this->scheduler.getSystem<ECS::RenderSystem>();
+    auto& renderSystem = this->scheduler.getSystem<ECS::RenderSystem>();
     renderSystem.setProjectionMatrix(camera.getProjectionMatrix(aspect));
     renderSystem.setViewMatrix(camera.getViewMatrix());
 
@@ -157,7 +154,7 @@ ChunkManager& World::getChunkManager()
     return this->chunkManager;
 }
 
-const Shader& World::getShader() const
+Shader& World::getShader()
 {
     return this->shader;
 }

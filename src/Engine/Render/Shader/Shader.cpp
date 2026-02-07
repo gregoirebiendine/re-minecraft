@@ -1,28 +1,24 @@
-
 #include "Shader.h"
 
-std::string Shader::loadFile(const std::string& path)
+#include "TextureRegistry.h"
+
+Shader::Shader(const std::string& folder)
 {
-    std::ifstream file(path);
+    const auto path = Files::SOURCE_FOLDER.string().append(folder);
+    const auto entries = fs::directory_iterator(path);
+    std::string vertContent;
+    std::string fragContent;
 
-    if (!file.is_open())
-        throw std::runtime_error("Failed to load file " + path);
+    for (const auto& entry : entries) {
+        if (const auto ext = entry.path().filename().extension(); ext == ".vert")
+            vertContent = loadFile(entry.path().string());
+        else if (ext == ".frag")
+            fragContent = loadFile(entry.path().string());
+        else
+            throw std::runtime_error("[Farfield::Shader] Unsupported shader extension: " + ext.string());
+    }
 
-    std::string content;
-    file.seekg(0, std::ios::end);
-    content.resize(file.tellg());
-    file.seekg(0, std::ios::beg);
-    file.read(&content[0], content.size());
-    file.close();
-    return content;
-}
-
-Shader::Shader(const std::string& vertexPath, const std::string& fragPath)
-{
-    const std::string vertexContent = loadFile(vertexPath);
-    const std::string fragContent = loadFile(fragPath);
-
-    const char *vertexShaderSource = vertexContent.c_str();
+    const char *vertexShaderSource = vertContent.c_str();
     const char *fragmentShaderSource = fragContent.c_str();
 
     // Create Vertex Shader of count 1, that read from vertexShaderSource (basic shape)
@@ -62,6 +58,22 @@ void Shader::use() const
     glUseProgram(this->ID);
 }
 
+std::string Shader::loadFile(const std::string& path)
+{
+    std::ifstream file(path);
+
+    if (!file.is_open())
+        throw std::runtime_error("[Farfield::Shader] Failed to load file " + path);
+
+    std::string content;
+    file.seekg(0, std::ios::end);
+    content.resize(file.tellg());
+    file.seekg(0, std::ios::beg);
+    file.read(&content[0], static_cast<std::streamsize>(content.size()));
+    file.close();
+    return content;
+}
+
 void Shader::checkCompileErrors(const GLuint shader, const char* name)
 {
     GLint success;
@@ -79,6 +91,7 @@ void Shader::checkCompileErrors(const GLuint shader, const char* name)
         throw std::runtime_error(infoLog);
     }
 }
+
 
 void Shader::setUniformInt(const char *name, const int value) const {
     const int loc = glGetUniformLocation(this->ID, name);
@@ -106,29 +119,23 @@ void Shader::setUniformMat4(const char *name, glm::mat4 value) const
     glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(value));
 }
 
-void Shader::setModelMatrix(const glm::mat4& modelMatrix) const
+void Shader::setModelMatrix(const glm::mat4& modelMatrix)
 {
-    GLint loc = this->modelMatrixUniform;
-
-    if (loc == -1)
-         loc = glGetUniformLocation(this->ID, "ModelMatrix");
-    glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    if (this->modelMatrixUniform == -1)
+        this->modelMatrixUniform = glGetUniformLocation(this->ID, "ModelMatrix");
+    glUniformMatrix4fv(this->modelMatrixUniform, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 }
 
-void Shader::setViewMatrix(const glm::mat4& viewMatrix) const
+void Shader::setViewMatrix(const glm::mat4& viewMatrix)
 {
-    GLint loc = this->viewMatrixUniform;
-
-    if (loc == -1)
-        loc = glGetUniformLocation(this->ID, "ViewMatrix");
-    glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+    if (this->viewMatrixUniform == -1)
+        this->viewMatrixUniform = glGetUniformLocation(this->ID, "ViewMatrix");
+    glUniformMatrix4fv(this->viewMatrixUniform, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 }
 
-void Shader::setProjectionMatrix(const glm::mat4& projectionMatrix) const
+void Shader::setProjectionMatrix(const glm::mat4& projectionMatrix)
 {
-    GLint loc = this->projectionMatrixUniform;
-
-    if (loc == -1)
-        loc = glGetUniformLocation(this->ID, "ProjectionMatrix");
-    glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+    if (this->projectionMatrixUniform == -1)
+        this->projectionMatrixUniform = glGetUniformLocation(this->ID, "ProjectionMatrix");
+    glUniformMatrix4fv(this->projectionMatrixUniform, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 }

@@ -43,7 +43,7 @@ class World {
 
         const BlockRegistry& getBlockRegistry() const;
         const TextureRegistry& getTextureRegistry() const;
-        const Shader& getShader() const;
+        Shader& getShader();
         ChunkManager& getChunkManager();
 
         // Lifecycle

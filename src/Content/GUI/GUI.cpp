@@ -1,14 +1,8 @@
 #include "GUI.h"
 
 GUI::GUI() :
-    guiShader(
-    "../resources/shaders/UI/ui.vert",
-    "../resources/shaders/UI/ui.frag"
-    ),
-    outlineShader(
-        "../resources/shaders/Outline/outline.vert",
-        "../resources/shaders/Outline/outline.frag"
-    )
+    guiShader("/resources/shaders/UI/"),
+    outlineShader("/resources/shaders/Outline/")
 {
     // Empty
 }
@@ -96,7 +90,7 @@ void GUI::createRectangle(const float x, const float y, const float width, const
     });
 }
 
-void GUI::render() const
+void GUI::render()
 {
     glDisable(GL_DEPTH_TEST);
     glEnable( GL_BLEND);
@@ -112,7 +106,7 @@ void GUI::render() const
     glDisable(GL_BLEND);
 }
 
-void GUI::renderBlockOutline(const Camera& camera, const float& aspect, const glm::vec3& cubePos) const
+void GUI::renderBlockOutline(const Camera& camera, const float& aspect, const glm::vec3& cubePos)
 {
     glDisable(GL_CULL_FACE);
     glPolygonOffset(-1, -1);

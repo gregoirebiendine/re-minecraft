@@ -11,6 +11,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Utils.h"
+
+namespace fs = std::filesystem;
+
 class Shader {
     GLuint ID;
 
@@ -22,7 +26,7 @@ class Shader {
     static void checkCompileErrors(GLuint shader, const char* name);
 
     public:
-        Shader(const std::string& vertexPath, const std::string& fragPath);
+        Shader(const std::string& folder);
         ~Shader();
 
         Shader(const Shader&) = delete;
@@ -35,9 +39,9 @@ class Shader {
         void setUniformVec4(const char *name, glm::vec4 value) const;
         void setUniformMat4(const char *name, glm::mat4 value) const;
 
-        void setModelMatrix(const glm::mat4& modelMatrix) const;
-        void setViewMatrix(const glm::mat4& viewMatrix) const;
-        void setProjectionMatrix(const glm::mat4& projectionMatrix) const;
+        void setModelMatrix(const glm::mat4& modelMatrix);
+        void setViewMatrix(const glm::mat4& viewMatrix);
+        void setProjectionMatrix(const glm::mat4& projectionMatrix);
 };
 
 #endif

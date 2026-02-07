@@ -30,7 +30,7 @@ glm::mat4 Camera::getViewMatrix() const
     return glm::lookAt(this->position, this->position + forward, {0,1,0});
 }
 
-glm::mat4 Camera::setViewMatrix(const Shader& shader, const float& aspect) const
+glm::mat4 Camera::setViewMatrix(Shader& shader, const float& aspect)
 {
     const auto v = this->getViewMatrix();
     const auto p = this->getProjectionMatrix(aspect);

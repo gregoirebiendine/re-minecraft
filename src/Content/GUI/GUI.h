@@ -71,8 +71,8 @@ class GUI
         void init(glm::ivec2 viewportSize);
         void changeViewportSize(glm::ivec2 size);
 
-        void render() const;
-        void renderBlockOutline(const Camera& camera, const float& aspect, const glm::vec3& cubePos) const;
+        void render();
+        void renderBlockOutline(const Camera& camera, const float& aspect, const glm::vec3& cubePos);
 
         static void createImGuiFrame();
         static void renderImGuiFrame(glm::vec3 pos, glm::vec3 forward, const std::string& selectedBlockName);

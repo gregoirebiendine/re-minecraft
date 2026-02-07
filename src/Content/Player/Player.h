@@ -47,9 +47,9 @@ class Player
         GUI& getGUI();
 
         void update();
-        void render() const;
+        void render();
         void handleInputs(const InputState& inputs, const Viewport& viewport, double deltaTime);
-        void renderBlockOutline(const float& aspect) const;
+        void renderBlockOutline(const float& aspect);
 
         void setSelectedBlockId(Material id);
 

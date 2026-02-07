@@ -14,22 +14,19 @@ namespace ECS
 
         public:
             RenderSystem() :
-                shader(
-                "../resources/shaders/Entity/entity.vert",
-                "../resources/shaders/Entity/entity.frag"
-                )
+                shader("/resources/shaders/Entity/")
             {}
 
-            void setViewMatrix(const glm::mat4& view) const
+            void setViewMatrix(const glm::mat4& view)
             {
                 this->shader.use();
                 this->shader.setViewMatrix(view);
             }
 
-            void setProjectionMatrix(const glm::mat4& projection) const
+            void setProjectionMatrix(const glm::mat4& projection)
             {
-                shader.use();
-                shader.setProjectionMatrix(projection);
+                this->shader.use();
+                this->shader.setProjectionMatrix(projection);
             }
 
             void render(Handler& handler) override

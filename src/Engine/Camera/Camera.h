@@ -31,7 +31,7 @@ class Camera {
     public:
         void moveCamera(double mouseX, double mouseY, double deltaTime);
 
-        [[nodiscard]] glm::mat4 setViewMatrix(const Shader& shader, const float& aspect) const;
+        [[nodiscard]] glm::mat4 setViewMatrix(Shader& shader, const float& aspect);
 
         [[nodiscard]] glm::vec3 getForwardVector() const;
         [[nodiscard]] glm::mat4 getViewMatrix() const;

@@ -45,7 +45,7 @@ void Player::update()
     this->updateCameraPosition();
 }
 
-void Player::render() const
+void Player::render()
 {
     GUI::createImGuiFrame();
     GUI::renderImGuiFrame(this->position, this->camera.getForwardVector(), this->world.getBlockRegistry().get(this->selectedBlockId).getName());
@@ -122,7 +122,7 @@ void Player::applyHorizontalMovement()
     }
 }
 
-void Player::renderBlockOutline(const float& aspect) const
+void Player::renderBlockOutline(const float& aspect)
 {
     if (this->lastRaycast.hit)
         this->gui.renderBlockOutline(this->camera, aspect, this->lastRaycast.pos);
