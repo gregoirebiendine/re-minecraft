@@ -2,6 +2,7 @@
 #define RE_MINECRAFT_PLAYER_H
 
 #include "GUI.h"
+#include "Raycast.h"
 #include "Camera.h"
 #include "InputState.h"
 #include "World.h"
@@ -18,7 +19,6 @@ class Player
 
     static constexpr float EYE_LEVEL = 1.75f;       // Blocks above feet
     static constexpr int JUMP_BUFFER = 5;           // Frames to remember jump input
-
 
     World& world;
 

@@ -11,6 +11,7 @@ file(
     GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 )
 
+#Local libs
 list(APPEND SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/glad/src/glad.c
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/stbi/stb_image.cpp
@@ -22,6 +23,7 @@ list(APPEND SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/src/imgui_widgets.cpp
 )
 
+#Headers
 set(
     HEADERS
     ${CMAKE_SOURCE_DIR}/lib
@@ -51,9 +53,12 @@ set(
     ${CMAKE_SOURCE_DIR}/src/Content/BlockRegistry
     ${CMAKE_SOURCE_DIR}/src/Content/TextureRegistry
     ${CMAKE_SOURCE_DIR}/src/Content/PrefabRegistry
+    ${CMAKE_SOURCE_DIR}/src/Content/MeshRegistry
     ${CMAKE_SOURCE_DIR}/src/Content/NeighborAccess
     ${CMAKE_SOURCE_DIR}/src/Content/GUI
     ${CMAKE_SOURCE_DIR}/src/Content/Player
+    ${CMAKE_SOURCE_DIR}/src/Content/Meshes
+    ${CMAKE_SOURCE_DIR}/src/Content/Meshes/EntityMeshData
 )
 
 #add_subdirectory(lib/flint) # Comment for now as the lib won't compile on Windows

@@ -19,7 +19,8 @@ Engine::Engine() :
 
     // Instantiate members
     this->textureRegistry.createTextures();
-    this->world = std::make_unique<World>(this->blockRegistry, this->textureRegistry, this->prefabRegistry);
+    this->meshRegistry = std::make_unique<MeshRegistry>();
+    this->world = std::make_unique<World>(this->blockRegistry, this->textureRegistry, this->prefabRegistry, *this->meshRegistry);
     this->player = std::make_unique<Player>(*this->world);
 
     // Apply settings to classes
@@ -112,7 +113,7 @@ void Engine::update() const
 {
     const auto vpMatrix = this->player->getCamera().setViewMatrix(this->world->getShader(), this->viewport.getAspectRatio());
 
-    this->world->update(this->player->getCamera().getPosition(), vpMatrix);
+    this->world->update(this->player->getCamera(), this->viewport.getAspectRatio(), vpMatrix);
     this->player->update();
 }
 

@@ -18,7 +18,11 @@ class VBO {
         ~VBO();
 
         template<typename T>
-        void addData(const std::vector<T> &v) const;
+        void addData(const std::vector<T> &v) const
+        {
+            this->bind();
+            glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(v.size() * sizeof(T)), v.data(), GL_STATIC_DRAW);
+        }
 
         void bind() const;
         void unbind() const;

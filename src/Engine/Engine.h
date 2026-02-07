@@ -37,6 +37,8 @@ class Engine {
     TextureRegistry textureRegistry;
     PrefabRegistry prefabRegistry;
 
+    std::unique_ptr<MeshRegistry> meshRegistry;
+
     std::unique_ptr<Player> player;
     std::unique_ptr<World> world;
 

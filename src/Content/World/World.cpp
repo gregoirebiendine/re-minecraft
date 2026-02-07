@@ -1,8 +1,14 @@
 #include "World.h"
 
-World::World(const BlockRegistry& _blockRegistry, const TextureRegistry& _textureRegistry, const PrefabRegistry& _prefabRegistry) :
+World::World(
+    const BlockRegistry& _blockRegistry,
+    const TextureRegistry& _textureRegistry,
+    const PrefabRegistry& _prefabRegistry,
+    const MeshRegistry& _meshRegistry
+) :
     blockRegistry(_blockRegistry),
     textureRegistry(_textureRegistry),
+    meshRegistry(_meshRegistry),
     shader(
         "../resources/shaders/World/world.vert",
         "../resources/shaders/World/world.frag"
@@ -10,16 +16,33 @@ World::World(const BlockRegistry& _blockRegistry, const TextureRegistry& _textur
     chunkManager(_blockRegistry, _prefabRegistry),
     meshManager(*this)
 {
+    // Setup entity vector
+    this->entities.reserve(MAX_ENTITY);
+
+    // Register MovementSystem to ECS
+    this->scheduler.registerSystem<ECS::MovementSystem>();
+    this->scheduler.registerSystem<ECS::RenderSystem>();
+
+    // Create a Zombie entity with initial position and velocity
+    const auto zombieMesh = this->meshRegistry.get("zombie");
+    const auto zombie = this->ecs.createEntity();
+    this->ecs.addComponent(zombie, ECS::Position{8.5f, 71.f, 8.5f});
+    this->ecs.addComponent(zombie, ECS::Velocity{0.f, 0.f, 0.f});
+    this->ecs.addComponent(zombie, ECS::MeshRefComponent{ zombieMesh });
+    this->entities.emplace_back(zombie);
+
+    // Set WorldShader uniform to use loaded textures
     this->shader.use();
     this->shader.setUniformInt("Textures", 0);
 
+    // Create spawn area (8*8*5)
     for (int z = -4; z <= 4; ++z)
         for (int y = 0; y <= 5; ++y)
             for (int x = -4; x <= 4; ++x)
                 this->chunkManager.requestChunk({x, y, z});
 }
 
-// World lifecycle
+
 Material World::getBlock(const int wx, const int wy, const int wz)
 {
     const auto [cx, cy, cz] = ChunkPos::fromWorld(wx, wy, wz);
@@ -70,9 +93,11 @@ void World::fill(const glm::ivec3 from, const glm::ivec3 to, const Material mat)
             }
 }
 
-// Updates
-void World::update(const glm::vec3& cameraPos, const glm::mat4& vpMatrix)
+void World::update(const Camera& camera, const float aspect, const glm::mat4& vpMatrix)
 {
+    const glm::vec3 cameraPosition = camera.getPosition();
+
+    // Swap chunks pending changes
     {
         auto lock = chunkManager.acquireReadLock();
         for (auto& chunk : chunkManager.getChunks() | std::views::values) {
@@ -81,10 +106,19 @@ void World::update(const glm::vec3& cameraPos, const glm::mat4& vpMatrix)
         }
     }
 
-    this->chunkManager.updateStreaming(cameraPos);
+    // Update chunk meshing
+    this->chunkManager.updateStreaming(cameraPosition);
     this->chunkManager.updateFrustum(vpMatrix);
-    this->meshManager.scheduleMeshing(cameraPos);
+    this->meshManager.scheduleMeshing(cameraPosition);
     this->meshManager.update();
+
+    // Update render shader
+    const auto& render = this->scheduler.getSystem<ECS::RenderSystem>();
+    render.setProjectionMatrix(camera.getProjectionMatrix(aspect));
+    render.setViewMatrix(camera.getViewMatrix());
+
+    // Update ECS
+    this->scheduler.update(this->ecs, Viewport::dt);
 }
 
 void World::render()

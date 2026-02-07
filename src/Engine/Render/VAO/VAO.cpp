@@ -45,6 +45,16 @@ void VAO::storeOutlineData(const std::vector<GLfloat>& data) const
     this->vbo.unbind();
 }
 
+void VAO::storeEntityMeshData(const std::vector<EntityVertex>& data) const
+{
+    this->vbo.addData<EntityVertex>(data);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(EntityVertex), static_cast<void *>( nullptr ));
+
+    this->vbo.unbind();
+}
+
 void VAO::bind() const
 {
     glBindVertexArray(this->ID);

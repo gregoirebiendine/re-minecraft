@@ -15,6 +15,7 @@
 #include "Camera.h"
 #include "Shader.h"
 #include "VAO.h"
+#include "ChunkPos.h"
 #include "OutlineVertices.h"
 #include "DirectionUtils.h"
 

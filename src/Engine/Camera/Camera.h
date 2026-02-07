@@ -13,9 +13,6 @@
 #include <glm/gtx/vector_angle.hpp>
 
 #include "Shader.h"
-#include "World.h"
-#include "Raycast.h"
-#include "Material.h"
 
 class Camera {
     static constexpr float SPEED = 8.f;

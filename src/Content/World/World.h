@@ -8,23 +8,40 @@
 
 #include "glm/glm.hpp"
 
+#include "Camera.h"
 #include "BlockRegistry.h"
 #include "TextureRegistry.h"
 #include "PrefabRegistry.h"
+#include "MeshRegistry.h"
 #include "ChunkManager.h"
 #include "ChunkMeshManager.h"
 #include "Shader.h"
+#include "Viewport.h"
+#include "ECS/Systems/MovementSystem.h"
+#include "ECS/Systems/RenderSystem.h"
 
 class World {
-    BlockRegistry blockRegistry;
-    TextureRegistry textureRegistry;
+    static constexpr int MAX_ENTITY = 100;
+
+    const BlockRegistry& blockRegistry;
+    const TextureRegistry& textureRegistry;
+    const MeshRegistry& meshRegistry;
 
     Shader shader;
     ChunkManager chunkManager;
     ChunkMeshManager meshManager;
 
+    ECS::Handler ecs{MAX_ENTITY};
+    ECS::SystemScheduler scheduler;
+    std::vector<ECS::Entity> entities;
+
     public:
-        explicit World(const BlockRegistry& _blockRegistry, const TextureRegistry& _textureRegistry, const PrefabRegistry& _prefabRegistry);
+        explicit World(
+            const BlockRegistry& _blockRegistry,
+            const TextureRegistry& _textureRegistry,
+            const PrefabRegistry& _prefabRegistry,
+            const MeshRegistry& _meshRegistry
+        );
 
         const BlockRegistry& getBlockRegistry() const;
         const TextureRegistry& getTextureRegistry() const;
@@ -39,7 +56,7 @@ class World {
         [[nodiscard]] bool isAir(int wx, int wy, int wz);
 
         // Updates
-        void update(const glm::vec3& cameraPos, const glm::mat4& vpMatrix);
+        void update(const Camera& camera, float aspect, const glm::mat4& vpMatrix);
         void render();
 };
 
