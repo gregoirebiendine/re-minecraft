@@ -44,6 +44,7 @@ namespace ECS
 
                     const glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
                     this->shader.setModelMatrix(model);
+                    this->shader.setUniformUInt("LayerId", ref.texId);
                     ref.mesh->render();
                 });
             }

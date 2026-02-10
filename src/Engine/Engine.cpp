@@ -19,7 +19,7 @@ Engine::Engine() :
 
     // Instantiate members
     this->textureRegistry.createTextures();
-    this->meshRegistry = std::make_unique<MeshRegistry>(this->textureRegistry);
+    this->meshRegistry = std::make_unique<MeshRegistry>();
     this->world = std::make_unique<World>(this->blockRegistry, this->textureRegistry, this->prefabRegistry, *this->meshRegistry);
     this->player = std::make_unique<Player>(*this->world);
 

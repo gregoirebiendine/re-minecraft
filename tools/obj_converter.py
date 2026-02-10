@@ -14,7 +14,6 @@ with open(f"{FILE}.obj", "r") as f:
 
         elif line.startswith("vt "):
             parts = line.replace("vt ", "").strip().split(" ")
-            # Flip V: OBJ has V=0 at bottom, engine expects V=0 at top
             uvs.append(f"{parts[0]},{1.0 - float(parts[1])}")
 
         elif line.startswith("vn "):
@@ -24,7 +23,7 @@ with open(f"{FILE}.obj", "r") as f:
             faces = line.replace("f ", "").strip().split(" ")
             indicesList = [list(map(int, i.split("/"))) for i in faces]
             for indices in indicesList:
-                res.append("{" + "{{{v}}}, {{{n}}}, {{{uv}}}, texId".format(v = vertices[indices[0] - 1], uv = uvs[indices[1] - 1], n = normals[indices[2] - 1]) + "}")
+                res.append("{" + "{{{v}}}, {{{n}}}, {{{uv}}}".format(v = vertices[indices[0] - 1], uv = uvs[indices[1] - 1], n = normals[indices[2] - 1]) + "}")
         
     with open(f"{FILE}.ffm", "w") as out:
         out.write(",\n".join(res))

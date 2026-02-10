@@ -15,7 +15,7 @@ class MeshRegistry
     std::unordered_map<std::string, std::shared_ptr<EntityMeshData>> cache;
 
     public:
-        explicit MeshRegistry(const TextureRegistry& _textureRegistry);
+        explicit MeshRegistry();
 
         std::shared_ptr<EntityMeshData> load(const std::string& name, const std::vector<EntityVertex>& vertices);
         std::shared_ptr<EntityMeshData> get(const std::string& name) const;

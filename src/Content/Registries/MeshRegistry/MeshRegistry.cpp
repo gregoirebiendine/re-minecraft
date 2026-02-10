@@ -1,9 +1,9 @@
 #include "MeshRegistry.h"
 #include "ZombieMesh.h"
 
-MeshRegistry::MeshRegistry(const TextureRegistry& _textureRegistry)
+MeshRegistry::MeshRegistry()
 {
-    this->load("zombie", getZombieMesh(_textureRegistry.getByName("zombie")));
+    this->load("zombie", ZOMBIE_MESH);
 }
 
 std::shared_ptr<EntityMeshData> MeshRegistry::load(const std::string& name, const std::vector<EntityVertex>& vertices)

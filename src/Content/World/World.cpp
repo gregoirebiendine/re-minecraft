@@ -26,10 +26,11 @@ World::World(
 
     // Create a Zombie entity with initial position and velocity
     const auto zombieMesh = this->meshRegistry.get("zombie");
+    const auto zombieTexture = this->textureRegistry.getByName("zombie");
     const auto zombie = this->ecs.createEntity();
     this->ecs.addComponent(zombie, ECS::Position{8.5f, 71.f, 8.5f});
     this->ecs.addComponent(zombie, ECS::Velocity{0.f, 0.f, 0.f});
-    this->ecs.addComponent(zombie, ECS::MeshRefComponent{ zombieMesh });
+    this->ecs.addComponent(zombie, ECS::MeshRefComponent{ zombieMesh, zombieTexture });
     this->entities.emplace_back(zombie);
 
     // Set WorldShader uniform to use loaded textures

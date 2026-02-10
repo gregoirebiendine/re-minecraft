@@ -58,9 +58,6 @@ void VAO::storeEntityMeshData(const std::vector<EntityVertex>& data) const
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(EntityVertex), reinterpret_cast<void *>( offsetof(EntityVertex, uv) ));
 
-    glEnableVertexAttribArray(3);
-    glVertexAttribIPointer(3, 1, GL_UNSIGNED_INT, sizeof(EntityVertex), reinterpret_cast<void *>( offsetof(EntityVertex, texId) ));
-
     this->vbo.unbind();
 }
 
