@@ -118,17 +118,24 @@ void Engine::update() const
 
 void Engine::render() const
 {
+    // Begin MSAA rendering
+    this->viewport.beginFrame();
+
     // Clear window and buffer
     glClearColor(0.509f, 0.784f, 0.898f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Render World
     this->textureRegistry.bind();
+    this->textureRegistry.bindSlots();
     this->world->render();
 
     // Render Player
     this->player->renderBlockOutline(this->viewport.getAspectRatio());
     this->player->render();
+
+    // Resolve MSAA to screen
+    this->viewport.endFrame();
 
     // Update buffer
     this->viewport.swapBuffers();

@@ -30,7 +30,7 @@ class Engine {
         HANDLE frameTimer = nullptr;
     #endif
 
-    Viewport viewport;
+    mutable Viewport viewport;
     InputState inputs;
     
     BlockRegistry blockRegistry;

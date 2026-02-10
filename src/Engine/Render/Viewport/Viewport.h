@@ -20,21 +20,35 @@ class Viewport
     GLFWwindow *window{nullptr};
     float aspectRatio{};
 
+    // MSAA FBO
+    static constexpr int MSAA_SAMPLES = 4;
+    GLuint msaaFBO{0};
+    GLuint msaaColorBuffer{0};
+    GLuint msaaDepthBuffer{0};
+    int fbWidth{0}, fbHeight{0};
+
     static void initGLFW();
     static GLFWmonitor *getMonitor();
     static const GLFWvidmode *getVideoMode();
+
+    void createMSAABuffers();
+    void deleteMSAABuffers();
 
     public:
         static constexpr double dt = 1.f / 60.f; // 60Hz
 
         void initWindow(InputState* inputs);
-        void initViewport() const;
-        void closeWindow() const;
+        void initViewport();
+        void closeWindow();
 
         [[nodiscard]] GLFWwindow *getWindow() const;
         [[nodiscard]] bool shouldClose() const;
         static void pollEvents();
         void swapBuffers() const;
+
+        // MSAA methods
+        void beginFrame();
+        void endFrame();
 
         Settings& getSettings();
 

@@ -12,7 +12,7 @@ void Viewport::initGLFW()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     // Use MSAA 4x
-    glfwWindowHint(GLFW_SAMPLES, 4);
+    // glfwWindowHint(GLFW_SAMPLES, 4);
 }
 
 void Viewport::initWindow(InputState* inputs)
@@ -54,7 +54,7 @@ void Viewport::initWindow(InputState* inputs)
         throw std::runtime_error("Cannot initialize GLAD");
 
     // Setup STBI image load
-    stbi_set_flip_vertically_on_load(true);
+    // stbi_set_flip_vertically_on_load(true);
 
     // Setup ImGui implementation
     IMGUI_CHECKVERSION();
@@ -67,7 +67,7 @@ void Viewport::initWindow(InputState* inputs)
     this->aspectRatio = static_cast<float>(viewportSize.x) / static_cast<float>(viewportSize.y);
 }
 
-void Viewport::initViewport() const
+void Viewport::initViewport()
 {
     const auto viewportSize = this->settings.getViewportSize();
 
@@ -85,12 +85,80 @@ void Viewport::initViewport() const
     glCullFace(GL_BACK);
     glEnable(GL_CULL_FACE);
 
-    // Enable MSAA
-    glEnable(GL_MULTISAMPLE);
+    // Create MSAA framebuffer
+    fbWidth = viewportSize.x;
+    fbHeight = viewportSize.y;
+    createMSAABuffers();
 }
 
-void Viewport::closeWindow() const
+void Viewport::createMSAABuffers()
 {
+    // Create multisampled FBO
+    glGenFramebuffers(1, &msaaFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, msaaFBO);
+
+    // Create multisampled color buffer
+    glGenRenderbuffers(1, &msaaColorBuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, msaaColorBuffer);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, MSAA_SAMPLES, GL_RGBA8, fbWidth, fbHeight);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, msaaColorBuffer);
+
+    // Create multisampled depth buffer
+    glGenRenderbuffers(1, &msaaDepthBuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, msaaDepthBuffer);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, MSAA_SAMPLES, GL_DEPTH24_STENCIL8, fbWidth, fbHeight);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, msaaDepthBuffer);
+
+    // Check framebuffer completeness
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        throw std::runtime_error("MSAA Framebuffer is not complete");
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Viewport::deleteMSAABuffers()
+{
+    if (msaaFBO) {
+        glDeleteFramebuffers(1, &msaaFBO);
+        msaaFBO = 0;
+    }
+    if (msaaColorBuffer) {
+        glDeleteRenderbuffers(1, &msaaColorBuffer);
+        msaaColorBuffer = 0;
+    }
+    if (msaaDepthBuffer) {
+        glDeleteRenderbuffers(1, &msaaDepthBuffer);
+        msaaDepthBuffer = 0;
+    }
+}
+
+void Viewport::beginFrame()
+{
+    // Bind MSAA framebuffer for rendering
+    glBindFramebuffer(GL_FRAMEBUFFER, msaaFBO);
+    glViewport(0, 0, fbWidth, fbHeight);
+}
+
+void Viewport::endFrame()
+{
+    // Resolve MSAA: blit from multisampled FBO to default framebuffer
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, msaaFBO);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glBlitFramebuffer(
+        0, 0, fbWidth, fbHeight,
+        0, 0, fbWidth, fbHeight,
+        GL_COLOR_BUFFER_BIT,
+        GL_NEAREST
+    );
+
+    // Bind default framebuffer for any post-processing or UI
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Viewport::closeWindow()
+{
+    deleteMSAABuffers();
+
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();

@@ -126,6 +126,7 @@ void World::render()
 {
     this->shader.use();
 
+    // Render block
     for (const auto chunk : this->chunkManager.getRenderableChunks()) {
         const auto& mesh = this->meshManager.getMesh(chunk->getPosition());
 
