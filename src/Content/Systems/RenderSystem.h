@@ -15,7 +15,10 @@ namespace ECS
         public:
             RenderSystem() :
                 shader("/resources/shaders/Entity/")
-            {}
+            {
+                this->shader.use();
+                this->shader.setUniformInt("Textures", 0);
+            }
 
             void setViewMatrix(const glm::mat4& view)
             {

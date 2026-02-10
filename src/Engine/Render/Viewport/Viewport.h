@@ -47,8 +47,8 @@ class Viewport
         void swapBuffers() const;
 
         // MSAA methods
-        void beginFrame();
-        void endFrame();
+        void beginFrame() const;
+        void endFrame() const;
 
         Settings& getSettings();
 

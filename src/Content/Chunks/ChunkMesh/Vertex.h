@@ -44,9 +44,10 @@ struct GuiVertex {
 
 struct EntityVertex {
     glm::vec3 position;
-    // glm::vec3 normal;
-    // glm::vec2 uv;
+    glm::vec3 normal;
+    glm::vec2 uv;
+    uint32_t texId;
 };
 
 
-#endif //RE_MINECRAFT_VERTEX_H
+#endif

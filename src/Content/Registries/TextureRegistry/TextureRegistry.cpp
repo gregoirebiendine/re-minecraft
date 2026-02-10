@@ -89,8 +89,8 @@ void TextureRegistry::createTextures()
     layers.emplace_back();
 
     // Pack textures
-    for (size_t idx : sortedIndices) {
-        auto& tex = pending[idx];
+    for (const size_t idx : sortedIndices) {
+        const auto& tex = pending[idx];
         bool placed = false;
 
         for (size_t layerIdx = 0; layerIdx < layers.size(); layerIdx++) {
@@ -178,9 +178,6 @@ void TextureRegistry::createTextures()
                  gpuSlots.data(),
                  GL_STATIC_DRAW);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-    std::cout << "[TextureRegistry] Packed " << textureSlots.size()
-              << " textures into " << layers.size() << " layer(s)" << std::endl;
 }
 
 TextureId TextureRegistry::registerTexture(const std::string& name, const std::string& path)

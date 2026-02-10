@@ -10,9 +10,6 @@ void Viewport::initGLFW()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-
-    // Use MSAA 4x
-    // glfwWindowHint(GLFW_SAMPLES, 4);
 }
 
 void Viewport::initWindow(InputState* inputs)
@@ -54,7 +51,7 @@ void Viewport::initWindow(InputState* inputs)
         throw std::runtime_error("Cannot initialize GLAD");
 
     // Setup STBI image load
-    // stbi_set_flip_vertically_on_load(true);
+    stbi_set_flip_vertically_on_load(true);
 
     // Setup ImGui implementation
     IMGUI_CHECKVERSION();
@@ -132,16 +129,14 @@ void Viewport::deleteMSAABuffers()
     }
 }
 
-void Viewport::beginFrame()
+void Viewport::beginFrame() const
 {
-    // Bind MSAA framebuffer for rendering
     glBindFramebuffer(GL_FRAMEBUFFER, msaaFBO);
     glViewport(0, 0, fbWidth, fbHeight);
 }
 
-void Viewport::endFrame()
+void Viewport::endFrame() const
 {
-    // Resolve MSAA: blit from multisampled FBO to default framebuffer
     glBindFramebuffer(GL_READ_FRAMEBUFFER, msaaFBO);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     glBlitFramebuffer(

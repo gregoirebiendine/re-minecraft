@@ -36,7 +36,6 @@ class Engine {
     BlockRegistry blockRegistry;
     TextureRegistry textureRegistry;
     PrefabRegistry prefabRegistry;
-
     std::unique_ptr<MeshRegistry> meshRegistry;
 
     std::unique_ptr<Player> player;
