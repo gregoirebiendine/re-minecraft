@@ -12,9 +12,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "Camera.h"
 #include "Shader.h"
 #include "VAO.h"
+#include "ChunkPos.h"
 #include "OutlineVertices.h"
 #include "DirectionUtils.h"
 
@@ -33,7 +33,7 @@ struct DigitalColor
         this->a = a;
     }
 
-    operator glm::vec4() const
+    explicit operator glm::vec4() const
     {
         return {this->r, this->g, this->b, this->a};
     }
@@ -64,17 +64,17 @@ class GUI
     void createCrosshair(glm::ivec2 viewportSize);
     void createRectangle(float x, float y, float width, float height, DigitalColor color);
 
+    static void createImGuiFrame();
+    static void renderImGuiFrame(glm::vec3 pos, glm::vec3 forward, const std::string& selectedBlockName);
+
     public:
         explicit GUI();
 
         void init(glm::ivec2 viewportSize);
         void changeViewportSize(glm::ivec2 size);
 
-        void render() const;
-        void renderBlockOutline(const Camera& camera, const float& aspect, const glm::vec3& cubePos) const;
-
-        static void createImGuiFrame();
-        static void renderImGuiFrame(glm::vec3 pos, glm::vec3 forward, const std::string& selectedBlockName);
+        void render(const glm::vec3& pos, const glm::vec3& forward, const std::string& selectedBlockName);
+        void renderBlockOutline(const glm::mat4& v, const glm::mat4& p, const glm::vec3& pos);
 };
 
 #endif //RE_MINECRAFT_GUI_H

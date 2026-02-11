@@ -2,9 +2,9 @@
 
 layout (location = 0) in vec3 pos;
 
+uniform mat4 ModelMatrix;
 uniform mat4 ViewMatrix;
 uniform mat4 ProjectionMatrix;
-uniform mat4 ModelMatrix;
 
 void main()
 {

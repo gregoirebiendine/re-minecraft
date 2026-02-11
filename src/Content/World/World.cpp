@@ -1,25 +1,79 @@
 #include "World.h"
+#include "Viewport.h"
 
-World::World(const BlockRegistry& _blockRegistry, const TextureRegistry& _textureRegistry, const PrefabRegistry& _prefabRegistry) :
+#include "Systems/PlayerMovementSystem.h"
+#include "Systems/PlayerInputSystem.h"
+#include "Systems/CameraSystem.h"
+#include "Systems/RenderSystem.h"
+#include "Systems/GravitySystem.h"
+#include "Systems/CollisionSystem.h"
+
+#include "Components/Movements.h"
+#include "Components/Gravity.h"
+#include "Components/CollisionBox.h"
+#include "Components/MeshRef.h"
+#include "Components/PlayerInput.h"
+#include "Components/Friction.h"
+
+World::World(
+    const BlockRegistry& _blockRegistry,
+    const TextureRegistry& _textureRegistry,
+    const PrefabRegistry& _prefabRegistry,
+    const MeshRegistry& _meshRegistry,
+    const InputState& _inputs
+) :
     blockRegistry(_blockRegistry),
     textureRegistry(_textureRegistry),
-    shader(
-        "../resources/shaders/World/world.vert",
-        "../resources/shaders/World/world.frag"
-    ),
+    meshRegistry(_meshRegistry),
+    inputs(_inputs),
+    shader("/resources/shaders/World/"),
     chunkManager(_blockRegistry, _prefabRegistry),
     meshManager(*this)
 {
+    // Setup entity vector
+    this->entities.reserve(MAX_ENTITY);
+
+    // Register MovementSystem to ECS
+    this->scheduler.registerSystem<ECS::PlayerInputSystem>(this->inputs);
+    this->scheduler.registerSystem<ECS::CameraSystem>(this->inputs);
+    this->scheduler.registerSystem<ECS::GravitySystem>();
+    this->scheduler.registerSystem<ECS::PlayerMovementSystem>();
+    this->scheduler.registerSystem<ECS::CollisionSystem>(*this);
+    this->scheduler.registerSystem<ECS::RenderSystem>();
+
+    // Create player entity
+    this->player = this->ecs.createEntity();
+    this->ecs.addComponent(this->player, ECS::Position{8.5f, 71.f, 8.5f});
+    this->ecs.addComponent(this->player, ECS::Velocity{0.f, 0.f, 0.f});
+    this->ecs.addComponent(this->player, ECS::Camera{});
+    this->ecs.addComponent(this->player, ECS::PlayerInput{});
+    this->ecs.addComponent(this->player, ECS::Gravity{});
+    this->ecs.addComponent(this->player, ECS::Friction{});
+    this->ecs.addComponent(this->player, ECS::CollisionBox{{0.3f, 0.9f, 0.3f}});
+
+    // Create a Zombie entity
+    const auto zombieMesh = this->meshRegistry.get("zombie");
+    const auto zombieTexture = this->textureRegistry.getByName("zombie");
+    const auto zombie = this->ecs.createEntity();
+    this->ecs.addComponent(zombie, ECS::Position{7.5f, 72.f, 7.5f});
+    this->ecs.addComponent(zombie, ECS::Velocity{0.f, 0.f, 0.f});
+    this->ecs.addComponent(zombie, ECS::Gravity());
+    this->ecs.addComponent(zombie, ECS::CollisionBox{{0.475f, 1.f, 0.475f}});
+    this->ecs.addComponent(zombie, ECS::MeshRef{ zombieMesh, zombieTexture });
+    this->entities.emplace_back(zombie);
+
+    // Set WorldShader uniform to use loaded textures
     this->shader.use();
     this->shader.setUniformInt("Textures", 0);
 
+    // Create spawn area (8*8*5)
     for (int z = -4; z <= 4; ++z)
         for (int y = 0; y <= 5; ++y)
             for (int x = -4; x <= 4; ++x)
                 this->chunkManager.requestChunk({x, y, z});
 }
 
-// World lifecycle
+
 Material World::getBlock(const int wx, const int wy, const int wz)
 {
     const auto [cx, cy, cz] = ChunkPos::fromWorld(wx, wy, wz);
@@ -34,7 +88,8 @@ Material World::getBlock(const int wx, const int wy, const int wz)
 
 bool World::isAir(const int wx, const int wy, const int wz)
 {
-    return this->blockRegistry.isEqual(this->getBlock(wx, wy, wz), "core:air");
+    const auto mat = this->getBlock(wx, wy, wz);
+    return this->blockRegistry.isEqual(BlockData::getBlockId(mat), "core:air");
 }
 
 void World::setBlock(const int wx, const int wy, const int wz, const Material mat)
@@ -70,9 +125,32 @@ void World::fill(const glm::ivec3 from, const glm::ivec3 to, const Material mat)
             }
 }
 
-// Updates
-void World::update(const glm::vec3& cameraPos, const glm::mat4& vpMatrix)
+
+// Update and render
+void World::update(const float aspect)
 {
+    // Get systems
+    auto& cameraSystem = this->scheduler.getSystem<ECS::CameraSystem>();
+    auto& renderSystem = this->scheduler.getSystem<ECS::RenderSystem>();
+
+    // Update window aspect inside camera system
+    cameraSystem.setAspect(aspect);
+
+    // Update ECS
+    this->scheduler.update(this->ecs, Viewport::dt);
+
+    // Get ViewMatrix and ProjectionMatrix
+    const auto& v = cameraSystem.getViewMatrix();
+    const auto& p = cameraSystem.getProjectionMatrix();
+    const auto& cameraPosition = cameraSystem.getCameraPosition();
+
+    // Update shaders matrices
+    renderSystem.setProjectionMatrix(p);
+    renderSystem.setViewMatrix(v);
+    this->shader.setProjectionMatrix(p);
+    this->shader.setViewMatrix(v);
+
+    // Swap chunks pending changes
     {
         auto lock = chunkManager.acquireReadLock();
         for (auto& chunk : chunkManager.getChunks() | std::views::values) {
@@ -81,9 +159,10 @@ void World::update(const glm::vec3& cameraPos, const glm::mat4& vpMatrix)
         }
     }
 
-    this->chunkManager.updateStreaming(cameraPos);
-    this->chunkManager.updateFrustum(vpMatrix);
-    this->meshManager.scheduleMeshing(cameraPos);
+    // Update chunk meshing
+    this->chunkManager.updateStreaming(cameraPosition);
+    this->chunkManager.updateFrustum(p * v);
+    this->meshManager.scheduleMeshing(cameraPosition);
     this->meshManager.update();
 }
 
@@ -91,12 +170,16 @@ void World::render()
 {
     this->shader.use();
 
+    // Render chunks
     for (const auto chunk : this->chunkManager.getRenderableChunks()) {
         const auto& mesh = this->meshManager.getMesh(chunk->getPosition());
 
         this->shader.setModelMatrix(chunk->getChunkModel());
         mesh.render();
     }
+
+    // Render ECS
+    this->scheduler.render(this->ecs);
 }
 
 
@@ -116,7 +199,7 @@ ChunkManager& World::getChunkManager()
     return this->chunkManager;
 }
 
-const Shader& World::getShader() const
+Shader& World::getShader()
 {
     return this->shader;
 }

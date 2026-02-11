@@ -20,7 +20,7 @@
 #include "TextureRegistry.h"
 #include "PrefabRegistry.h"
 #include "World.h"
-#include "Player.h"
+#include "PlayerController.h"
 
 using Clock = std::chrono::steady_clock;
 using Duration = std::chrono::duration<double>;
@@ -30,15 +30,16 @@ class Engine {
         HANDLE frameTimer = nullptr;
     #endif
 
-    Viewport viewport;
+    mutable Viewport viewport;
     InputState inputs;
     
     BlockRegistry blockRegistry;
     TextureRegistry textureRegistry;
     PrefabRegistry prefabRegistry;
+    std::unique_ptr<MeshRegistry> meshRegistry;
 
-    std::unique_ptr<Player> player;
     std::unique_ptr<World> world;
+    std::unique_ptr<PlayerController> playerController;
 
     void update() const;
     void render() const;

@@ -1,13 +1,15 @@
 #ifndef RE_MINECRAFT_MATERIAL_H
 #define RE_MINECRAFT_MATERIAL_H
 
+#include <cstdint>
+
 constexpr int ROTATION_SHIFT = 13;
 constexpr int BLOCK_ID_MASK = 0x1FFF;
 constexpr int ROTATION_MASK = 0x7;
 
-using Material = uint16_t;      // 16bits
-using BlockId = uint16_t;       // 16bits
-using BlockRotation = uint8_t;  // 8bits
+using Material = std::uint16_t;      // 16bits
+using BlockId = std::uint16_t;       // 16bits
+using BlockRotation = std::uint8_t;  // 8bits
 
 enum MaterialFace : unsigned char
 {

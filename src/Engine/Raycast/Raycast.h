@@ -2,7 +2,9 @@
 #define RE_MINECRAFT_RAYCAST_H
 
 #include <glm/vec3.hpp>
+
 #include "Material.h"
+#include "World.h"
 
 namespace Raycast
 {
@@ -63,4 +65,4 @@ namespace Raycast
     }
 }
 
-#endif //RE_MINECRAFT_RAYCAST_H
+#endif

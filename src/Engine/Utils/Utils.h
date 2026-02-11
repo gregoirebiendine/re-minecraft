@@ -2,7 +2,10 @@
 #define RE_MINECRAFT_UTILS_H
 
 #include <random>
+#include <filesystem>
 #include "ChunkPos.h"
+
+namespace fs = std::filesystem;
 
 namespace ChunkCoords
 {
@@ -35,6 +38,11 @@ namespace Maths
 
         return distrib(gen);
     }
+}
+
+namespace Files
+{
+    static const fs::path SOURCE_FOLDER =  fs::current_path().parent_path();
 }
 
 #endif //RE_MINECRAFT_UTILS_H
