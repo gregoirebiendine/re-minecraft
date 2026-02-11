@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_MESHREGISTRY_H
-#define RE_MINECRAFT_MESHREGISTRY_H
+#ifndef FARFIELD_MESHREGISTRY_H
+#define FARFIELD_MESHREGISTRY_H
 
 #include <string>
 #include <memory>

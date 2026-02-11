@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_VIEWPORT_H
-#define RE_MINECRAFT_VIEWPORT_H
+#ifndef FARFIELD_VIEWPORT_H
+#define FARFIELD_VIEWPORT_H
 
 #include <iostream>
 
@@ -63,4 +63,4 @@ class Viewport
 
 };
 
-#endif //RE_MINECRAFT_VIEWPORT_H
+#endif

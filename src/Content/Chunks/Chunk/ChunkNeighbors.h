@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_CHUNKNEIGHBORS_H
-#define RE_MINECRAFT_CHUNKNEIGHBORS_H
+#ifndef FARFIELD_CHUNKNEIGHBORS_H
+#define FARFIELD_CHUNKNEIGHBORS_H
 
 #include "Chunk.h"
 
@@ -12,4 +12,4 @@ struct ChunkNeighbors {
     const Chunk* down;
 };
 
-#endif //RE_MINECRAFT_CHUNKNEIGHBORS_H
+#endif

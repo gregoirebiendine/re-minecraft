@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_MOVEMENTSYSTEM_H
-#define RE_MINECRAFT_MOVEMENTSYSTEM_H
+#ifndef FARFIELD_MOVEMENTSYSTEM_H
+#define FARFIELD_MOVEMENTSYSTEM_H
 
 #include "ECS/ISystem.h"
 #include "Components/Movements.h"

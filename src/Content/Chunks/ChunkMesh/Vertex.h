@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_VERTEX_H
-#define RE_MINECRAFT_VERTEX_H
+#ifndef FARFIELD_VERTEX_H
+#define FARFIELD_VERTEX_H
 
 #include <glm/glm.hpp>
 

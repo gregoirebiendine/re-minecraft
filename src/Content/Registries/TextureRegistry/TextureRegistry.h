@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_TEXTUREREGISTRY_H
-#define RE_MINECRAFT_TEXTUREREGISTRY_H
+#ifndef FARFIELD_TEXTUREREGISTRY_H
+#define FARFIELD_TEXTUREREGISTRY_H
 
 #include <unordered_map>
 #include <stdexcept>
@@ -84,4 +84,4 @@ class TextureRegistry
         void bindSlots() const;
 };
 
-#endif //RE_MINECRAFT_TEXTUREREGISTRY_H
+#endif

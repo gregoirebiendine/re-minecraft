@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_ECSSYSTEM_H
-#define RE_MINECRAFT_ECSSYSTEM_H
+#ifndef FARFIELD_ECSSYSTEM_H
+#define FARFIELD_ECSSYSTEM_H
 
 #include <cstdint>
 #include <unordered_map>

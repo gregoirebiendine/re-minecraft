@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_CHUNK_H
-#define RE_MINECRAFT_CHUNK_H
+#ifndef FARFIELD_CHUNK_H
+#define FARFIELD_CHUNK_H
 
 #define GLM_ENABLE_EXPERIMENTAL
 
@@ -79,4 +79,4 @@ class Chunk {
         }
 };
 
-#endif //RE_MINECRAFT_CHUNK_H
+#endif

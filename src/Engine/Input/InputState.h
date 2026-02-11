@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_INPUTSTATE_H
-#define RE_MINECRAFT_INPUTSTATE_H
+#ifndef FARFIELD_INPUTSTATE_H
+#define FARFIELD_INPUTSTATE_H
 
 #include <utility>
 #include <algorithm>
@@ -131,4 +131,4 @@ struct InputState
     }
 };
 
-#endif //RE_MINECRAFT_INPUTSTATE_H
+#endif

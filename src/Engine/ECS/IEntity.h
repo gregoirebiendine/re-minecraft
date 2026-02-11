@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_IENTITY_H
-#define RE_MINECRAFT_IENTITY_H
+#ifndef FARFIELD_IENTITY_H
+#define FARFIELD_IENTITY_H
 
 #include <cstdint>
 #include <vector>

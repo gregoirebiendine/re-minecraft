@@ -1,6 +1,6 @@
 
-#ifndef RE_MINECRAFT_CUBE_VAO_H
-#define RE_MINECRAFT_CUBE_VAO_H
+#ifndef FARFIELD_VAO_H
+#define FARFIELD_VAO_H
 
 #include <vector>
 
@@ -27,4 +27,4 @@ class VAO {
 };
 
 
-#endif //RE_MINECRAFT_CUBE_VAO_H
+#endif

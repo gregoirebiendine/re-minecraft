@@ -1,5 +1,5 @@
-#ifndef VBO_H
-#define VBO_H
+#ifndef FARFIELD_VBO_H
+#define FARFIELD_VBO_H
 
 #define GLM_ENABLE_EXPERIMENTAL
 

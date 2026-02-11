@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_NEIGHBORACCESS_H
-#define RE_MINECRAFT_NEIGHBORACCESS_H
+#ifndef FARFIELD_NEIGHBORACCESS_H
+#define FARFIELD_NEIGHBORACCESS_H
 
 #include <array>
 
@@ -33,4 +33,4 @@ class NeighborAccess {
 };
 
 
-#endif //RE_MINECRAFT_NEIGHBORACCESS_H
+#endif

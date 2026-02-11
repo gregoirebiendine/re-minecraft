@@ -1,5 +1,5 @@
-#ifndef ENGINE_H
-#define ENGINE_H
+#ifndef FARFIELD_ENGINE_H
+#define FARFIELD_ENGINE_H
 
 #define GLM_ENABLE_EXPERIMENTAL
 

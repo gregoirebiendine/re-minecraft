@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_CHUNKMANAGER_H
-#define RE_MINECRAFT_CHUNKMANAGER_H
+#ifndef FARFIELD_CHUNKMANAGER_H
+#define FARFIELD_CHUNKMANAGER_H
 
 #include <thread>
 #include <condition_variable>
@@ -86,4 +86,4 @@ class ChunkManager {
         void releaseDecorationLock(const ChunkPos& pos);
 };
 
-#endif //RE_MINECRAFT_CHUNKMANAGER_H
+#endif

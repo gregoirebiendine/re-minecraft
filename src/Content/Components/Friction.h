@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_FRICTION_H
-#define RE_MINECRAFT_FRICTION_H
+#ifndef FARFIELD_FRICTION_H
+#define FARFIELD_FRICTION_H
 
 namespace ECS {
     struct Friction {

@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_ZOMBIEMESH_H
-#define RE_MINECRAFT_ZOMBIEMESH_H
+#ifndef FARFIELD_ZOMBIEMESH_H
+#define FARFIELD_ZOMBIEMESH_H
 
 #include <vector>
 #include "glm/vec3.hpp"

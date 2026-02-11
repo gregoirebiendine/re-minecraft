@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_UTILS_H
-#define RE_MINECRAFT_UTILS_H
+#ifndef FARFIELD_UTILS_H
+#define FARFIELD_UTILS_H
 
 #include <random>
 #include <filesystem>
@@ -45,4 +45,4 @@ namespace Files
     static const fs::path SOURCE_FOLDER =  fs::current_path().parent_path();
 }
 
-#endif //RE_MINECRAFT_UTILS_H
+#endif

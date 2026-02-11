@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_RAYCAST_H
-#define RE_MINECRAFT_RAYCAST_H
+#ifndef FARFIELD_RAYCAST_H
+#define FARFIELD_RAYCAST_H
 
 #include <glm/vec3.hpp>
 

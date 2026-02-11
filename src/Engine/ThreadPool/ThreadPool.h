@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_THREADPOOL_H
-#define RE_MINECRAFT_THREADPOOL_H
+#ifndef FARFIELD_THREADPOOL_H
+#define FARFIELD_THREADPOOL_H
 
 #pragma once
 
@@ -73,4 +73,4 @@ void ThreadPool<Job>::loop() {
     }
 }
 
-#endif //RE_MINECRAFT_THREADPOOL_H
+#endif

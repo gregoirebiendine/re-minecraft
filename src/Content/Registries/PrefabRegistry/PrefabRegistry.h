@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_PREFABREGISTRY_H
-#define RE_MINECRAFT_PREFABREGISTRY_H
+#ifndef FARFIELD_PREFABREGISTRY_H
+#define FARFIELD_PREFABREGISTRY_H
 
 #include <iostream>
 #include <fstream>
@@ -47,4 +47,4 @@ class PrefabRegistry
 };
 
 
-#endif //RE_MINECRAFT_PREFABREGISTRY_H
+#endif

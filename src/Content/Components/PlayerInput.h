@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_PLAYERINPUT_H
-#define RE_MINECRAFT_PLAYERINPUT_H
+#ifndef FARFIELD_PLAYERINPUT_H
+#define FARFIELD_PLAYERINPUT_H
 
 #include <cstdint>
 #include <glm/glm.hpp>

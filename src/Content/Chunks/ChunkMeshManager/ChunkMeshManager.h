@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_CHUNKMESHMANAGER_H
-#define RE_MINECRAFT_CHUNKMESHMANAGER_H
+#ifndef FARFIELD_CHUNKMESHMANAGER_H
+#define FARFIELD_CHUNKMESHMANAGER_H
 
 #pragma once
 
@@ -47,4 +47,4 @@ class ChunkMeshManager {
         std::queue<std::pair<ChunkPos, MeshData>> uploadQueue;
 };
 
-#endif //RE_MINECRAFT_CHUNKMESHMANAGER_H
+#endif

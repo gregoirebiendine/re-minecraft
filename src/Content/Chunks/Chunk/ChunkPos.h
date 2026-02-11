@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_CHUNKPOS_H
-#define RE_MINECRAFT_CHUNKPOS_H
+#ifndef FARFIELD_CHUNKPOS_H
+#define FARFIELD_CHUNKPOS_H
 
 #include <functional>
 #include <iostream>
@@ -79,4 +79,4 @@ inline ChunkPos operator*(const ChunkPos pos, const int mul)
     return {pos.x * mul, pos.y * mul, pos.z * mul};
 }
 
-#endif //RE_MINECRAFT_CHUNKPOS_H
+#endif

@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_MATERIAL_H
-#define RE_MINECRAFT_MATERIAL_H
+#ifndef FARFIELD_MATERIAL_H
+#define FARFIELD_MATERIAL_H
 
 #include <cstdint>
 
@@ -86,4 +86,4 @@ namespace BlockData
 
 }
 
-#endif //RE_MINECRAFT_MATERIAL_H
+#endif

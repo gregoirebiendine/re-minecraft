@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_CAMERASYSTEM_H
-#define RE_MINECRAFT_CAMERASYSTEM_H
+#ifndef FARFIELD_CAMERASYSTEM_H
+#define FARFIELD_CAMERASYSTEM_H
 
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_clip_space.hpp>

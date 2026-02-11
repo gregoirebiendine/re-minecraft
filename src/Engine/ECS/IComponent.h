@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_ICOMPONENT_H
-#define RE_MINECRAFT_ICOMPONENT_H
+#ifndef FARFIELD_ICOMPONENT_H
+#define FARFIELD_ICOMPONENT_H
 
 #include <cstdint>
 #include <vector>

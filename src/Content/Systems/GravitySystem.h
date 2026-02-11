@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_GRAVITYSYSTEM_H
-#define RE_MINECRAFT_GRAVITYSYSTEM_H
+#ifndef FARFIELD_GRAVITYSYSTEM_H
+#define FARFIELD_GRAVITYSYSTEM_H
 
 #include "ECS/ISystem.h"
 #include "Components/Movements.h"

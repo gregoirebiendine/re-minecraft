@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_SETTINGS_H
-#define RE_MINECRAFT_SETTINGS_H
+#ifndef FARFIELD_SETTINGS_H
+#define FARFIELD_SETTINGS_H
 
 #include <glm/glm.hpp>
 
@@ -31,4 +31,4 @@ class Settings
         [[nodiscard]] uint8_t getFOV() const;
 };
 
-#endif //RE_MINECRAFT_SETTINGS_H
+#endif

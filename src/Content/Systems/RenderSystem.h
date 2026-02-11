@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_RENDERSYSTEM_H
-#define RE_MINECRAFT_RENDERSYSTEM_H
+#ifndef FARFIELD_RENDERSYSTEM_H
+#define FARFIELD_RENDERSYSTEM_H
 
 #include "Shader.h"
 #include "EntityMeshData.h"

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.30)
-project(re_minecraft VERSION 0.0.1)
+project(farfield VERSION 0.0.1)
 
 set(CMAKE_CXX_STANDARD 26)
 
@@ -64,9 +64,9 @@ set(
 #add_subdirectory(lib/flint) # Comment for now as the lib won't compile on Windows
 add_subdirectory(lib/GLFW)
 
-add_executable(re_minecraft ${SOURCES})
+add_executable(farfield ${SOURCES})
 
-#target_link_libraries(re_minecraft PRIVATE flint) # Comment for now as the lib won't compile on Windows
-target_link_libraries(re_minecraft PRIVATE glfw)
+#target_link_libraries(farfield PRIVATE flint) # Comment for now as the lib won't compile on Windows
+target_link_libraries(farfield PRIVATE glfw)
 
-target_include_directories(re_minecraft PRIVATE ${HEADERS})
+target_include_directories(farfield PRIVATE ${HEADERS})

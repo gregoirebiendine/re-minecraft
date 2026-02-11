@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_CHUNKMESH_H
-#define RE_MINECRAFT_CHUNKMESH_H
+#ifndef FARFIELD_CHUNKMESH_H
+#define FARFIELD_CHUNKMESH_H
 
 #pragma once
 
@@ -32,4 +32,4 @@ class ChunkMesh {
         std::atomic<uint8_t> frontBufferIndex{0};
 };
 
-#endif //RE_MINECRAFT_CHUNKMESH_H
+#endif

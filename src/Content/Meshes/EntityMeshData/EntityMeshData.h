@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_ENTITYMESHDATA_H
-#define RE_MINECRAFT_ENTITYMESHDATA_H
+#ifndef FARFIELD_ENTITYMESHDATA_H
+#define FARFIELD_ENTITYMESHDATA_H
 
 #include <vector>
 #include <glad/glad.h>

@@ -1,5 +1,5 @@
-#ifndef SHADER_H
-#define SHADER_H
+#ifndef FARFIELD_SHADER_H
+#define FARFIELD_SHADER_H
 
 #include <filesystem>
 #include <fstream>

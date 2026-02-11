@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_TERRAINGENERATOR_H
-#define RE_MINECRAFT_TERRAINGENERATOR_H
+#ifndef FARFIELD_TERRAINGENERATOR_H
+#define FARFIELD_TERRAINGENERATOR_H
 
 #include <iostream>
 #include <random>
@@ -37,4 +37,4 @@ class TerrainGenerator
         void decorate(const Chunk& chunk, NeighborAccess& neighbors) const;
 };
 
-#endif //RE_MINECRAFT_TERRAINGENERATOR_H
+#endif

@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_PLAYERINPUTSYSTEM_H
-#define RE_MINECRAFT_PLAYERINPUTSYSTEM_H
+#ifndef FARFIELD_PLAYERINPUTSYSTEM_H
+#define FARFIELD_PLAYERINPUTSYSTEM_H
 
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_clip_space.hpp>

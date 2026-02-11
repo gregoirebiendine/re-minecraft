@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_FRUSTUM_H
-#define RE_MINECRAFT_FRUSTUM_H
+#ifndef FARFIELD_FRUSTUM_H
+#define FARFIELD_FRUSTUM_H
 
 #include <array>
 
@@ -13,4 +13,4 @@ class Frustum {
         [[nodiscard]] bool isBoxVisible(const glm::vec3& min, const glm::vec3& max) const;
 };
 
-#endif //RE_MINECRAFT_FRUSTUM_H
+#endif

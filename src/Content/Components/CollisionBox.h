@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_COLLISIONBOX_H
-#define RE_MINECRAFT_COLLISIONBOX_H
+#ifndef FARFIELD_COLLISIONBOX_H
+#define FARFIELD_COLLISIONBOX_H
 
 #include "glm/vec3.hpp"
 
@@ -12,4 +12,4 @@ namespace ECS
     };
 }
 
-#endif //RE_MINECRAFT_COLLISIONBOX_H
+#endif

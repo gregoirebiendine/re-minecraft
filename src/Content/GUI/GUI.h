@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_GUI_H
-#define RE_MINECRAFT_GUI_H
+#ifndef FARFIELD_GUI_H
+#define FARFIELD_GUI_H
 
 #pragma once
 
@@ -77,4 +77,4 @@ class GUI
         void renderBlockOutline(const glm::mat4& v, const glm::mat4& p, const glm::vec3& pos);
 };
 
-#endif //RE_MINECRAFT_GUI_H
+#endif

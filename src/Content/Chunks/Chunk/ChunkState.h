@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_CHUNKSTATE_H
-#define RE_MINECRAFT_CHUNKSTATE_H
+#ifndef FARFIELD_CHUNKSTATE_H
+#define FARFIELD_CHUNKSTATE_H
 
 // enum class ChunkState {
 //     UNLOADED,
@@ -40,4 +40,4 @@ inline bool isFullyGenerated(ChunkState state) {
     return state >= ChunkState::DECOR_DONE;
 }
 
-#endif //RE_MINECRAFT_CHUNKSTATE_H
+#endif

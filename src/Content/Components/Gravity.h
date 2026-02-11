@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_GRAVITY_H
-#define RE_MINECRAFT_GRAVITY_H
+#ifndef FARFIELD_GRAVITY_H
+#define FARFIELD_GRAVITY_H
 
 namespace ECS {
     struct Gravity {

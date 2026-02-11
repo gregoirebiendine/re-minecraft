@@ -1,5 +1,5 @@
-#ifndef WORLD_H
-#define WORLD_H
+#ifndef FARFIELD_WORLD_H
+#define FARFIELD_WORLD_H
 
 #include <unordered_map>
 #include <memory>

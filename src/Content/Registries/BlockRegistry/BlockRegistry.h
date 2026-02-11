@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_BLOCKREGISTRY_H
-#define RE_MINECRAFT_BLOCKREGISTRY_H
+#ifndef FARFIELD_BLOCKREGISTRY_H
+#define FARFIELD_BLOCKREGISTRY_H
 
 #include <fstream>
 #include <memory>
@@ -84,4 +84,4 @@ class BlockRegistry
         std::vector<BlockId> getAll() const;
 };
 
-#endif //RE_MINECRAFT_BLOCKREGISTRY_H
+#endif

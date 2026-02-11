@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_OUTLINEVERTICES_H
-#define RE_MINECRAFT_OUTLINEVERTICES_H
+#ifndef FARFIELD_OUTLINEVERTICES_H
+#define FARFIELD_OUTLINEVERTICES_H
 
 #include <vector>
 
@@ -149,4 +149,4 @@ const std::vector OUTLINE_VERTICES = {
     -0.003f, 1.003f, -0.003f,   0.003f, 1.003f, 1.003f,   -0.003f, 1.003f, 1.003f,
 };
 
-#endif //RE_MINECRAFT_OUTLINEVERTICES_H
+#endif

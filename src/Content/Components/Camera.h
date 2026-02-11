@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_CAMERA_COMP_H
-#define RE_MINECRAFT_CAMERA_COMP_H
+#ifndef FARFIELD_CAMERA_COMP_H
+#define FARFIELD_CAMERA_COMP_H
 
 #include "glm/vec3.hpp"
 

@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_DIRECTIONUTILS_H
-#define RE_MINECRAFT_DIRECTIONUTILS_H
+#ifndef FARFIELD_DIRECTIONUTILS_H
+#define FARFIELD_DIRECTIONUTILS_H
 
 #include <iostream>
 #include <glm/glm.hpp>
@@ -66,4 +66,4 @@ namespace DirectionUtils
 }
 
 
-#endif //RE_MINECRAFT_DIRECTIONUTILS_H
+#endif
