@@ -19,10 +19,14 @@ namespace ECS
         public:
             explicit CollisionSystem(World& _world) : world(_world) {};
 
-            bool resolveAxis(Position& pos, Velocity& velocity, const CollisionBox& box, const int axis) const
+            bool resolveAxis(Position& pos, Velocity& velocity, const CollisionBox& box, const int axis, const float prePos) const
             {
+                constexpr float EPSILON = 0.001f;
+                constexpr float CORNER_THRESHOLD = 0.01f;
+
                 glm::vec3 min = {pos.x - box.halfExtents.x, pos.y, pos.z - box.halfExtents.z};
                 glm::vec3 max = {pos.x + box.halfExtents.x, pos.y + box.halfExtents.y * 2, pos.z + box.halfExtents.z};
+
                 const glm::ivec3 minBlock = glm::floor(min);
                 const glm::ivec3 maxBlock = glm::floor(max);
 
@@ -37,7 +41,7 @@ namespace ECS
                             const glm::vec3 blockMinVec = {static_cast<float>(x), static_cast<float>(y), static_cast<float>(z)};
                             const glm::vec3 blockMaxVec = {static_cast<float>(x + 1), static_cast<float>(y + 1), static_cast<float>(z + 1)};
 
-                            // Check for full 3D AABB overlap first
+                            // Check for full 3D AABB overlap
                             if (max.x <= blockMinVec.x || min.x >= blockMaxVec.x)
                                 continue;
                             if (max.y <= blockMinVec.y || min.y >= blockMaxVec.y)
@@ -45,13 +49,34 @@ namespace ECS
                             if (max.z <= blockMinVec.z || min.z >= blockMaxVec.z)
                                 continue;
 
-                            const float blockMin = (axis == 0) ? blockMinVec.x : ((axis == 1) ? blockMinVec.y : blockMinVec.z);
-                            const float blockMax = (axis == 0) ? blockMaxVec.x : ((axis == 1) ? blockMaxVec.y : blockMaxVec.z);
+                            if (axis == 1)
+                            {
+                                // Y resolver: skip if entity was already overlapping on Y before movement
+                                // (prevents walking beside a wall and getting pushed up)
+                                const float preMin = prePos;
+                                const float preMax = prePos + box.halfExtents.y * 2;
+                                const float blockAxisMin = blockMinVec.y;
+                                const float blockAxisMax = blockMaxVec.y;
+
+                                if (preMax - blockAxisMin > EPSILON && blockAxisMax - preMin > EPSILON)
+                                    continue;
+
+                                // Y resolver: skip if cross-axis overlap is tiny
+                                // (prevents catching on block corners while falling)
+                                const float overlapX = std::min(max.x - blockMinVec.x, blockMaxVec.x - min.x);
+                                const float overlapZ = std::min(max.z - blockMinVec.z, blockMaxVec.z - min.z);
+
+                                if (overlapX < CORNER_THRESHOLD || overlapZ < CORNER_THRESHOLD)
+                                    continue;
+                            }
+
+                            const float blockAxisMin = (axis == 0) ? blockMinVec.x : ((axis == 1) ? blockMinVec.y : blockMinVec.z);
+                            const float blockAxisMax = (axis == 0) ? blockMaxVec.x : ((axis == 1) ? blockMaxVec.y : blockMaxVec.z);
                             const float playerMin = (axis == 0) ? min.x : ((axis == 1) ? min.y : min.z);
                             const float playerMax = (axis == 0) ? max.x : ((axis == 1) ? max.y : max.z);
 
-                            const float penPositive = playerMax - blockMin;
-                            const float penNegative = blockMax - playerMin;
+                            const float penPositive = playerMax - blockAxisMin;
+                            const float penNegative = blockAxisMax - playerMin;
 
                             const float velocityOnAxis = (axis == 0) ? velocity.x : ((axis == 1) ? velocity.y : velocity.z);
                             float pushAmount;
@@ -92,15 +117,18 @@ namespace ECS
 
                 view.forEach([&]([[maybe_unused]] EntityId id, Position& pos, Velocity& vel, CollisionBox& box)
                 {
+                    const float preY = pos.y;
                     pos.y += vel.y;
                     const bool wasGoingDown = vel.y < 0.f;
-                    const bool hitY = this->resolveAxis(pos, vel, box, 1);
+                    const bool hitY = this->resolveAxis(pos, vel, box, 1, preY);
 
+                    const float preX = pos.x;
                     pos.x += vel.x;
-                    this->resolveAxis(pos, vel, box, 0);
+                    this->resolveAxis(pos, vel, box, 0, preX);
 
+                    const float preZ = pos.z;
                     pos.z += vel.z;
-                    this->resolveAxis(pos, vel, box, 2);
+                    this->resolveAxis(pos, vel, box, 2, preZ);
 
                     box.isGrounded = wasGoingDown && hitY;
                 });

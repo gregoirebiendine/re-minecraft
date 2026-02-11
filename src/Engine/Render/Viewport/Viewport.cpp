@@ -30,6 +30,9 @@ void Viewport::initWindow(InputState* inputs)
     const auto videoMode = getVideoMode();
     glfwSetWindowPos(this->window, (videoMode->width / 2) - (viewportSize.x / 2),  (videoMode->height / 2) - (viewportSize.y / 2));
 
+    // Set fps target to screen refresh rate
+    this->settings.setFpsTarget(videoMode->refreshRate);
+
     // VSync
     glfwSwapInterval(this->settings.isVSync());
 

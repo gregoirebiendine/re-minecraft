@@ -88,7 +88,8 @@ Material World::getBlock(const int wx, const int wy, const int wz)
 
 bool World::isAir(const int wx, const int wy, const int wz)
 {
-    return this->blockRegistry.isEqual(this->getBlock(wx, wy, wz), "core:air");
+    const auto mat = this->getBlock(wx, wy, wz);
+    return this->blockRegistry.isEqual(BlockData::getBlockId(mat), "core:air");
 }
 
 void World::setBlock(const int wx, const int wy, const int wz, const Material mat)

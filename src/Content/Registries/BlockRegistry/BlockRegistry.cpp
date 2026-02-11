@@ -72,7 +72,7 @@ void BlockRegistry::registerBlocksFromFile(const std::string& registerNamespace)
 const BlockMeta& BlockRegistry::get(const BlockId id) const
 {
     if (id >= this->blocks.size())
-        throw std::out_of_range("Out of range BlockID. This means this block id is not registered in the Engine");
+        throw std::out_of_range("[BlockRegistry::get] Out of range BlockID : " + std::to_string(id));
     return this->blocks[id];
 }
 
@@ -86,7 +86,7 @@ BlockId BlockRegistry::getByName(const std::string& name) const
 bool BlockRegistry::isEqual(const BlockId id, const std::string& name) const
 {
     if (id >= this->blocks.size())
-        throw std::out_of_range("Out of range BlockID. This means this block id is not registered in the Engine");
+        throw std::out_of_range("[BlockRegistry::isEqual] Out of range BlockID : " + std::to_string(id));
 
     return this->blocks[id].getFullName() == name;
 }

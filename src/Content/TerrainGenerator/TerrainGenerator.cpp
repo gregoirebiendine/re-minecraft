@@ -81,7 +81,7 @@ void TerrainGenerator::placePrefab(NeighborAccess& neighbors, const std::string&
 
         const Material groundBlock = neighbors.getBlock(worldX, groundY, worldZ);
 
-        if (!this->blockRegistry.isEqual(groundBlock, "core:grass"))
+        if (!this->blockRegistry.isEqual(BlockData::getBlockId(groundBlock), "core:grass"))
             continue;
 
         for (const auto& block : prefab.blocks) {

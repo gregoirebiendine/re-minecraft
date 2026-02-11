@@ -12,7 +12,7 @@ out vec4 FragColor;
 uniform sampler2DArray Textures;
 
 // Texel offset for 1024x1024 atlas to prevent bleeding
-const float TEXEL_INSET = 2.0 / 1024.0;
+const float TEXEL_INSET = 1.0 / 1024.0;
 
 // Rotate UV coordinates by 90 degree increments
 vec2 rotateUV(vec2 uv, uint rotation) {

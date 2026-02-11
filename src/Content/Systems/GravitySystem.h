@@ -18,9 +18,11 @@ namespace ECS
                 view.forEach([&]([[maybe_unused]] EntityId id, Velocity& vel, const Gravity& gravity, const CollisionBox& box)
                 {
                     if (box.isGrounded)
-                        return;
-                    vel.y -= gravity.strength;
-                    vel.y = glm::max(vel.y, gravity.terminalVelocity);
+                          vel.y = -gravity.strength;
+                    else {
+                          vel.y -= gravity.strength;
+                          vel.y = glm::max(vel.y, gravity.terminalVelocity);
+                    }
                 });
             }
     };

@@ -15,7 +15,7 @@ namespace ECS
     {
         static constexpr float ACCELERATION = 0.04f;
         static constexpr float MAX_SPEED    = 0.075f;
-        static constexpr float JUMP_FORCE   = 0.28f;
+        static constexpr float JUMP_FORCE   = 0.2f;
 
         public:
             void update(Handler &handler, [[maybe_unused]] float deltaTime) override

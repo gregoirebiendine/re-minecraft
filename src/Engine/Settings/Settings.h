@@ -5,7 +5,7 @@
 
 class Settings
 {
-    double fps{120.0};
+    double fps{165.0};
     double targetFrameTime{1.0 / fps};
     bool vsync{true};
 
