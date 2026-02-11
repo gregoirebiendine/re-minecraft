@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_ECSENTITY_H
-#define RE_MINECRAFT_ECSENTITY_H
+#ifndef RE_MINECRAFT_IENTITY_H
+#define RE_MINECRAFT_IENTITY_H
 
 #include <cstdint>
 #include <vector>
@@ -34,12 +34,12 @@ namespace ECS
         std::size_t count = 0;
 
         public:
-            explicit SparseSet(std::size_t max_entities = 0) :
+            explicit SparseSet(const std::size_t max_entities = 0) :
                 sparse(max_entities, INVALID_INDEX),
                 dense(max_entities)
             {}
 
-            bool contains(const EntityId id) const
+            [[nodiscard]] bool contains(const EntityId id) const
             {
                 if (id >= this->sparse.size())
                     return false;
@@ -60,7 +60,7 @@ namespace ECS
                 if (contains(id))
                     return sparse[id];
 
-                const Index newIndex = static_cast<Index>(count);
+                const auto newIndex = static_cast<Index>(count);
 
                 if (newIndex >= dense.size())
                     dense.resize(newIndex + 1);
@@ -78,7 +78,7 @@ namespace ECS
                     return false;
 
                 const Index removed_index = sparse[id];
-                const Index last_index = static_cast<Index>(count - 1);
+                const auto last_index = static_cast<Index>(count - 1);
                 const EntityId last_entity = dense[last_index];
 
                 // Swap last element into the removed slot
@@ -92,16 +92,16 @@ namespace ECS
                 return true;
             }
 
-            Index getIndex(const EntityId id) const
+            [[nodiscard]] Index getIndex(const EntityId id) const
             {
                 if (!this->contains(id))
                     return INVALID_INDEX;
                 return sparse[id];
             }
 
-            std::size_t size() const { return count; }
+            [[nodiscard]] std::size_t size() const { return count; }
 
-            const std::vector<EntityId>& getDense() const { return dense; }
+            [[nodiscard]] const std::vector<EntityId>& getDense() const { return dense; }
     };
 
     class EntityManager
@@ -138,7 +138,7 @@ namespace ECS
                 return true;
             }
 
-            bool isAlive(const IEntity entity) const
+            [[nodiscard]] bool isAlive(const IEntity entity) const
             {
                 if (entity.id >= generations.size())
                     return false;
@@ -147,4 +147,4 @@ namespace ECS
     };
 }
 
-#endif //RE_MINECRAFT_ECSENTITY_H
+#endif

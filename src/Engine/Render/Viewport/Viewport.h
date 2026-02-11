@@ -15,13 +15,14 @@
 
 class Viewport
 {
+    static constexpr int MSAA_SAMPLES = 4;
+
     Settings settings;
 
     GLFWwindow *window{nullptr};
     float aspectRatio{};
 
     // MSAA FBO
-    static constexpr int MSAA_SAMPLES = 4;
     GLuint msaaFBO{0};
     GLuint msaaColorBuffer{0};
     GLuint msaaDepthBuffer{0};
@@ -57,7 +58,7 @@ class Viewport
 
         [[nodiscard]] float getAspectRatio() const;
 
-        void toggleCursor(bool isMouseCaptured) const;
+        void setCursorVisibility(bool showCursor) const;
 
 
 };

@@ -203,9 +203,9 @@ float Viewport::getAspectRatio() const
     return this->aspectRatio;
 }
 
-void Viewport::toggleCursor(const bool isMouseCaptured) const
+void Viewport::setCursorVisibility(const bool showCursor) const
 {
-    glfwSetInputMode(this->window, GLFW_CURSOR, isMouseCaptured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+    glfwSetInputMode(this->window, GLFW_CURSOR, showCursor ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
 }
 
 // Statics

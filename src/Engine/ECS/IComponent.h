@@ -1,5 +1,5 @@
-#ifndef RE_MINECRAFT_ECSCOMPONENT_H
-#define RE_MINECRAFT_ECSCOMPONENT_H
+#ifndef RE_MINECRAFT_ICOMPONENT_H
+#define RE_MINECRAFT_ICOMPONENT_H
 
 #include <cstdint>
 #include <vector>
@@ -16,10 +16,10 @@ namespace ECS
     {
         public:
             virtual ~IComponentPool() = default;
-            virtual bool has(EntityId id) const = 0;
             virtual void remove(EntityId id) = 0;
             virtual void clear() = 0;
-            virtual std::size_t size() const = 0;
+            [[nodiscard]] virtual bool has(EntityId id) const = 0;
+            [[nodiscard]] virtual std::size_t size() const = 0;
     };
 
     template<typename T>
@@ -196,13 +196,12 @@ namespace ECS
             void forEach(Func&& callback)
             {
                 // Find the smallest pool
-                ComponentPool<T1>* smallestRef = &pool1;
                 std::size_t smallestSize = pool1.size();
 
                 if (pool2.size() < smallestSize) smallestSize = pool2.size();
                 if (pool3.size() < smallestSize) smallestSize = pool3.size();
 
-                // Iterate smallest pool, check others
+                // Iterate the smallest pool, check others
                 auto iterate = [&](auto& leadPool)
                 {
                     const auto& dense = leadPool.getEntitySet().getDense();
@@ -210,8 +209,7 @@ namespace ECS
                     {
                         const EntityId id = dense[i];
                         if (pool1.has(id) && pool2.has(id) && pool3.has(id))
-                            callback(id, pool1.get(id),
-                                     pool2.get(id), pool3.get(id));
+                            callback(id, pool1.get(id), pool2.get(id), pool3.get(id));
                     }
                 };
 
@@ -223,6 +221,55 @@ namespace ECS
                     iterate(pool3);
             }
     };
+
+    template<typename T1, typename T2, typename T3, typename T4>
+    class View4
+    {
+        ComponentPool<T1>& pool1;
+        ComponentPool<T2>& pool2;
+        ComponentPool<T3>& pool3;
+        ComponentPool<T4>& pool4;
+
+        public:
+            View4(ComponentPool<T1>& p1, ComponentPool<T2>& p2, ComponentPool<T3>& p3, ComponentPool<T4>& p4) :
+                pool1(p1),
+                pool2(p2),
+                pool3(p3),
+                pool4(p4)
+            {}
+
+            template<typename Func>
+            void forEach(Func&& callback)
+            {
+                // Find the smallest pool
+                std::size_t smallestSize = pool1.size();
+
+                if (pool2.size() < smallestSize) smallestSize = pool2.size();
+                if (pool3.size() < smallestSize) smallestSize = pool3.size();
+                if (pool4.size() < smallestSize) smallestSize = pool4.size();
+
+                // Iterate the smallest pool, check others
+                auto iterate = [&](auto& leadPool)
+                {
+                    const auto& dense = leadPool.getEntitySet().getDense();
+                    for (std::size_t i = 0; i < leadPool.size(); ++i)
+                    {
+                        const EntityId id = dense[i];
+                        if (pool1.has(id) && pool2.has(id) && pool3.has(id) && pool4.has(id))
+                            callback(id, pool1.get(id), pool2.get(id), pool3.get(id), pool4.get(id));
+                    }
+                };
+
+                if (pool1.size() == smallestSize)
+                    iterate(pool1);
+                else if (pool2.size() == smallestSize)
+                    iterate(pool2);
+                else if (pool3.size() == smallestSize)
+                    iterate(pool3);
+                else
+                    iterate(pool4);
+            }
+    };
 }
 
-#endif //RE_MINECRAFT_ECSCOMPONENT_H
+#endif

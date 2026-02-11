@@ -4,7 +4,7 @@
 #include "Shader.h"
 #include "EntityMeshData.h"
 #include "ECS/ISystem.h"
-#include "Components/MeshRefComponent.h"
+#include "Components/MeshRef.h"
 
 namespace ECS
 {
@@ -22,22 +22,20 @@ namespace ECS
 
             void setViewMatrix(const glm::mat4& view)
             {
-                this->shader.use();
                 this->shader.setViewMatrix(view);
             }
 
             void setProjectionMatrix(const glm::mat4& projection)
             {
-                this->shader.use();
                 this->shader.setProjectionMatrix(projection);
             }
 
             void render(Handler& handler) override
             {
-                auto view = handler.query<Position, MeshRefComponent>();
+                auto view = handler.query<Position, MeshRef>();
 
                 this->shader.use();
-                view.forEach([&]([[maybe_unused]] EntityId id, const Position& pos, const MeshRefComponent& ref)
+                view.forEach([&]([[maybe_unused]] EntityId id, const Position& pos, const MeshRef& ref)
                 {
                     if (!ref.mesh)
                         return;

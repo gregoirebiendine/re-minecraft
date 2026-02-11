@@ -8,13 +8,13 @@
 
 #include "glm/glm.hpp"
 
-#include "Camera.h"
 #include "BlockRegistry.h"
 #include "TextureRegistry.h"
 #include "PrefabRegistry.h"
 #include "MeshRegistry.h"
 #include "ChunkManager.h"
 #include "ChunkMeshManager.h"
+#include "InputState.h"
 #include "Shader.h"
 #include "ECS/ISystem.h"
 
@@ -24,6 +24,7 @@ class World {
     const BlockRegistry& blockRegistry;
     const TextureRegistry& textureRegistry;
     const MeshRegistry& meshRegistry;
+    const InputState& inputs;
 
     Shader shader;
     ChunkManager chunkManager;
@@ -31,15 +32,22 @@ class World {
 
     ECS::Handler ecs{MAX_ENTITY};
     ECS::SystemScheduler scheduler{};
+
     std::vector<ECS::IEntity> entities{};
+    ECS::IEntity player;
 
     public:
         explicit World(
             const BlockRegistry& _blockRegistry,
             const TextureRegistry& _textureRegistry,
             const PrefabRegistry& _prefabRegistry,
-            const MeshRegistry& _meshRegistry
+            const MeshRegistry& _meshRegistry,
+            const InputState& _inputs
         );
+
+        ECS::Handler& getECS() { return this->ecs; }
+        ECS::SystemScheduler& getECSScheduler() { return this->scheduler; }
+        ECS::IEntity& getPlayerEntity() { return this->player; }
 
         const BlockRegistry& getBlockRegistry() const;
         const TextureRegistry& getTextureRegistry() const;
@@ -54,7 +62,7 @@ class World {
         [[nodiscard]] bool isAir(int wx, int wy, int wz);
 
         // Updates
-        void update(const Camera& camera, float aspect, const glm::mat4& vpMatrix);
+        void update(float aspect);
         void render();
 };
 

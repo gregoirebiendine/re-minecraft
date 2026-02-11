@@ -3,9 +3,7 @@
 GUI::GUI() :
     guiShader("/resources/shaders/UI/"),
     outlineShader("/resources/shaders/Outline/")
-{
-    // Empty
-}
+{}
 
 void GUI::init(const glm::ivec2 viewportSize)
 {
@@ -90,10 +88,13 @@ void GUI::createRectangle(const float x, const float y, const float width, const
     });
 }
 
-void GUI::render()
+void GUI::render(const glm::vec3& pos, const glm::vec3& forward, const std::string& selectedBlockName)
 {
     glDisable(GL_DEPTH_TEST);
     glEnable( GL_BLEND);
+
+    createImGuiFrame();
+    renderImGuiFrame(pos, forward, selectedBlockName);
 
     this->guiShader.use();
     this->guiShader.setProjectionMatrix(this->projectionMatrix);
@@ -106,15 +107,15 @@ void GUI::render()
     glDisable(GL_BLEND);
 }
 
-void GUI::renderBlockOutline(const Camera& camera, const float& aspect, const glm::vec3& cubePos)
+void GUI::renderBlockOutline(const glm::mat4& v, const glm::mat4& p, const glm::vec3& pos)
 {
     glDisable(GL_CULL_FACE);
     glPolygonOffset(-1, -1);
 
     this->outlineShader.use();
-    this->outlineShader.setModelMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(cubePos)));
-    this->outlineShader.setViewMatrix(camera.getViewMatrix());
-    this->outlineShader.setProjectionMatrix(camera.getProjectionMatrix(aspect));
+    this->outlineShader.setModelMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(pos)));
+    this->outlineShader.setViewMatrix(v);
+    this->outlineShader.setProjectionMatrix(p);
 
     this->outlineVao.bind();
     glDrawArrays(GL_TRIANGLES, 0, 288);

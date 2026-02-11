@@ -110,12 +110,18 @@ namespace ECS
             {
                 return View3<T1, T2, T3>(getPool<T1>(), getPool<T2>(), getPool<T3>());
             }
+
+            template<typename T1, typename T2, typename T3, typename T4>
+            View4<T1, T2, T3, T4> query()
+            {
+                return View4<T1, T2, T3, T4>(getPool<T1>(), getPool<T2>(), getPool<T3>(), getPool<T4>());
+            }
     };
 
-    class IISystem
+    class ISystem
     {
         public:
-            virtual ~IISystem() = default;
+            virtual ~ISystem() = default;
             virtual void update(Handler& handler, float deltaTime) = 0;
     };
 
@@ -128,7 +134,7 @@ namespace ECS
 
     class SystemScheduler
     {
-        std::vector<std::unique_ptr<IISystem>> systems;
+        std::vector<std::unique_ptr<ISystem>> systems;
         std::vector<std::unique_ptr<IRenderSystem>> renderSystems;
 
         public:
@@ -138,7 +144,7 @@ namespace ECS
                 auto system = std::make_unique<T>(std::forward<Args>(args)...);
                 auto* ptr = system.get();
 
-                if constexpr (std::is_base_of_v<IISystem, T>)
+                if constexpr (std::is_base_of_v<ISystem, T>)
                     systems.push_back(std::move(system));
                 else if constexpr (std::is_base_of_v<IRenderSystem, T>)
                     renderSystems.push_back(std::move(system));
@@ -174,4 +180,4 @@ namespace ECS
     };
 }
 
-#endif //RE_MINECRAFT_ECSSYSTEM_H
+#endif

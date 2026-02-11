@@ -2,11 +2,11 @@
 #define RE_MINECRAFT_MOVEMENTSYSTEM_H
 
 #include "ECS/ISystem.h"
-#include "Components/MovementComponent.h"
+#include "Components/Movements.h"
 
 namespace ECS
 {
-    class MovementSystem : public IISystem
+    class MovementSystem : public ISystem
     {
         public:
             void update(Handler& handler, float dt) override

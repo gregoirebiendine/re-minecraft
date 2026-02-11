@@ -126,6 +126,7 @@ void Shader::setUniformMat4(const char *name, glm::mat4 value) const
 
 void Shader::setModelMatrix(const glm::mat4& modelMatrix)
 {
+    this->use();
     if (this->modelMatrixUniform == -1)
         this->modelMatrixUniform = glGetUniformLocation(this->ID, "ModelMatrix");
     glUniformMatrix4fv(this->modelMatrixUniform, 1, GL_FALSE, glm::value_ptr(modelMatrix));
@@ -133,6 +134,7 @@ void Shader::setModelMatrix(const glm::mat4& modelMatrix)
 
 void Shader::setViewMatrix(const glm::mat4& viewMatrix)
 {
+    this->use();
     if (this->viewMatrixUniform == -1)
         this->viewMatrixUniform = glGetUniformLocation(this->ID, "ViewMatrix");
     glUniformMatrix4fv(this->viewMatrixUniform, 1, GL_FALSE, glm::value_ptr(viewMatrix));
@@ -140,6 +142,7 @@ void Shader::setViewMatrix(const glm::mat4& viewMatrix)
 
 void Shader::setProjectionMatrix(const glm::mat4& projectionMatrix)
 {
+    this->use();
     if (this->projectionMatrixUniform == -1)
         this->projectionMatrixUniform = glGetUniformLocation(this->ID, "ProjectionMatrix");
     glUniformMatrix4fv(this->projectionMatrixUniform, 1, GL_FALSE, glm::value_ptr(projectionMatrix));

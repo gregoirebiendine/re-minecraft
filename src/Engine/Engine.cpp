@@ -20,15 +20,42 @@ Engine::Engine() :
     // Instantiate members
     this->textureRegistry.createTextures();
     this->meshRegistry = std::make_unique<MeshRegistry>();
-    this->world = std::make_unique<World>(this->blockRegistry, this->textureRegistry, this->prefabRegistry, *this->meshRegistry);
-    this->player = std::make_unique<Player>(*this->world);
+    this->world = std::make_unique<World>(this->blockRegistry, this->textureRegistry, this->prefabRegistry, *this->meshRegistry, this->inputs);
+    this->playerController = std::make_unique<PlayerController>(*this->world);
 
     // Apply settings to classes
     const auto settings = this->viewport.getSettings();
 
-    this->player->getGUI().init(settings.getViewportSize());
-    this->player->getCamera().setFOV(settings.getFOV());
+    this->playerController->getGUI().init(settings.getViewportSize());
     this->world->getChunkManager().setViewDistance(settings.getViewDistance());
+}
+
+void Engine::preciseWait(const double seconds) const
+{
+    if (seconds <= 0.0) return;
+
+    #ifdef _WIN32
+        if (this->frameTimer) {
+            LARGE_INTEGER dueTime;
+            dueTime.QuadPart = -static_cast<LONGLONG>(seconds * 10'000'000.0);
+
+            if (SetWaitableTimerEx(this->frameTimer, &dueTime, 0, nullptr, nullptr, nullptr, 0)) {
+                WaitForSingleObject(this->frameTimer, INFINITE);
+                return;
+            }
+        }
+        std::this_thread::sleep_for(std::chrono::duration_cast<Clock::duration>(Duration(seconds)));
+
+    #elif defined(__linux__)
+        struct timespec req;
+        req.tv_sec = static_cast<time_t>(seconds);
+        req.tv_nsec = static_cast<long>((seconds - req.tv_sec) * 1'000'000'000.0);
+
+        while (clock_nanosleep(CLOCK_MONOTONIC, 0, &req, &req) == EINTR) {}
+
+    #else
+        std::this_thread::sleep_for(std::chrono::duration_cast<Clock::duration>(Duration(seconds)));
+    #endif
 }
 
 Engine::~Engine()
@@ -57,14 +84,16 @@ void Engine::loop()
 
         // INPUTS
         Viewport::pollEvents();
-        this->player->handleInputs(this->inputs, this->viewport, frameTime);
-        this->inputs.clear();
+        this->playerController->handleInputs(this->inputs, this->viewport);
 
         // UPDATES
         while (accumulator >= Viewport::dt) {
             this->update();
             accumulator -= Viewport::dt;
         }
+
+        // CLEAR INPUTS
+        this->inputs.clear();
 
         // RENDERING
         this->render();
@@ -80,40 +109,9 @@ void Engine::loop()
     this->viewport.closeWindow();
 }
 
-void Engine::preciseWait(const double seconds) const
-{
-    if (seconds <= 0.0) return;
-
-    #ifdef _WIN32
-    if (this->frameTimer) {
-        LARGE_INTEGER dueTime;
-        dueTime.QuadPart = -static_cast<LONGLONG>(seconds * 10'000'000.0);
-
-        if (SetWaitableTimerEx(this->frameTimer, &dueTime, 0, nullptr, nullptr, nullptr, 0)) {
-            WaitForSingleObject(this->frameTimer, INFINITE);
-            return;
-        }
-    }
-    std::this_thread::sleep_for(std::chrono::duration_cast<Clock::duration>(Duration(seconds)));
-
-    #elif defined(__linux__)
-    struct timespec req;
-    req.tv_sec = static_cast<time_t>(seconds);
-    req.tv_nsec = static_cast<long>((seconds - req.tv_sec) * 1'000'000'000.0);
-
-    while (clock_nanosleep(CLOCK_MONOTONIC, 0, &req, &req) == EINTR) {}
-
-    #else
-    std::this_thread::sleep_for(std::chrono::duration_cast<Clock::duration>(Duration(seconds)));
-    #endif
-}
-
 void Engine::update() const
 {
-    const auto vpMatrix = this->player->getCamera().setViewMatrix(this->world->getShader(), this->viewport.getAspectRatio());
-
-    this->world->update(this->player->getCamera(), this->viewport.getAspectRatio(), vpMatrix);
-    this->player->update();
+    this->world->update(this->viewport.getAspectRatio());
 }
 
 void Engine::render() const
@@ -131,12 +129,9 @@ void Engine::render() const
     this->world->render();
 
     // Render Player
-    this->player->renderBlockOutline(this->viewport.getAspectRatio());
-    this->player->render();
+    this->playerController->renderGUI();
 
-    // Resolve MSAA to screen
+    // Resolve MSAA and swap buffers
     this->viewport.endFrame();
-
-    // Update buffer
     this->viewport.swapBuffers();
 }

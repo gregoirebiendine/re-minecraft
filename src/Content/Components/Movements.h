@@ -25,6 +25,16 @@ namespace ECS
             return os << "(" << vel.x << ", " << vel.y << ", " << vel.z << ")";
         }
     };
+
+    struct Rotation : glm::vec3
+    {
+        using glm::vec3::vec3;
+
+        friend std::ostream& operator<<(std::ostream& os, const Rotation& rot)
+        {
+            return os << "(" << rot.x << ", " << rot.y << ", " << rot.z << ")";
+        }
+    };
 }
 
 #endif

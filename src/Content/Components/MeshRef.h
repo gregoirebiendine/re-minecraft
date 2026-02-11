@@ -7,7 +7,7 @@
 
 namespace ECS
 {
-    struct MeshRefComponent
+    struct MeshRef
     {
         std::shared_ptr<EntityMeshData> mesh;
         TextureId texId;
