@@ -1,17 +1,20 @@
 #include "Font.h"
 
-Font::Font()
+Font::Font(const TextureId _textureID) :
+    textureID(_textureID)
 {
     for (int i = 0; i < static_cast<int>(this->supportedChars.size()); i++) {
-        const glm::vec2 p{ i % CHAR_PER_ROW, i / CHAR_PER_ROW };
+        const glm::vec2 p{ (i % CHAR_PER_ROW) * CHAR_SIZE, (i / CHAR_PER_ROW) * CHAR_SIZE };
         const FontUVArray uvs = {
-            glm::vec2{ rangeX(p.x), rangeY(p.y + CHAR_SIZE) },                  // uv 1 : x | y + 30
-            glm::vec2{ rangeX(p.x + CHAR_SIZE), rangeY(p.y + CHAR_SIZE) },    // uv 2 : x + 30 | y + 30
-            glm::vec2{ rangeX(p.x), rangeY(p.y) },                                // uv 3 : x | y
+            // Triangle 1: TL, BL, BR
+            glm::vec2{ rangeX(p.x), rangeY(p.y) },
+            glm::vec2{ rangeX(p.x), rangeY(p.y + CHAR_SIZE) },
+            glm::vec2{ rangeX(p.x + CHAR_SIZE), rangeY(p.y + CHAR_SIZE) },
 
-            glm::vec2{ rangeX(p.x + CHAR_SIZE), rangeY(p.y + CHAR_SIZE) },    // uv 4 : x + 30 | y + 30
-            glm::vec2{ rangeX(p.x + CHAR_SIZE), rangeY(p.y) },                  // uv 5 : x + 30 | y
-            glm::vec2{ rangeX(p.x), rangeY(p.y) }                                 // uv 6 : x | y
+            // Triangle 2: TL, BR, TR
+            glm::vec2{ rangeX(p.x), rangeY(p.y) },
+            glm::vec2{ rangeX(p.x + CHAR_SIZE), rangeY(p.y + CHAR_SIZE) },
+            glm::vec2{ rangeX(p.x + CHAR_SIZE), rangeY(p.y) },
         };
 
         this->charMap.insert(std::make_pair(this->supportedChars[i], uvs));
@@ -24,7 +27,7 @@ FontUVArray Font::getUVFromChar(const char c) const
 
     if (uvIt != this->charMap.end())
         return uvIt->second;
-    return this->charMap.at(0);
+    return this->charMap.at('?');
 }
 
 std::vector<FontUVArray> Font::getUVFromString(const std::string &str) const
@@ -40,10 +43,12 @@ std::vector<FontUVArray> Font::getUVFromString(const std::string &str) const
 // Statics
 float Font::rangeX(const float &v)
 {
-    return Maths::mapRange(v, 0.f, FONT_W, 0.f, 1.f);
+    static constexpr float W = static_cast<float>(CHAR_PER_ROW) * CHAR_SIZE;
+    return Maths::mapRange(v, 0.f, W, 0.f, 1.f);
 }
 
 float Font::rangeY(const float &v)
 {
-    return Maths::mapRange(v, 0.f, FONT_H, 0.f, 1.f);
+    static constexpr float H = 5.f * CHAR_SIZE;
+    return Maths::mapRange(v, 0.f, H, 0.f, 1.f);
 }

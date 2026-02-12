@@ -14,6 +14,7 @@
 
 #include "Shader.h"
 #include "VAO.h"
+#include "Font.h"
 #include "ChunkPos.h"
 #include "OutlineVertices.h"
 #include "DirectionUtils.h"
@@ -33,9 +34,9 @@ struct DigitalColor
         this->a = a;
     }
 
-    explicit operator glm::vec4() const
+    operator glm::vec4() const
     {
-        return {this->r, this->g, this->b, this->a};
+        return glm::vec4{this->r, this->g, this->b, this->a};
     }
 
     bool operator==(const DigitalColor& other) const
@@ -50,6 +51,8 @@ class GUI
     static constexpr float CH_THICKNESS = 4.f;
     static constexpr float CH_OFFSET = 3.f;
 
+    const Font& font;
+
     Shader guiShader;
     Shader outlineShader;
     VAO guiVao;
@@ -63,12 +66,13 @@ class GUI
 
     void createCrosshair(glm::ivec2 viewportSize);
     void createRectangle(float x, float y, float width, float height, DigitalColor color);
+    void createText(float x, float y, const std::string& text);
 
     static void createImGuiFrame();
     static void renderImGuiFrame(glm::vec3 pos, glm::vec3 forward, const std::string& selectedBlockName);
 
     public:
-        explicit GUI();
+        explicit GUI(const Font& _font);
 
         void init(glm::ivec2 viewportSize);
         void changeViewportSize(glm::ivec2 size);

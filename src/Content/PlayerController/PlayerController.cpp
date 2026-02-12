@@ -4,8 +4,9 @@
 #include "Components/Movements.h"
 #include "Components/Camera.h"
 
-PlayerController::PlayerController(World& _world) :
+PlayerController::PlayerController(World& _world, const Font& _font) :
     world(_world),
+    gui(_font),
     selectedBlockId(_world.getBlockRegistry().getByName("core:oak_plank"))
 {}
 
