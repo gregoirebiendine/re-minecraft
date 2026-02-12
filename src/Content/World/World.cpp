@@ -42,8 +42,8 @@ World::World(
     this->scheduler.registerSystem<ECS::RenderSystem>();
 
     // Create player entity
-    // const auto playerMesh = this->meshRegistry.get("player");
-    // const auto playerTexture = this->textureRegistry.getByName("player");
+    const auto playerMesh = this->meshRegistry.get("player");
+    const auto playerTexture = this->textureRegistry.getByName("player");
     this->player = this->ecs.createEntity();
     this->ecs.addComponent(this->player, ECS::Position{8.5f, 71.f, 8.5f});
     this->ecs.addComponent(this->player, ECS::Velocity{0.f, 0.f, 0.f});
@@ -53,7 +53,7 @@ World::World(
     this->ecs.addComponent(this->player, ECS::Gravity{});
     this->ecs.addComponent(this->player, ECS::Friction{});
     this->ecs.addComponent(this->player, ECS::CollisionBox{{0.3f, 0.9f, 0.3f}});
-    // this->ecs.addComponent(this->player, ECS::MeshRef{ playerMesh, playerTexture });
+    this->ecs.addComponent(this->player, ECS::MeshRef{ playerMesh, playerTexture });
 
 
     // Create a Zombie entity

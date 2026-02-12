@@ -46,9 +46,9 @@ struct DigitalColor
 
 class GUI
 {
-    static constexpr float SIZE = 20.f;
-    static constexpr float THICKNESS = 4.f;
-    static constexpr float OFFSET = 3.f;
+    static constexpr float CH_SIZE = 20.f;
+    static constexpr float CH_THICKNESS = 4.f;
+    static constexpr float CH_OFFSET = 3.f;
 
     Shader guiShader;
     Shader outlineShader;

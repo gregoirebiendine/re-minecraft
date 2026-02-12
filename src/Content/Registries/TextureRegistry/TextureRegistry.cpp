@@ -1,6 +1,5 @@
 #include "TextureRegistry.h"
 
-// AtlasLayer implementation
 AtlasLayer::AtlasLayer()
 {
     freeRects.push_back({0, 0, SIZE, SIZE});
@@ -59,6 +58,7 @@ TextureRegistry::TextureRegistry()
 {
     this->registerTextureFromFolder("/resources/textures/blocks");
     this->registerTextureFromFolder("/resources/textures/entities");
+    this->registerTextureFromFolder("/resources/textures/gui");
 }
 
 TextureRegistry::~TextureRegistry()

@@ -37,35 +37,35 @@ void GUI::createCrosshair(const glm::ivec2 viewportSize) {
 
     // Hor 1
     this->createRectangle(
-        mid.x - (SIZE / 2) - OFFSET,
-        mid.y - (THICKNESS / 2),
-        (SIZE / 2),
-        THICKNESS,
+        mid.x - (CH_SIZE / 2) - CH_OFFSET,
+        mid.y - (CH_THICKNESS / 2),
+        (CH_SIZE / 2),
+        CH_THICKNESS,
         color
     );
     // Hor 2
     this->createRectangle(
-        mid.x + OFFSET,
-        mid.y - (THICKNESS / 2),
-        (SIZE / 2),
-        THICKNESS,
+        mid.x + CH_OFFSET,
+        mid.y - (CH_THICKNESS / 2),
+        (CH_SIZE / 2),
+        CH_THICKNESS,
         color
     );
 
     // Vert 1
     this->createRectangle(
-        mid.x - (THICKNESS / 2),
-        mid.y - (SIZE / 2) - OFFSET,
-        THICKNESS,
-        (SIZE / 2),
+        mid.x - (CH_THICKNESS / 2),
+        mid.y - (CH_SIZE / 2) - CH_OFFSET,
+        CH_THICKNESS,
+        (CH_SIZE / 2),
         color
     );
     // Vert 2
     this->createRectangle(
-        mid.x - (THICKNESS / 2),
-        mid.y + OFFSET,
-        THICKNESS,
-        (SIZE / 2),
+        mid.x - (CH_THICKNESS / 2),
+        mid.y + CH_OFFSET,
+        CH_THICKNESS,
+        (CH_SIZE / 2),
         color
     );
 }

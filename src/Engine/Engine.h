@@ -21,6 +21,7 @@
 #include "PrefabRegistry.h"
 #include "World.h"
 #include "PlayerController.h"
+#include "Font.h"
 
 using Clock = std::chrono::steady_clock;
 using Duration = std::chrono::duration<double>;
@@ -37,6 +38,8 @@ class Engine {
     TextureRegistry textureRegistry;
     PrefabRegistry prefabRegistry;
     std::unique_ptr<MeshRegistry> meshRegistry;
+
+    std::unique_ptr<Font> font;
 
     std::unique_ptr<World> world;
     std::unique_ptr<PlayerController> playerController;

@@ -39,6 +39,7 @@ set(
     ${CMAKE_SOURCE_DIR}/src/Engine/Render/VAO
     ${CMAKE_SOURCE_DIR}/src/Engine/Render/VBO
     ${CMAKE_SOURCE_DIR}/src/Engine/Render/Viewport
+    ${CMAKE_SOURCE_DIR}/src/Engine/Render/Font
     ${CMAKE_SOURCE_DIR}/src/Engine/Settings
     ${CMAKE_SOURCE_DIR}/src/Engine/ThreadPool
     ${CMAKE_SOURCE_DIR}/src/Engine/Utils

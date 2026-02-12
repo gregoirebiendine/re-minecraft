@@ -22,6 +22,7 @@ Engine::Engine() :
     this->meshRegistry = std::make_unique<MeshRegistry>();
     this->world = std::make_unique<World>(this->blockRegistry, this->textureRegistry, this->prefabRegistry, *this->meshRegistry, this->inputs);
     this->playerController = std::make_unique<PlayerController>(*this->world);
+    this->font = std::make_unique<Font>();
 
     // Apply settings to classes
     const auto settings = this->viewport.getSettings();

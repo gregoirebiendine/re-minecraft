@@ -38,6 +38,12 @@ namespace Maths
 
         return distrib(gen);
     }
+
+    template <typename T = float>
+    T mapRange(T v, T minIn, T maxIn, T minOut, T maxOut)
+    {
+        return minOut + (maxOut - minOut) * ((std::clamp(v, minIn, maxIn) - minIn) / (maxIn - minIn));
+    }
 }
 
 namespace Files
