@@ -9,11 +9,11 @@ namespace ECS
     {
         float fov = 90.f;
         float sensitivity = 0.1f;
-        float nearPlane = 0.1f;
+        float nearPlane = 0.01f;
         float farPlane = 512.f;
         float yaw = 0.f;
         float pitch = 0.f;
-        glm::vec3 eyeOffset = {0, 1.7f, 0};
+        glm::vec3 eyeOffset = {0.f, 1.75f, 0.0f};
     };
 }
 

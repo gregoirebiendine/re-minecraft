@@ -44,15 +44,15 @@ namespace ECS
 
             void update(Handler &handler, [[maybe_unused]] float dt) override
             {
+                double dx = 0;
+                double dy = 0;
+
                 if (this->firstCapture) {
                     this->lastX = inputs.mouseX;
                     this->lastY = inputs.mouseY;
                     this->firstCapture = false;
                     return;
                 }
-
-                double dx = 0;
-                double dy = 0;
 
                 if (this->mouseCaptured) {
                     dx = inputs.mouseX - lastX;
@@ -61,9 +61,9 @@ namespace ECS
                     lastY = inputs.mouseY;
                 }
 
-                auto view = handler.query<Position, Camera>();
+                auto view = handler.query<Position, Rotation, Camera>();
 
-                view.forEach([&]([[maybe_unused]] EntityId id, [[maybe_unused]] const Position& pos, Camera& camera)
+                view.forEach([&]([[maybe_unused]] EntityId id, [[maybe_unused]] const Position& pos, Rotation& rot, Camera& camera)
                 {
                     // Compute yaw/pitch from mouse delta
                     camera.yaw += static_cast<float>(dx * camera.sensitivity);
@@ -74,6 +74,9 @@ namespace ECS
                     if (camera.yaw <= -180.0f) camera.yaw += 360.0f;
 
                     camera.pitch = glm::clamp(camera.pitch, -89.99f, 89.99f);
+
+                    rot.y = camera.yaw;
+                    rot.x = camera.pitch;
 
                     // Store matrices data
                     this->cameraPosition = pos + camera.eyeOffset;

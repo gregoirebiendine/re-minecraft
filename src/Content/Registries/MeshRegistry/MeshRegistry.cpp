@@ -1,9 +1,11 @@
 #include "MeshRegistry.h"
 #include "ZombieMesh.h"
+#include "PlayerMesh.h"
 
 MeshRegistry::MeshRegistry()
 {
     this->load("zombie", ZOMBIE_MESH);
+    this->load("player", PLAYER_MESH);
 }
 
 std::shared_ptr<EntityMeshData> MeshRegistry::load(const std::string& name, const std::vector<EntityVertex>& vertices)

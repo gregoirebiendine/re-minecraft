@@ -1,4 +1,4 @@
-FILE = "zombie"
+FILE = "player"
 
 with open(f"{FILE}.obj", "r") as f:
     lines = f.readlines()
