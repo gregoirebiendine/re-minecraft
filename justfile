@@ -10,34 +10,41 @@ binary_name := "farfield"
 default:
     @just --list
 
-_config:
+[private]
+config:
     cmake -B .build -S .
 
 # Configure and build the project
-build: _config
+[group: 'run']
+build: config
     cmake --build .build
     cp .build/{{ binary_name }} {{ binary_name }}
 
 # Build and run the project
+[group: 'run']
 run: build
     @echo "========="
     @./{{ binary_name }}
 
 # Remove build directory
+[group: 'clean']
 clean:
     rm -rf .build
 
 # Remove build directory && binary file
+[group: 'clean']
 fclean: clean
     rm -f {{ binary_name }}
 
 # Rebuild the tool each time a change/file add is detected
 [linux]
+[group: 'dev']
 debug:
     while sleep 1; do find src resources -type f | entr -cd bash -c 'just run'; done
 
 # Rebuild the tool each time a change/file add is detected
 [windows]
+[group: 'dev']
 debug:
     watchexec -r -w src -w resources just run
 
