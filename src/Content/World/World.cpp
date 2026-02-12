@@ -42,8 +42,8 @@ World::World(
     this->scheduler.registerSystem<ECS::RenderSystem>();
 
     // Create player entity
-    const auto playerMesh = this->meshRegistry.get("player");
-    const auto playerTexture = this->textureRegistry.getByName("player");
+    // const auto playerMesh = this->meshRegistry.get("player");
+    // const auto playerTexture = this->textureRegistry.getByName("player");
     this->player = this->ecs.createEntity();
     this->ecs.addComponent(this->player, ECS::Position{8.5f, 71.f, 8.5f});
     this->ecs.addComponent(this->player, ECS::Velocity{0.f, 0.f, 0.f});
@@ -53,7 +53,7 @@ World::World(
     this->ecs.addComponent(this->player, ECS::Gravity{});
     this->ecs.addComponent(this->player, ECS::Friction{});
     this->ecs.addComponent(this->player, ECS::CollisionBox{{0.3f, 0.9f, 0.3f}});
-    this->ecs.addComponent(this->player, ECS::MeshRef{ playerMesh, playerTexture });
+    // this->ecs.addComponent(this->player, ECS::MeshRef{ playerMesh, playerTexture });
 
 
     // Create a Zombie entity
@@ -63,7 +63,7 @@ World::World(
     this->ecs.addComponent(zombie, ECS::Position{7.5f, 72.f, 7.5f});
     this->ecs.addComponent(zombie, ECS::Velocity{0.f, 0.f, 0.f});
     this->ecs.addComponent(zombie, ECS::Gravity());
-    this->ecs.addComponent(zombie, ECS::CollisionBox{{0.475f, 1.f, 0.475f}});
+    this->ecs.addComponent(zombie, ECS::CollisionBox{{0.45f, 1.f, 0.45f}});
     this->ecs.addComponent(zombie, ECS::MeshRef{ zombieMesh, zombieTexture });
     this->entities.emplace_back(zombie);
 
@@ -89,6 +89,11 @@ Material World::getBlock(const int wx, const int wy, const int wz)
 
     const auto [x, y, z] = BlockPos::fromWorld(wx, wy, wz);
     return chunk->getBlock(x, y, z);
+}
+
+Material World::getBlock(const glm::ivec3 pos)
+{
+    return this->getBlock(pos.x, pos.y, pos.z);
 }
 
 bool World::isAir(const int wx, const int wy, const int wz)
@@ -128,6 +133,29 @@ void World::fill(const glm::ivec3 from, const glm::ivec3 to, const Material mat)
             {
                 this->setBlock(x, y, z, mat);
             }
+}
+
+bool World::isEntityAt(const glm::ivec3 blockPos)
+{
+    const auto blockMin = glm::vec3(blockPos);
+    const glm::vec3 blockMax = blockMin + 1.0f;
+
+    bool found = false;
+
+    auto view = this->ecs.query<ECS::Position, ECS::CollisionBox>();
+    view.forEach([&]([[maybe_unused]] ECS::EntityId id, const ECS::Position& pos, const ECS::CollisionBox& box) {
+        const glm::vec3 eMin = { pos.x - box.halfExtents.x, pos.y, pos.z - box.halfExtents.z };
+        const glm::vec3 eMax = { pos.x + box.halfExtents.x, pos.y + box.halfExtents.y * 2, pos.z + box.halfExtents.z };
+
+        if (blockMin.x < eMax.x && blockMax.x > eMin.x &&
+            blockMin.y < eMax.y && blockMax.y > eMin.y &&
+            blockMin.z < eMax.z && blockMax.z > eMin.z)
+        {
+            found = true;
+        }
+    });
+
+    return found;
 }
 
 

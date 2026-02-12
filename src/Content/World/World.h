@@ -59,7 +59,9 @@ class World {
         void setBlock(int wx, int wy, int wz, Material mat);
         void setBlock(int wx, int wy, int wz, const std::string& blockName);
         [[nodiscard]] Material getBlock(int wx, int wy, int wz);
+        [[nodiscard]] Material getBlock(glm::ivec3 pos);
         [[nodiscard]] bool isAir(int wx, int wy, int wz);
+        bool isEntityAt(glm::ivec3 blockPos);
 
         // Updates
         void update(float aspect);

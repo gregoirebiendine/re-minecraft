@@ -18,7 +18,7 @@ void PlayerController::renderGUI()
 
     this->gui.render(pos, ECS::CameraSystem::getForwardVector(camera), world.getBlockRegistry().get(selectedBlockId).getName());
 
-    if (this->lastRaycast.hit)
+    if (this->lastRaycast.hasHitBlock())
         this->gui.renderBlockOutline(cameraSystem.getViewMatrix(), cameraSystem.getProjectionMatrix(), this->lastRaycast.pos);
 }
 
@@ -32,16 +32,16 @@ void PlayerController::handleInputs(const InputState& inputs, const Viewport& vi
 
     this->lastRaycast = Raycast::cast(this->world, pos + camera.eyeOffset, forward);
 
-    // Left Mouse Button
-    if (inputs.isMouseButtonPressed(Inputs::Mouse::LEFT) && this->lastRaycast.hit)
+    // Left Mouse Button (Break block)
+    if (inputs.isMouseButtonPressed(Inputs::Mouse::LEFT) && this->lastRaycast.hasHitBlock())
         this->world.setBlock(this->lastRaycast.pos.x, this->lastRaycast.pos.y, this->lastRaycast.pos.z, "core:air");
 
-    // Right Mouse Button
-    if (inputs.isMouseButtonPressed(Inputs::Mouse::RIGHT) && this->lastRaycast.hit)
+    // Right Mouse Button (Place block)
+    if (inputs.isMouseButtonPressed(Inputs::Mouse::RIGHT) && this->lastRaycast.hasHitBlock() && !this->world.isEntityAt(this->lastRaycast.previousPos))
         this->placeBlock(forward);
 
-    // Middle Mouse Button
-    if (inputs.isMouseButtonPressed(Inputs::Mouse::MIDDLE) && this->lastRaycast.hit)
+    // Middle Mouse Button (Get targeted block in inventory)
+    if (inputs.isMouseButtonPressed(Inputs::Mouse::MIDDLE) && this->lastRaycast.hasHitBlock())
     {
         const Material mat = world.getBlock(this->lastRaycast.pos.x, this->lastRaycast.pos.y, this->lastRaycast.pos.z);
         this->selectedBlockId = BlockData::getBlockId(mat);
@@ -95,6 +95,6 @@ void PlayerController::placeBlock(const glm::vec3& forward) const
             break;
     }
 
-    const auto packedMaterial = BlockData::packBlockData(selectedBlockId, rotation);
+    const Material packedMaterial = BlockData::packBlockData(selectedBlockId, rotation);
     world.setBlock(this->lastRaycast.previousPos.x, this->lastRaycast.previousPos.y, this->lastRaycast.previousPos.z, packedMaterial);
 }
