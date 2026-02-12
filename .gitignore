@@ -5,6 +5,7 @@
 .idea
 cmake-build-debug
 build
+.build
 .claude
 
 # Prerequisites
@@ -49,3 +50,5 @@ build
 # debug information files
 *.dwo
 /docs
+
+farfield
