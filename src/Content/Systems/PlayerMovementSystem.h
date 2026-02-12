@@ -15,7 +15,7 @@ namespace ECS
     {
         static constexpr float ACCELERATION = 0.04f;
         static constexpr float MAX_SPEED    = 0.075f;
-        static constexpr float JUMP_FORCE   = 0.2f;
+        static constexpr float JUMP_FORCE   = 0.16f;
 
         public:
             void update(Handler &handler, [[maybe_unused]] float deltaTime) override
@@ -23,7 +23,7 @@ namespace ECS
                 auto view = handler.query<PlayerInput, Camera, Velocity, CollisionBox>();
                 auto& frictionPool = handler.getPool<Friction>();
 
-                view.forEach([&]([[maybe_unused]] EntityId id, PlayerInput& input, Camera& camera, Velocity& vel, CollisionBox& box) {
+                view.forEach([&]([[maybe_unused]] const EntityId id, PlayerInput& input, Camera& camera, Velocity& vel, CollisionBox& box) {
                     const float friction = frictionPool.has(id) ? frictionPool.get(id).ground : 0.8f;
 
                     // Jump

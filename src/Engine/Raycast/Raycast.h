@@ -75,16 +75,18 @@ namespace Raycast
     inline Hit cast(World& world, const glm::vec3 origin, const glm::vec3 dir, const float dist = MAX_DISTANCE)
     {
         Hit blockHit{};
-        float blockDist = dist;
+        Hit entityHit{};
+        const float blockDist = dist;
+        float closestEntityDist = blockDist;
         float t = STEP;
 
         // Iterate along raycast for blocks
         while (t < dist) {
-            glm::vec3 pos = origin + dir * t;
+            glm::ivec3 pos = glm::floor(origin + dir * t);
 
-            if (world.getBlock(glm::floor(pos))) {
+            if (world.getBlock(pos)) {
                 const glm::ivec3 previousPos = glm::floor(origin + dir * (t - STEP));
-                const glm::ivec3 diff = glm::ivec3(pos) - previousPos;
+                const glm::ivec3 diff = pos - previousPos;
                 const MaterialFace hitFace = calculateHitFace(diff);
 
                 blockHit = {
@@ -100,12 +102,8 @@ namespace Raycast
             t += STEP;
         }
 
-
-        Hit entityHit{};
-        float closestEntityDist = blockDist;
-        auto view = world.getECS().query<ECS::Position, ECS::CollisionBox>();
-
         // Iterate over entities to check along raycast
+        auto view = world.getECS().query<ECS::Position, ECS::CollisionBox>();
         view.forEach([&](const ECS::EntityId id, const ECS::Position& pos, const ECS::CollisionBox& box)
         {
             if (id == world.getPlayerEntity().id)

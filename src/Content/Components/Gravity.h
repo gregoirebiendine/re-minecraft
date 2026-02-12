@@ -3,8 +3,8 @@
 
 namespace ECS {
     struct Gravity {
-        float strength = 0.018f;
-        float terminalVelocity = -0.18f;
+        float strength = 0.01f;
+        float terminalVelocity = -0.22f;
     };
 }
 

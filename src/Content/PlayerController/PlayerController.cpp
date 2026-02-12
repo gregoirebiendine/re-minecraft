@@ -57,6 +57,14 @@ void PlayerController::handleInputs(const InputState& inputs, const Viewport& vi
         viewport.setCursorVisibility(isCaptured);
         cameraSystem.setMouseCaptured(!isCaptured);
     }
+
+    // FUN TEST
+    if (inputs.isKeyPressed(Inputs::Keys::E)) {
+        auto& vel = this->world.getECS().getComponent<ECS::Velocity>(this->world.getPlayerEntity());
+        vel.x = 10.f;
+        vel.y = 0.5f;
+        vel.z = 10.f;
+    }
 }
 
 void PlayerController::setSelectedBlockId(const BlockId id)
