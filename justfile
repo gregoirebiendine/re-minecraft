@@ -4,6 +4,8 @@ alias d := debug
 alias fc := fclean
 alias r := run
 
+set windows-shell := ["powershell.exe", "-c"]
+
 binary_name := if os() == "windows" { "farfield.exe" } else { "farfield" }
 
 # Shows available receipes
@@ -18,13 +20,18 @@ config:
 [group('run')]
 build: config
     cmake --build .build
-    cp .build/{{ binary_name }} {{ binary_name }}
 
 # Build and run the project
 [group('run')]
+[windows]
+run: build
+    @echo "========="; cd .build; ./Debug/{{ binary_name }}
+
+[group('run')]
+[linux]
 run: build
     @echo "========="
-    @./{{ binary_name }}
+    @./build/{{ binary_name }}
 
 # Remove build directory
 [group('clean')]

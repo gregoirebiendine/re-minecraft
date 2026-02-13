@@ -45,7 +45,7 @@ World::World(
     const auto playerMesh = this->meshRegistry.get("player");
     const auto playerTexture = this->textureRegistry.getByName("player");
     this->player = this->ecs.createEntity();
-    this->ecs.addComponent(this->player, ECS::Position{8.5f, 71.f, 8.5f});
+    this->ecs.addComponent(this->player, ECS::Position{8.5f, 78.f, 8.5f});
     this->ecs.addComponent(this->player, ECS::Velocity{0.f, 0.f, 0.f});
     this->ecs.addComponent(this->player, ECS::Rotation{0.f, 0.f, 0.f});
     this->ecs.addComponent(this->player, ECS::Camera{});
@@ -60,7 +60,7 @@ World::World(
     const auto zombieMesh = this->meshRegistry.get("zombie");
     const auto zombieTexture = this->textureRegistry.getByName("zombie");
     const auto zombie = this->ecs.createEntity();
-    this->ecs.addComponent(zombie, ECS::Position{7.5f, 72.f, 7.5f});
+    this->ecs.addComponent(zombie, ECS::Position{7.5f, 78.f, 7.5f});
     this->ecs.addComponent(zombie, ECS::Velocity{0.f, 0.f, 0.f});
     this->ecs.addComponent(zombie, ECS::Gravity());
     this->ecs.addComponent(zombie, ECS::CollisionBox{{0.45f, 1.f, 0.45f}});

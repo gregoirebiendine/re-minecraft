@@ -3,7 +3,7 @@ project(farfield VERSION 0.0.1)
 
 set(CMAKE_CXX_STANDARD 26)
 
-add_compile_options(-Wall -Wextra -Wpedantic)
+#add_compile_options(-Wall)
 
 set(CMAKE_CXX_ABI_COMPILED ON)
 
