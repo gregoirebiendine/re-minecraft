@@ -42,6 +42,7 @@ class ChunkManager {
         [[nodiscard]] ChunkMap& getChunks();
         [[nodiscard]] std::vector<Chunk*> getRenderableChunks();
 
+        bool isAreaReady(ChunkPos center, int radius);
         [[nodiscard]] Chunk* getChunk(int cx, int cy, int cz);
         bool canDecorate(const ChunkPos& pos);
 
@@ -50,7 +51,7 @@ class ChunkManager {
 
         void setViewDistance(uint8_t dist);
 
-        void updateStreaming(const glm::vec3& cameraPos);
+        void updateStreaming(const glm::vec3& playerPos);
         void updateFrustum(const glm::mat4& vpMatrix);
         void requestChunk(const ChunkPos& pos);
 

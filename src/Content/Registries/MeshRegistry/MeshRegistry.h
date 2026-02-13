@@ -8,7 +8,6 @@
 
 #include "EntityMeshData.h"
 #include "Vertex.h"
-#include "TextureRegistry.h"
 
 class MeshRegistry
 {

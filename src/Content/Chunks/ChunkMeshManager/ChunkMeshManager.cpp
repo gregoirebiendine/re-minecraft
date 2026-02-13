@@ -25,7 +25,7 @@ void ChunkMeshManager::requestRebuild(Chunk& chunk, const float distance)
     this->workers.enqueue(job);
 }
 
-void ChunkMeshManager::scheduleMeshing(const glm::vec3& cameraPos)
+void ChunkMeshManager::scheduleMeshing(const glm::vec3& playerPos)
 {
     auto lock = world.getChunkManager().acquireReadLock();
     for (auto&[pos, chunk] : world.getChunkManager().getChunks()) {
@@ -49,7 +49,7 @@ void ChunkMeshManager::scheduleMeshing(const glm::vec3& cameraPos)
 
         workers.enqueue({
             pos,
-            glm::distance(cameraPos, center),
+            glm::distance(playerPos, center),
             chunk->getGenerationID()
         });
     }
@@ -95,7 +95,6 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
     neighbors[3] = { west  != nullptr, west  ? west->getBlockSnapshot()  : BlockStorage{} };
     neighbors[4] = { up    != nullptr, up    ? up->getBlockSnapshot()    : BlockStorage{} };
     neighbors[5] = { down  != nullptr, down  ? down->getBlockSnapshot()  : BlockStorage{} };
-
 
     const auto& textureRegistry = this->world.getTextureRegistry();
 
@@ -182,11 +181,9 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
     {
         std::lock_guard lock(uploadMutex);
         uploadQueue.emplace(job.pos, std::move(data));
+        if (chunk->getState() == ChunkState::MESHING)
+            chunk->setState(ChunkState::MESHED);
     }
-
-    // Only change state for first-time meshing, not for remeshing
-    if (chunk->getState() == ChunkState::MESHING)
-        chunk->setState(ChunkState::MESHED);
 }
 
 const ChunkMesh& ChunkMeshManager::getMesh(const ChunkPos &pos) const

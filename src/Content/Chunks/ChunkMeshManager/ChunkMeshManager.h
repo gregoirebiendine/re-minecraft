@@ -26,7 +26,7 @@ class ChunkMeshManager {
 
         void update();
         void requestRebuild(Chunk& chunk, float distance);
-        void scheduleMeshing(const glm::vec3& cameraPos);
+        void scheduleMeshing(const glm::vec3& playerPos);
 
         const ChunkMesh& getMesh(const ChunkPos& pos) const;
 

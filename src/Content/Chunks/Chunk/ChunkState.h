@@ -1,15 +1,6 @@
 #ifndef FARFIELD_CHUNKSTATE_H
 #define FARFIELD_CHUNKSTATE_H
 
-// enum class ChunkState {
-//     UNLOADED,
-//     GENERATING,
-//     GENERATED,
-//     MESHING,
-//     MESHED,
-//     READY,
-// };
-
 enum class ChunkState
 {
     UNLOADED,

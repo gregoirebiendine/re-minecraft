@@ -158,22 +158,22 @@ void ChunkManager::setViewDistance(const uint8_t dist)
     this->unloadDistance = dist + 2;
 }
 
-void ChunkManager::updateStreaming(const glm::vec3& cameraPos)
+void ChunkManager::updateStreaming(const glm::vec3& playerPos)
 {
-    ChunkPos cameraChunk = ChunkPos::fromWorld(cameraPos);
+    auto [playerX, playerY, playerZ] = ChunkPos::fromWorld(playerPos);
     std::unordered_set<ChunkPos, ChunkPosHash> wanted;
 
-    wanted.reserve((2 * this->viewDistance + 1) * (2 * this->viewDistance + 1) * 5);
+    wanted.reserve((2 * this->viewDistance + 1) * (2 * this->viewDistance + 1) * (2 * this->viewDistance + 1));
 
     for (int z = -this->viewDistance; z <= this->viewDistance; ++z) {
-        for (int y = -3; y <= 3; ++y) {
-            const int generatedY = cameraChunk.y + y;
+        for (int y = -this->viewDistance; y <= this->viewDistance; ++y) {
+            const int generatedY = playerY + y;
 
             for (int x = -this->viewDistance; x <= this->viewDistance; ++x) {
                 ChunkPos pos {
-                    cameraChunk.x + x,
+                    playerX + x,
                     generatedY < 0 ? 0 : generatedY,
-                    cameraChunk.z + z
+                    playerZ + z
                 };
 
                 wanted.insert(pos);
@@ -192,9 +192,9 @@ void ChunkManager::updateStreaming(const glm::vec3& cameraPos)
         for (auto it = chunks.begin(); it != chunks.end(); ) {
             Chunk& chunk = *it->second;
 
-            const int dx = chunk.getPosition().x - cameraChunk.x;
-            const int dy = chunk.getPosition().y - cameraChunk.y;
-            const int dz = chunk.getPosition().z - cameraChunk.z;
+            const int dx = chunk.getPosition().x - playerX;
+            const int dy = chunk.getPosition().y - playerY;
+            const int dz = chunk.getPosition().z - playerZ;
 
             if (std::abs(dx) > this->unloadDistance ||
                 std::abs(dy) > this->unloadDistance ||
@@ -234,6 +234,27 @@ std::vector<Chunk *> ChunkManager::getRenderableChunks()
 void ChunkManager::updateFrustum(const glm::mat4& vpMatrix)
 {
     this->frustum.update(vpMatrix);
+}
+
+bool ChunkManager::isAreaReady(const ChunkPos center, const int radius)
+{
+    const int minX = center.x - radius;
+    const int minY = center.y - radius;
+    const int minZ = center.z - radius;
+    const int maxX = center.x + radius;
+    const int maxY = center.y + radius;
+    const int maxZ = center.z + radius;
+
+    for (int z = minZ; z <= maxZ; ++z)
+        for (int y = minY; y <= maxY; ++y)
+            for (int x = minX; x <= maxX; ++x) {
+                const auto c = this->getChunk(x, y, z);
+
+                if (!c || c->getState() != ChunkState::READY)
+                    return false;
+            }
+    return true;
+
 }
 
 ChunkMap& ChunkManager::getChunks()

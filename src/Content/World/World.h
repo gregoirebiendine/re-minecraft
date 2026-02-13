@@ -19,6 +19,8 @@
 #include "ECS/ISystem.h"
 
 class World {
+    static constexpr ChunkPos SPAWN_CENTER{0, 4, 0};
+    static constexpr int SPAWN_RADIUS = 3;
     static constexpr int MAX_ENTITY = 100;
 
     const BlockRegistry& blockRegistry;
@@ -35,6 +37,8 @@ class World {
 
     std::vector<ECS::IEntity> entities{};
     ECS::IEntity player;
+
+    bool isSimulationReady = false;
 
     public:
         explicit World(

@@ -42,10 +42,10 @@ World::World(
     this->scheduler.registerSystem<ECS::RenderSystem>();
 
     // Create player entity
-    const auto playerMesh = this->meshRegistry.get("player");
-    const auto playerTexture = this->textureRegistry.getByName("player");
+    // const auto playerMesh = this->meshRegistry.get("player");
+    // const auto playerTexture = this->textureRegistry.getByName("player");
     this->player = this->ecs.createEntity();
-    this->ecs.addComponent(this->player, ECS::Position{8.5f, 78.f, 8.5f});
+    this->ecs.addComponent(this->player, ECS::Position{8.5f, 73.f, 8.5f});
     this->ecs.addComponent(this->player, ECS::Velocity{0.f, 0.f, 0.f});
     this->ecs.addComponent(this->player, ECS::Rotation{0.f, 0.f, 0.f});
     this->ecs.addComponent(this->player, ECS::Camera{});
@@ -53,14 +53,13 @@ World::World(
     this->ecs.addComponent(this->player, ECS::Gravity{});
     this->ecs.addComponent(this->player, ECS::Friction{});
     this->ecs.addComponent(this->player, ECS::CollisionBox{{0.3f, 0.9f, 0.3f}});
-    this->ecs.addComponent(this->player, ECS::MeshRef{ playerMesh, playerTexture });
-
+    // this->ecs.addComponent(this->player, ECS::MeshRef{ playerMesh, playerTexture });
 
     // Create a Zombie entity
     const auto zombieMesh = this->meshRegistry.get("zombie");
     const auto zombieTexture = this->textureRegistry.getByName("zombie");
     const auto zombie = this->ecs.createEntity();
-    this->ecs.addComponent(zombie, ECS::Position{7.5f, 78.f, 7.5f});
+    this->ecs.addComponent(zombie, ECS::Position{7.5f, 73.f, 7.5f});
     this->ecs.addComponent(zombie, ECS::Velocity{0.f, 0.f, 0.f});
     this->ecs.addComponent(zombie, ECS::Gravity());
     this->ecs.addComponent(zombie, ECS::CollisionBox{{0.45f, 1.f, 0.45f}});
@@ -71,10 +70,14 @@ World::World(
     this->shader.use();
     this->shader.setUniformInt("Textures", 0);
 
-    // Create spawn area (8*8*5)
-    for (int z = -4; z <= 4; ++z)
-        for (int y = 0; y <= 5; ++y)
-            for (int x = -4; x <= 4; ++x)
+    // Create spawn area
+    constexpr glm::ivec2 rx = {SPAWN_CENTER.x - SPAWN_RADIUS, SPAWN_CENTER.x + SPAWN_RADIUS};
+    constexpr glm::ivec2 ry = {SPAWN_CENTER.y - SPAWN_RADIUS, SPAWN_CENTER.y + SPAWN_RADIUS};
+    constexpr glm::ivec2 rz = {SPAWN_CENTER.z - SPAWN_RADIUS, SPAWN_CENTER.z + SPAWN_RADIUS};
+
+    for (int z = rz.x; z <= rz.y; ++z)
+        for (int y = ry.x; y <= ry.y; ++y)
+            for (int x = rx.x; x <= rx.y; ++x)
                 this->chunkManager.requestChunk({x, y, z});
 }
 
@@ -170,12 +173,15 @@ void World::update(const float aspect)
     cameraSystem.setAspect(aspect);
 
     // Update ECS
-    this->scheduler.update(this->ecs, Viewport::dt);
+    if (this->isSimulationReady)
+        this->scheduler.update(this->ecs, Viewport::dt);
+    else
+        this->isSimulationReady = this->chunkManager.isAreaReady(SPAWN_CENTER, SPAWN_RADIUS);
 
     // Get ViewMatrix and ProjectionMatrix
     const auto& v = cameraSystem.getViewMatrix();
     const auto& p = cameraSystem.getProjectionMatrix();
-    const auto& cameraPosition = cameraSystem.getCameraPosition();
+    const auto& playerPos = this->ecs.getComponent<ECS::Position>(this->player);
 
     // Update shaders matrices
     renderSystem.setProjectionMatrix(p);
@@ -193,9 +199,9 @@ void World::update(const float aspect)
     }
 
     // Update chunk meshing
-    this->chunkManager.updateStreaming(cameraPosition);
+    this->chunkManager.updateStreaming(playerPos);
     this->chunkManager.updateFrustum(p * v);
-    this->meshManager.scheduleMeshing(cameraPosition);
+    this->meshManager.scheduleMeshing(playerPos);
     this->meshManager.update();
 }
 
