@@ -31,7 +31,7 @@ run: build
 [linux]
 run: build
     @echo "========="
-    @./build/{{ binary_name }}
+    @./.build/{{ binary_name }}
 
 # Remove build directory
 [group('clean')]
