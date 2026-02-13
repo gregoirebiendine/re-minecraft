@@ -4,7 +4,7 @@ alias d := debug
 alias fc := fclean
 alias r := run
 
-binary_name := "farfield"
+binary_name := if os() == "windows" { "farfield.exe" } else { "farfield" }
 
 # Shows available receipes
 default:
@@ -15,36 +15,37 @@ config:
     cmake -B .build -S .
 
 # Configure and build the project
-[group: 'run']
+[group('run')]
 build: config
     cmake --build .build
     cp .build/{{ binary_name }} {{ binary_name }}
 
 # Build and run the project
-[group: 'run']
+[group('run')]
 run: build
     @echo "========="
     @./{{ binary_name }}
 
 # Remove build directory
-[group: 'clean']
+[group('clean')]
 clean:
     rm -rf .build
 
 # Remove build directory && binary file
-[group: 'clean']
+[confirm("Are you sure you want to remove the .build directory as well as the executable ?")]
+[group('clean')]
 fclean: clean
     rm -f {{ binary_name }}
 
 # Rebuild the tool each time a change/file add is detected
+[group('dev')]
 [linux]
-[group: 'dev']
 debug:
     while sleep 1; do find src resources -type f | entr -cd bash -c 'just run'; done
 
 # Rebuild the tool each time a change/file add is detected
+[group('dev')]
 [windows]
-[group: 'dev']
 debug:
     watchexec -r -w src -w resources just run
 
