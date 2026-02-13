@@ -49,7 +49,7 @@ just build
 # Build and run
 just run
 
-# Hot reload (rebuild on file changes, requires entr)
+# Hot reload (rebuild on file changes)
 just debug
 
 # Clean build artifacts
