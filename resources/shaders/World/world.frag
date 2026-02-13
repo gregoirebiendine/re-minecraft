@@ -11,9 +11,6 @@ out vec4 FragColor;
 
 uniform sampler2DArray Textures;
 
-// Texel offset for 1024x1024 atlas to prevent bleeding
-const float TEXEL_INSET = 1.0 / 1024.0;
-
 // Rotate UV coordinates by 90 degree increments
 vec2 rotateUV(vec2 uv, uint rotation) {
     vec2 centered = uv - 0.5;
@@ -44,12 +41,8 @@ void main()
     if (currentRotation == 6u && (currentNormal.y != 0.0 || abs(currentNormal.z) > 0.5))
         localUvs = rotateUV(localUvs, 1u);
 
-    // Apply texel inset to atlas bounds to prevent bleeding
-    vec2 atlasMin = atlasUvBounds.xy + TEXEL_INSET;
-    vec2 atlasMax = atlasUvBounds.zw - TEXEL_INSET;
-
-    // Map local UV (0-1) to inset atlas region
-    vec2 atlasUvs = mix(atlasMin, atlasMax, localUvs);
+    // Map local UV (0-1) to atlas region (border extrusion handles edge sampling)
+    vec2 atlasUvs = mix(atlasUvBounds.xy, atlasUvBounds.zw, localUvs);
 
     // ambient lighting
     float ambient = 0.4f;

@@ -1,4 +1,39 @@
 #include "TextureRegistry.h"
+#include <cstring>
+
+stbi_uc* TextureRegistry::createExtrudedTexture(const stbi_uc* src, int srcW, int srcH, int border)
+{
+    int dstW = srcW + 2 * border;
+    int dstH = srcH + 2 * border;
+    auto* dst = static_cast<stbi_uc*>(calloc(dstW * dstH * 4, 1));
+
+    // Copy original image into center
+    for (int y = 0; y < srcH; y++)
+        std::memcpy(dst + ((y + border) * dstW + border) * 4, src + (y * srcW) * 4, srcW * 4);
+
+    // Extrude all rows (including border rows) left and right
+    for (int dy = 0; dy < dstH; dy++) {
+        int srcY = std::clamp(dy - border, 0, srcH - 1);
+
+        // Fill left border columns
+        for (int b = 0; b < border; b++)
+            std::memcpy(dst + (dy * dstW + b) * 4, src + (srcY * srcW) * 4, 4);
+
+        // Fill right border columns
+        for (int b = 0; b < border; b++)
+            std::memcpy(dst + (dy * dstW + border + srcW + b) * 4, src + (srcY * srcW + srcW - 1) * 4, 4);
+    }
+
+    // Extrude top and bottom border rows (center portion already correct, fill border rows)
+    for (int b = 0; b < border; b++) {
+        // Top border row: duplicate first source row into center columns
+        std::memcpy(dst + (b * dstW + border) * 4, src, srcW * 4);
+        // Bottom border row: duplicate last source row into center columns
+        std::memcpy(dst + ((border + srcH + b) * dstW + border) * 4, src + ((srcH - 1) * srcW) * 4, srcW * 4);
+    }
+
+    return dst;
+}
 
 AtlasLayer::AtlasLayer()
 {
@@ -84,27 +119,33 @@ void TextureRegistry::createTextures()
 
     // Prepare slots vector (indexed by original TextureId)
     textureSlots.resize(pending.size());
+    std::vector<PlacedTexture> placements(pending.size());
 
     // Start with one layer
     layers.emplace_back();
 
-    // Pack textures
+    // Pack textures (using expanded dimensions to account for border extrusion)
     for (const size_t idx : sortedIndices) {
         const auto& tex = pending[idx];
+        int expandedW = tex.width + 2 * BORDER;
+        int expandedH = tex.height + 2 * BORDER;
         bool placed = false;
 
         for (size_t layerIdx = 0; layerIdx < layers.size(); layerIdx++) {
-            auto [x, y] = layers[layerIdx].tryInsert(tex.width, tex.height);
+            auto [x, y] = layers[layerIdx].tryInsert(expandedW, expandedH);
             if (x >= 0) {
+                int innerX = x + BORDER;
+                int innerY = y + BORDER;
                 textureSlots[idx] = {
                     static_cast<GLuint>(layerIdx),
-                    x / static_cast<float>(LAYER_SIZE),
-                    y / static_cast<float>(LAYER_SIZE),
-                    (x + tex.width) / static_cast<float>(LAYER_SIZE),
-                    (y + tex.height) / static_cast<float>(LAYER_SIZE),
+                    static_cast<float>(innerX) / static_cast<float>(LAYER_SIZE),
+                    static_cast<float>(innerY) / static_cast<float>(LAYER_SIZE),
+                    static_cast<float>(innerX + tex.width) / static_cast<float>(LAYER_SIZE),
+                    static_cast<float>(innerY + tex.height) / static_cast<float>(LAYER_SIZE),
                     static_cast<uint16_t>(tex.width),
                     static_cast<uint16_t>(tex.height)
                 };
+                placements[idx] = {x, y, layerIdx};
                 placed = true;
                 break;
             }
@@ -113,19 +154,23 @@ void TextureRegistry::createTextures()
         if (!placed) {
             // Create new layer
             layers.emplace_back();
-            auto [x, y] = layers.back().tryInsert(tex.width, tex.height);
+            auto [x, y] = layers.back().tryInsert(expandedW, expandedH);
             if (x < 0)
                 throw std::runtime_error("Texture too large for atlas: " + tex.path);
 
+            int innerX = x + BORDER;
+            int innerY = y + BORDER;
+            size_t layerIdx = layers.size() - 1;
             textureSlots[idx] = {
-                static_cast<GLuint>(layers.size() - 1),
-                x / static_cast<float>(LAYER_SIZE),
-                y / static_cast<float>(LAYER_SIZE),
-                (x + tex.width) / static_cast<float>(LAYER_SIZE),
-                (y + tex.height) / static_cast<float>(LAYER_SIZE),
+                static_cast<GLuint>(layerIdx),
+                static_cast<float>(innerX) / static_cast<float>(LAYER_SIZE),
+                static_cast<float>(innerY) / static_cast<float>(LAYER_SIZE),
+                static_cast<float>(innerX + tex.width) / static_cast<float>(LAYER_SIZE),
+                static_cast<float>(innerY + tex.height) / static_cast<float>(LAYER_SIZE),
                 static_cast<uint16_t>(tex.width),
                 static_cast<uint16_t>(tex.height)
             };
+            placements[idx] = {x, y, layerIdx};
         }
     }
 
@@ -134,19 +179,22 @@ void TextureRegistry::createTextures()
     glBindTexture(GL_TEXTURE_2D_ARRAY, this->ID);
     glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, LAYER_SIZE, LAYER_SIZE, static_cast<GLsizei>(layers.size()));
 
-    // Upload each texture to its packed position
+    // Upload each texture with extruded borders to its packed position
     for (size_t i = 0; i < pending.size(); i++) {
-        auto& slot = textureSlots[i];
+        auto& place = placements[i];
         auto& tex = pending[i];
 
-        int pixelX = static_cast<int>(slot.u0 * LAYER_SIZE);
-        int pixelY = static_cast<int>(slot.v0 * LAYER_SIZE);
+        const int expandedW = tex.width + 2 * BORDER;
+        const int expandedH = tex.height + 2 * BORDER;
+
+        stbi_uc* extruded = createExtrudedTexture(tex.data, tex.width, tex.height, BORDER);
 
         glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
-            pixelX, pixelY, slot.layer,
-            tex.width, tex.height, 1,
-            GL_RGBA, GL_UNSIGNED_BYTE, tex.data);
+            place.x, place.y, static_cast<GLint>(place.layer),
+            expandedW, expandedH, 1,
+            GL_RGBA, GL_UNSIGNED_BYTE, extruded);
 
+        free(extruded);
         stbi_image_free(tex.data);
     }
     pending.clear();

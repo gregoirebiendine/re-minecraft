@@ -10,9 +10,7 @@ uniform sampler2DArray Textures;
 
 void main()
 {
-    // Map local UV (0-1) to inset atlas region
     vec2 atlasUvs = mix(atlasUvBounds.xy, atlasUvBounds.zw, currentUvs);
 
-    // Texture
     FragColor = textureLod(Textures, vec3(atlasUvs, currentLayer), 0.0);
 }

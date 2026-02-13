@@ -34,26 +34,28 @@ struct alignas(16) GpuTextureSlot {
 };
 
 class AtlasLayer {
-public:
-    static constexpr int SIZE = 1024;
-    static constexpr int PADDING = 2;
+    public:
+        static constexpr int SIZE = 2048;
+        static constexpr int PADDING = 2;
 
-    struct FreeRect {
-        int x, y, width, height;
-    };
+        struct FreeRect {
+            int x, y, width, height;
+        };
 
-    AtlasLayer();
-    std::pair<int, int> tryInsert(int w, int h);
+        AtlasLayer();
+        std::pair<int, int> tryInsert(int w, int h);
 
-private:
-    std::vector<FreeRect> freeRects;
+    private:
+        std::vector<FreeRect> freeRects;
 };
 
 class TextureRegistry
 {
+    static constexpr int LAYER_SIZE = 2048;
+    static constexpr int BORDER = 2;
+
     GLuint ID{};
     GLuint slotsSSBO{};
-    static constexpr int LAYER_SIZE = 1024;
 
     struct PendingTexture {
         std::string name;
@@ -61,6 +63,13 @@ class TextureRegistry
         int width, height;
         stbi_uc* data;
     };
+
+    struct PlacedTexture {
+        int x, y;
+        size_t layer;
+    };
+
+    static stbi_uc* createExtrudedTexture(const stbi_uc* src, int srcW, int srcH, int border);
 
     std::vector<AtlasLayer> layers;
     std::vector<TextureSlot> textureSlots;
