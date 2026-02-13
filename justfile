@@ -1,7 +1,6 @@
 alias b := build
 alias c := clean
 alias d := debug
-alias fc := fclean
 alias r := run
 
 set windows-shell := ["powershell.exe", "-c"]
