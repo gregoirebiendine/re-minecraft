@@ -38,12 +38,6 @@ run: build
 clean:
     rm -rf .build
 
-# Remove build directory && binary file
-[confirm("Are you sure you want to remove the .build directory as well as the executable ?")]
-[group('clean')]
-fclean: clean
-    rm -f {{ binary_name }}
-
 # Rebuild the tool each time a change/file add is detected
 [group('dev')]
 [linux]
