@@ -1,4 +1,7 @@
 #include "GUI.h"
+#include "ChunkPos.h"
+#include "OutlineVertices.h"
+#include "CrosshairVertices.h"
 
 GUI::GUI(const Font& _font, const TextureRegistry& _textureRegistry, Settings& _settings) :
     font(_font),
@@ -15,9 +18,9 @@ GUI::GUI(const Font& _font, const TextureRegistry& _textureRegistry, Settings& _
     this->guiShader.setUniformInt("Textures", 0);
 
     // General GUI
-    this->createCrosshair(viewportSize);
+    this->data = getCrosshairVertices(viewportSize);
     this->createRectangle(0, static_cast<float>(viewportSize.y) - 80, 400, 80, {20,20,20,0.6f});
-    this->createText(20, static_cast<float>(viewportSize.y) - 50, "Hello, World! ");
+    this->createText(20, 600, "Bonjour je m'appelle Grégoire Biendiné, j'ai 23ans et j'ai un grand cœur");
     this->createImage(static_cast<float>(viewportSize.x) / 2.f, static_cast<float>(viewportSize.y), "hotbar");
     this->createImage(static_cast<float>(viewportSize.x) / 2.f, static_cast<float>(viewportSize.y), "hotbar_selection");
 
@@ -43,45 +46,6 @@ glm::mat4 GUI::getGUIProjectionMatrix() const
     );
 }
 
-void GUI::createCrosshair(const glm::ivec2& vpSize) {
-    const glm::vec2 mid = {vpSize.x / 2 , vpSize.y / 2};
-    const DigitalColor color{200, 200, 200, 0.8f};
-
-    // Hor 1
-    this->createRectangle(
-        mid.x - (CH_SIZE / 2) - CH_OFFSET,
-        mid.y - (CH_THICKNESS / 2),
-        (CH_SIZE / 2),
-        CH_THICKNESS,
-        color
-    );
-    // Hor 2
-    this->createRectangle(
-        mid.x + CH_OFFSET,
-        mid.y - (CH_THICKNESS / 2),
-        (CH_SIZE / 2),
-        CH_THICKNESS,
-        color
-    );
-
-    // Vert 1
-    this->createRectangle(
-        mid.x - (CH_THICKNESS / 2),
-        mid.y - (CH_SIZE / 2) - CH_OFFSET,
-        CH_THICKNESS,
-        (CH_SIZE / 2),
-        color
-    );
-    // Vert 2
-    this->createRectangle(
-        mid.x - (CH_THICKNESS / 2),
-        mid.y + CH_OFFSET,
-        CH_THICKNESS,
-        (CH_SIZE / 2),
-        color
-    );
-}
-
 void GUI::createRectangle(const float x, const float y, const float width, const float height, const DigitalColor color)
 {
     const float x1 = x + width;
@@ -102,13 +66,14 @@ void GUI::createRectangle(const float x, const float y, const float width, const
 
 void GUI::createText(const float x, const float y, const std::string &text)
 {
+    constexpr float scale = 1.f;
     const auto& uvs = this->font.getUVFromString(text);
     const DigitalColor color{255, 255, 255, 1.f};
-    const float y1 = y + Font::CHAR_SIZE;
+    const float y1 = y + Font::CHAR_SIZE_Y * scale;
 
     float curX = x;
     for (const auto& uv : uvs) {
-        float charX1 = curX + Font::CHAR_SIZE;
+        float charX1 = curX + Font::CHAR_SIZE_X * scale;
         this->data.insert(this->data.end(), {
             {{curX, y},    uv[0], color, this->fontTexId},
             {{curX, y1},   uv[1], color, this->fontTexId},
@@ -118,7 +83,7 @@ void GUI::createText(const float x, const float y, const std::string &text)
             {{charX1, y1}, uv[4], color, this->fontTexId},
             {{charX1, y},  uv[5], color, this->fontTexId},
         });
-        curX += Font::CHAR_SIZE;
+        curX += Font::CHAR_SIZE_X * scale;
     }
 }
 
@@ -128,10 +93,13 @@ void GUI::createImage(float x, float y, const std::string &image)
     const auto& textSlot = this->textureRegistry.getSlot(textId);
     const DigitalColor color{255, 255, 255, 1.f};
 
-    x -= static_cast<float>(textSlot.width);
-    y -= static_cast<float>(textSlot.height * 2) + 20;
-    const float x1 = x + static_cast<float>(textSlot.width * 2);
-    const float y1 = y + static_cast<float>(textSlot.height * 2);
+    const float w = static_cast<float>(textSlot.width) * 1.5f;
+    const float h = static_cast<float>(textSlot.height) * 1.5f;
+
+    x -= w * 0.5f;
+    y -= h + 20;
+    const float x1 = x + w;
+    const float y1 = y + h;
 
     this->data.insert(this->data.end(), {
         // First triangle

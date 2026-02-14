@@ -15,11 +15,9 @@
 #include "Shader.h"
 #include "VAO.h"
 #include "Font.h"
-#include "ChunkPos.h"
-#include "OutlineVertices.h"
-#include "DirectionUtils.h"
 #include "Settings.h"
 #include "TextureRegistry.h"
+#include "DirectionUtils.h"
 
 struct DigitalColor
 {
@@ -49,10 +47,6 @@ struct DigitalColor
 
 class GUI
 {
-    static constexpr float CH_SIZE = 20.f;
-    static constexpr float CH_THICKNESS = 4.f;
-    static constexpr float CH_OFFSET = 3.f;
-
     const Font& font;
     const TextureRegistry& textureRegistry;
     Settings& settings;
@@ -68,7 +62,6 @@ class GUI
     static float toScreenSpace(float v, float minIn, float maxIn);
     static float percent(float baseValue, float percentage);
 
-    void createCrosshair(const glm::ivec2& vpSize);
     void createRectangle(float x, float y, float width, float height, DigitalColor color);
     void createText(float x, float y, const std::string& text);
     void createImage(float x, float y, const std::string& image);

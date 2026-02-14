@@ -11,7 +11,7 @@ class Settings
 
     uint8_t viewDistance{8};
     uint8_t fov{100};
-    glm::ivec2 viewportSize{1920, 1080};
+    glm::ivec2 viewportSize{1600, 900};
 
     public:
         void setVSync(bool useVSync);
