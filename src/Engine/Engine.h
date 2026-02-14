@@ -31,6 +31,7 @@ class Engine {
         HANDLE frameTimer = nullptr;
     #endif
 
+    Settings settings;
     mutable Viewport viewport;
     InputState inputs;
     
@@ -40,7 +41,6 @@ class Engine {
     std::unique_ptr<MeshRegistry> meshRegistry;
 
     std::unique_ptr<Font> font;
-
     std::unique_ptr<World> world;
     std::unique_ptr<PlayerController> playerController;
 

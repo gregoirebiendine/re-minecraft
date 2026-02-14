@@ -35,6 +35,9 @@ void VAO::storeGuiData(const std::vector<GuiVertex>& data) const
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(GuiVertex), reinterpret_cast<void *>( offsetof(GuiVertex, color) ));
 
+    glEnableVertexAttribArray(3);
+    glVertexAttribIPointer(3, 1, GL_INT, sizeof(GuiVertex), reinterpret_cast<void *>( offsetof(GuiVertex, texId) ));
+
     this->vbo.unbind();
 }
 

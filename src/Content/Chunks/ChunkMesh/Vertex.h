@@ -41,6 +41,7 @@ struct GuiVertex {
     glm::vec2 position;
     glm::vec2 uv;
     glm::vec4 color;
+    int texId = -1;
 };
 
 struct EntityVertex {

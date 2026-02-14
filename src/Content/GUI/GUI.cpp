@@ -1,23 +1,25 @@
 #include "GUI.h"
 
-GUI::GUI(const Font& _font) :
+GUI::GUI(const Font& _font, const TextureRegistry& _textureRegistry, Settings& _settings) :
     font(_font),
+    textureRegistry(_textureRegistry),
+    settings(_settings),
     guiShader("/resources/shaders/UI/"),
-    outlineShader("/resources/shaders/Outline/")
+    outlineShader("/resources/shaders/Outline/"),
+    fontTexId(this->font.getTextureID())
 {
+    const auto& viewportSize = this->settings.getViewportSize();
+
+    // Set shader uniforms
     this->guiShader.use();
     this->guiShader.setUniformInt("Textures", 0);
-    this->guiShader.setUniformUInt("LayerId", this->font.getTextureID());
-}
-
-void GUI::init(const glm::ivec2 viewportSize)
-{
-    this->changeViewportSize(viewportSize);
 
     // General GUI
     this->createCrosshair(viewportSize);
     this->createRectangle(0, static_cast<float>(viewportSize.y) - 80, 400, 80, {20,20,20,0.6f});
-    this->createText(20, static_cast<float>(viewportSize.y) - 50, "Hello, World!");
+    this->createText(20, static_cast<float>(viewportSize.y) - 50, "Hello, World! ");
+    this->createImage(static_cast<float>(viewportSize.x) / 2.f, static_cast<float>(viewportSize.y), "hotbar");
+    this->createImage(static_cast<float>(viewportSize.x) / 2.f, static_cast<float>(viewportSize.y), "hotbar_selection");
 
     // Upload GUI data
     this->guiVao.bind();
@@ -30,18 +32,19 @@ void GUI::init(const glm::ivec2 viewportSize)
     this->outlineVao.unbind();
 }
 
-void GUI::changeViewportSize(const glm::ivec2 size)
+glm::mat4 GUI::getGUIProjectionMatrix() const
 {
-    this->projectionMatrix = glm::ortho(
-        0.0f, static_cast<float>(size.x),
-        static_cast<float>(size.y), 0.0f,
+    const auto& viewportSize = this->settings.getViewportSize();
+
+    return glm::ortho(
+        0.0f, static_cast<float>(viewportSize.x),
+        static_cast<float>(viewportSize.y), 0.0f,
         -1.f, 1.0f
     );
 }
 
-void GUI::createCrosshair(const glm::ivec2 viewportSize) {
-    // TODO: Update viewportSize when resizing
-    const glm::vec2 mid = {viewportSize.x / 2 , viewportSize.y / 2};
+void GUI::createCrosshair(const glm::ivec2& vpSize) {
+    const glm::vec2 mid = {vpSize.x / 2 , vpSize.y / 2};
     const DigitalColor color{200, 200, 200, 0.8f};
 
     // Hor 1
@@ -97,7 +100,7 @@ void GUI::createRectangle(const float x, const float y, const float width, const
     });
 }
 
-void GUI::createText(float x, float y, const std::string &text)
+void GUI::createText(const float x, const float y, const std::string &text)
 {
     const auto& uvs = this->font.getUVFromString(text);
     const DigitalColor color{255, 255, 255, 1.f};
@@ -107,16 +110,40 @@ void GUI::createText(float x, float y, const std::string &text)
     for (const auto& uv : uvs) {
         float charX1 = curX + Font::CHAR_SIZE;
         this->data.insert(this->data.end(), {
-            {{curX, y},    uv[0], color},
-            {{curX, y1},   uv[1], color},
-            {{charX1, y1}, uv[2], color},
+            {{curX, y},    uv[0], color, this->fontTexId},
+            {{curX, y1},   uv[1], color, this->fontTexId},
+            {{charX1, y1}, uv[2], color, this->fontTexId},
 
-            {{curX, y},    uv[3], color},
-            {{charX1, y1}, uv[4], color},
-            {{charX1, y},  uv[5], color},
+            {{curX, y},    uv[3], color, this->fontTexId},
+            {{charX1, y1}, uv[4], color, this->fontTexId},
+            {{charX1, y},  uv[5], color, this->fontTexId},
         });
         curX += Font::CHAR_SIZE;
     }
+}
+
+void GUI::createImage(float x, float y, const std::string &image)
+{
+    const auto textId = this->textureRegistry.getByName(image);
+    const auto& textSlot = this->textureRegistry.getSlot(textId);
+    const DigitalColor color{255, 255, 255, 1.f};
+
+    x -= static_cast<float>(textSlot.width);
+    y -= static_cast<float>(textSlot.height * 2) + 20;
+    const float x1 = x + static_cast<float>(textSlot.width * 2);
+    const float y1 = y + static_cast<float>(textSlot.height * 2);
+
+    this->data.insert(this->data.end(), {
+        // First triangle
+        {{x, y}, {0.f, 0.f}, color, textId},
+        {{x, y1}, {0.f, 1.f}, color, textId},
+        {{x1, y1}, {1.f, 1.f}, color, textId},
+
+        // Second triangle
+        {{x, y}, {0.f, 0.f}, color, textId},
+        {{x1, y1}, {1.f, 1.f}, color, textId},
+        {{x1, y}, {1.f, 0.f}, color, textId},
+    });
 }
 
 void GUI::render(const glm::vec3& pos, const glm::vec3& forward, const std::string& selectedBlockName)
@@ -129,7 +156,7 @@ void GUI::render(const glm::vec3& pos, const glm::vec3& forward, const std::stri
     renderImGuiFrame(pos, forward, selectedBlockName);
 
     this->guiShader.use();
-    this->guiShader.setProjectionMatrix(this->projectionMatrix);
+    this->guiShader.setProjectionMatrix(this->getGUIProjectionMatrix());
 
     this->guiVao.bind();
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->data.size()));

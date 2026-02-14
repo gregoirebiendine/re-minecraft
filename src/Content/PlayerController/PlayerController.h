@@ -6,6 +6,7 @@
 #include "InputState.h"
 #include "World.h"
 #include "Viewport.h"
+#include "Settings.h"
 
 class PlayerController
 {
@@ -19,7 +20,7 @@ class PlayerController
     void placeBlock(const glm::vec3& forward) const;
 
     public:
-        explicit PlayerController(World& _world, const Font& _font);
+        explicit PlayerController(World& _world, const Font& _font, Settings& _settings);
 
         void renderGUI();
         void handleInputs(const InputState& inputs, const Viewport& viewport);

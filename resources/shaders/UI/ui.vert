@@ -9,13 +9,13 @@ struct TextureSlot {
 layout (location = 0) in vec2 pos;
 layout (location = 1) in vec2 uvs;
 layout (location = 2) in vec4 color;
+layout (location = 3) in int texId;
 
 layout (std430, binding = 0) readonly buffer TextureSlots {
     TextureSlot slots[];
 };
 
 uniform mat4 ProjectionMatrix;
-uniform uint LayerId;
 
 out vec2 currentUvs;
 out vec4 atlasUvBounds;
@@ -25,7 +25,7 @@ flat out uint currentLayer;
 void main()
 {
     // Look up texture slot from atlas
-    TextureSlot slot = slots[LayerId];
+    TextureSlot slot = slots[texId];
 
     // Output
     currentUvs = uvs;

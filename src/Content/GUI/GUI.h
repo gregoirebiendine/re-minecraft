@@ -18,6 +18,8 @@
 #include "ChunkPos.h"
 #include "OutlineVertices.h"
 #include "DirectionUtils.h"
+#include "Settings.h"
+#include "TextureRegistry.h"
 
 struct DigitalColor
 {
@@ -52,30 +54,32 @@ class GUI
     static constexpr float CH_OFFSET = 3.f;
 
     const Font& font;
+    const TextureRegistry& textureRegistry;
+    Settings& settings;
 
     Shader guiShader;
     Shader outlineShader;
     VAO guiVao;
     VAO outlineVao;
 
-    glm::mat4 projectionMatrix{};
+    const TextureId& fontTexId;
     std::vector<GuiVertex> data;
 
     static float toScreenSpace(float v, float minIn, float maxIn);
     static float percent(float baseValue, float percentage);
 
-    void createCrosshair(glm::ivec2 viewportSize);
+    void createCrosshair(const glm::ivec2& vpSize);
     void createRectangle(float x, float y, float width, float height, DigitalColor color);
     void createText(float x, float y, const std::string& text);
+    void createImage(float x, float y, const std::string& image);
 
     static void createImGuiFrame();
     static void renderImGuiFrame(glm::vec3 pos, glm::vec3 forward, const std::string& selectedBlockName);
 
     public:
-        explicit GUI(const Font& _font);
+        explicit GUI(const Font& _font, const TextureRegistry& _textureRegistry, Settings& _settings);
 
-        void init(glm::ivec2 viewportSize);
-        void changeViewportSize(glm::ivec2 size);
+        [[nodiscard]] glm::mat4 getGUIProjectionMatrix() const;
 
         void render(const glm::vec3& pos, const glm::vec3& forward, const std::string& selectedBlockName);
         void renderBlockOutline(const glm::mat4& v, const glm::mat4& p, const glm::vec3& pos);

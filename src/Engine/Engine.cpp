@@ -1,6 +1,7 @@
 #include "Engine.h"
 
 Engine::Engine() :
+    viewport(settings),
     prefabRegistry(blockRegistry)
 {
     #ifdef _WIN32
@@ -24,13 +25,10 @@ Engine::Engine() :
     this->meshRegistry = std::make_unique<MeshRegistry>();
     this->font = std::make_unique<Font>(this->textureRegistry.getByName("font"));
     this->world = std::make_unique<World>(this->blockRegistry, this->textureRegistry, this->prefabRegistry, *this->meshRegistry, this->inputs);
-    this->playerController = std::make_unique<PlayerController>(*this->world, *this->font);
+    this->playerController = std::make_unique<PlayerController>(*this->world, *this->font, this->settings);
 
-    // Apply settings to classes
-    const auto settings = this->viewport.getSettings();
-
-    this->playerController->getGUI().init(settings.getViewportSize());
-    this->world->getChunkManager().setViewDistance(settings.getViewDistance());
+    // Update view distance from settings
+    this->world->getChunkManager().setViewDistance(this->settings.getViewDistance());
 }
 
 void Engine::preciseWait(const double seconds) const
@@ -71,7 +69,7 @@ Engine::~Engine()
 
 void Engine::loop()
 {
-    const auto targetFrameTime = this->viewport.getSettings().getFpsFrameTime();
+    const auto targetFrameTime = this->settings.getFpsFrameTime();
     auto previousTime = Clock::now();
     double accumulator = 0.0;
 

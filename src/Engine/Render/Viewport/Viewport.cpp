@@ -1,5 +1,9 @@
 #include "Viewport.h"
 
+Viewport::Viewport(Settings &_settings) :
+    settings(_settings)
+{}
+
 void Viewport::initGLFW()
 {
     if (!glfwInit())
@@ -185,12 +189,7 @@ void Viewport::swapBuffers() const
     glfwSwapBuffers(this->window);
 }
 
-Settings& Viewport::getSettings()
-{
-    return this->settings;
-}
-
-void Viewport::setVSyncUsage(const bool useVSync)
+void Viewport::setVSyncUsage(const bool useVSync) const
 {
     this->settings.setVSync(useVSync);
     glfwSwapInterval(useVSync);

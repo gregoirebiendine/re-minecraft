@@ -17,9 +17,9 @@ class Viewport
 {
     static constexpr int MSAA_SAMPLES = 4;
 
-    Settings settings;
-
     GLFWwindow *window{nullptr};
+    Settings& settings;
+
     float aspectRatio{};
 
     // MSAA FBO
@@ -38,6 +38,8 @@ class Viewport
     public:
         static constexpr double dt = 1.f / 60.f; // 60Hz
 
+        explicit Viewport(Settings& _settings);
+
         void initWindow(InputState* inputs);
         void initViewport();
         void closeWindow();
@@ -51,9 +53,7 @@ class Viewport
         void beginFrame() const;
         void endFrame() const;
 
-        Settings& getSettings();
-
-        void setVSyncUsage(bool useVSync);
+        void setVSyncUsage(bool useVSync) const;
         [[nodiscard]] bool useVSync() const;
 
         [[nodiscard]] float getAspectRatio() const;
