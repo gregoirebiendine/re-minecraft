@@ -4,20 +4,25 @@
 #include "Components/Movements.h"
 #include "Components/Camera.h"
 
-PlayerController::PlayerController(World& _world, const Font& _font, Settings& _settings) :
+PlayerController::PlayerController(World& _world, const Font& _font, const Settings& _settings) :
     world(_world),
     gui(_font, this->world.getTextureRegistry(), _settings),
-    selectedBlockId(_world.getBlockRegistry().getByName("core:oak_plank"))
+    selectedBlockId(_world.getBlockRegistry().getByName("core:oak_plank")),
+    playerEntity(this->world.getPlayerEntity()),
+    cameraSystem(this->world.getECSScheduler().getSystem<ECS::CameraSystem>())
 {}
 
-void PlayerController::renderGUI()
+void PlayerController::update()
 {
-    const auto& playerEntity = this->world.getPlayerEntity();
-    const auto& pos = this->world.getECS().getComponent<ECS::Position>(playerEntity);
-    const auto& camera = this->world.getECS().getComponent<ECS::Camera>(playerEntity);
-    const auto& cameraSystem = this->world.getECSScheduler().getSystem<ECS::CameraSystem>();
+    const auto& pos = this->world.getECS().getComponent<ECS::Position>(this->playerEntity);
+    const auto& camera = this->world.getECS().getComponent<ECS::Camera>(this->playerEntity);
 
-    this->gui.render(pos, ECS::CameraSystem::getForwardVector(camera), world.getBlockRegistry().get(selectedBlockId).getName());
+    this->gui.update(pos, ECS::CameraSystem::getForwardVector(camera), this->world.getBlockRegistry().get(selectedBlockId).getName());
+}
+
+void PlayerController::render()
+{
+    this->gui.render();
 
     if (this->lastRaycast.hasHitBlock())
         this->gui.renderBlockOutline(cameraSystem.getViewMatrix(), cameraSystem.getProjectionMatrix(), this->lastRaycast.pos);
@@ -25,10 +30,8 @@ void PlayerController::renderGUI()
 
 void PlayerController::handleInputs(const InputState& inputs, const Viewport& viewport)
 {
-    const auto& playerEntity = this->world.getPlayerEntity();
-    const auto& pos = this->world.getECS().getComponent<ECS::Position>(playerEntity);
-    const auto& camera = this->world.getECS().getComponent<ECS::Camera>(playerEntity);
-    auto& cameraSystem = this->world.getECSScheduler().getSystem<ECS::CameraSystem>();
+    const auto& pos = this->world.getECS().getComponent<ECS::Position>(this->playerEntity);
+    const auto& camera = this->world.getECS().getComponent<ECS::Camera>(this->playerEntity);
     const auto& forward = ECS::CameraSystem::getForwardVector(camera);
 
     this->lastRaycast = Raycast::cast(this->world, pos + camera.eyeOffset, forward);
@@ -42,9 +45,8 @@ void PlayerController::handleInputs(const InputState& inputs, const Viewport& vi
         this->placeBlock(forward);
 
     // Middle Mouse Button (Get targeted block in inventory)
-    if (inputs.isMouseButtonPressed(Inputs::Mouse::MIDDLE) && this->lastRaycast.hasHitBlock())
-    {
-        const Material mat = world.getBlock(this->lastRaycast.pos.x, this->lastRaycast.pos.y, this->lastRaycast.pos.z);
+    if (inputs.isMouseButtonPressed(Inputs::Mouse::MIDDLE) && this->lastRaycast.hasHitBlock()) {
+        const Material mat = this->world.getBlock(this->lastRaycast.pos.x, this->lastRaycast.pos.y, this->lastRaycast.pos.z);
         this->selectedBlockId = BlockData::getBlockId(mat);
     }
 
@@ -64,18 +66,13 @@ void PlayerController::handleInputs(const InputState& inputs, const Viewport& vi
         this->getGUI().toggleDebugPanel();
     }
 
-    // FUN TEST
+    // Launch player (robustness test)
     if (inputs.isKeyPressed(Inputs::Keys::E)) {
         auto& vel = this->world.getECS().getComponent<ECS::Velocity>(this->world.getPlayerEntity());
         vel.x = 10.f;
         vel.y = 0.5f;
         vel.z = 10.f;
     }
-}
-
-void PlayerController::setSelectedBlockId(const BlockId id)
-{
-    this->selectedBlockId = id;
 }
 
 void PlayerController::changeSelectedMaterial(const Inputs::Scroll dir)

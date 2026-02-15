@@ -1,23 +1,18 @@
-#include "GUI.h"
-#include "OutlineVertices.h"
-#include "CrosshairVertices.h"
-#include "ShapeWidget.h"
-#include "TextWidget.h"
+#include "GUIPanel.h"
 
-GUI::GUI(const Font& _font, const TextureRegistry& _textureRegistry, Settings& _settings) :
+GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, const Settings& _settings) :
     font(_font),
     textureRegistry(_textureRegistry),
     settings(_settings),
-    guiShader("/resources/shaders/UI/"),
-    outlineShader("/resources/shaders/Outline/")
+    shader("/resources/shaders/UI/")
 {
     const auto& viewportSize = this->settings.getViewportSize();
     const auto vpX = static_cast<float>(viewportSize.x);
     const auto vpY = static_cast<float>(viewportSize.y);
 
     // Set shader uniforms
-    this->guiShader.use();
-    this->guiShader.setUniformInt("Textures", 0);
+    this->shader.use();
+    this->shader.setUniformInt("Textures", 0);
 
     // Build widget tree
     this->root = std::make_unique<PanelWidget>();
@@ -33,6 +28,7 @@ GUI::GUI(const Font& _font, const TextureRegistry& _textureRegistry, Settings& _
             RGBA{50, 50, 50, 0.25f}
         )
     ));
+    this->debugPanel->setVisible(false);
 
     auto makeBoundText = [&](const float y, std::function<std::string()> fn) {
         auto t = std::make_unique<TextWidget>(this->font, glm::vec2{10.f, y});
@@ -61,9 +57,7 @@ GUI::GUI(const Font& _font, const TextureRegistry& _textureRegistry, Settings& _
             static_cast<int>(this->currentPos.y) / 16,
             static_cast<int>(this->currentPos.z) / 16
         };
-        return "Chunk: " + std::to_string(cp.x) + ", "
-                         + std::to_string(cp.y) + ", "
-                         + std::to_string(cp.z);
+        return "Chunk: " + cp;
     }));
 
     this->debugPanel->addChild(makeBoundText(80.f, [this] {
@@ -104,14 +98,20 @@ GUI::GUI(const Font& _font, const TextureRegistry& _textureRegistry, Settings& _
 
     // Initial build
     this->rebuildVertexBuffer();
-
-    // Upload Block Outline data
-    this->outlineVao.bind();
-    this->outlineVao.storeOutlineData(OUTLINE_VERTICES);
-    this->outlineVao.unbind();
 }
 
-glm::mat4 GUI::getGUIProjectionMatrix() const
+void GUIPanel::rebuildVertexBuffer()
+{
+    this->vertexBuffer.clear();
+    this->root->build(this->vertexBuffer, {0.f, 0.f});
+    this->root->clearDirty();
+
+    this->vao.bind();
+    this->vao.storeGuiData(this->vertexBuffer);
+    this->vao.unbind();
+}
+
+glm::mat4 GUIPanel::getGUIProjectionMatrix() const
 {
     const auto& viewportSize = this->settings.getViewportSize();
 
@@ -122,43 +122,8 @@ glm::mat4 GUI::getGUIProjectionMatrix() const
     );
 }
 
-void GUI::onHotbarSlotChanged(const int slot) const
+void GUIPanel::render()
 {
-    if (!this->hotbarSelection)
-        return;
-
-    const auto& viewportSize = this->settings.getViewportSize();
-    const auto vpX = static_cast<float>(viewportSize.x);
-    const auto vpY = static_cast<float>(viewportSize.y);
-
-    const auto texId = this->textureRegistry.getByName("hotbar_selection");
-    const auto& texSlot = this->textureRegistry.getSlot(texId);
-    const float w = static_cast<float>(texSlot.width) * 1.5f;
-    const float h = static_cast<float>(texSlot.height) * 1.5f;
-
-    // Offset selection by slot index (each slot is w wide)
-    const float x = vpX / 2.f - w * 0.5f + static_cast<float>(slot) * w;
-    const float y = vpY - h - 20.f;
-
-    this->hotbarSelection->setPosition(glm::vec2{x, y});
-}
-
-void GUI::toggleDebugPanel() const
-{
-    this->debugPanel->setVisible(!this->debugPanel->isVisible());
-}
-
-void GUI::render(const glm::vec3& pos, const glm::vec3& forward, const std::string& selectedBlockName)
-{
-    // Update per-frame data for bindings
-    this->currentPos = pos;
-    this->currentForward = forward;
-    this->currentSelectedBlock = selectedBlockName;
-
-    glDisable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     // Evaluates bindings
     this->root->tick();
 
@@ -167,42 +132,22 @@ void GUI::render(const glm::vec3& pos, const glm::vec3& forward, const std::stri
         this->rebuildVertexBuffer();
 
     // Draw
-    this->guiShader.use();
-    this->guiShader.setProjectionMatrix(this->getGUIProjectionMatrix());
+    this->shader.use();
+    this->shader.setProjectionMatrix(this->getGUIProjectionMatrix());
 
-    this->guiVao.bind();
+    this->vao.bind();
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->vertexBuffer.size()));
-    this->guiVao.unbind();
-
-    glEnable(GL_DEPTH_TEST);
-    glDisable(GL_BLEND);
+    this->vao.unbind();
 }
 
-void GUI::renderBlockOutline(const glm::mat4& v, const glm::mat4& p, const glm::vec3& pos)
+void GUIPanel::update(const glm::vec3 &pos, const glm::vec3 &forward, const std::string &selectedBlockName)
 {
-    glDisable(GL_CULL_FACE);
-    glPolygonOffset(-1, -1);
-
-    this->outlineShader.use();
-    this->outlineShader.setModelMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(pos)));
-    this->outlineShader.setViewMatrix(v);
-    this->outlineShader.setProjectionMatrix(p);
-
-    this->outlineVao.bind();
-    glDrawArrays(GL_TRIANGLES, 0, 288);
-    this->outlineVao.unbind();
-
-    glPolygonOffset(0, 0);
-    glEnable(GL_CULL_FACE);
+    this->currentPos = pos;
+    this->currentForward = forward;
+    this->currentSelectedBlock = selectedBlockName;
 }
 
-void GUI::rebuildVertexBuffer()
+void GUIPanel::toggleDebugPanel() const
 {
-    this->vertexBuffer.clear();
-    this->root->build(this->vertexBuffer, {0.f, 0.f});
-    this->root->clearDirty();
-
-    this->guiVao.bind();
-    this->guiVao.storeGuiData(this->vertexBuffer);
-    this->guiVao.unbind();
+    this->debugPanel->setVisible(!this->debugPanel->isVisible());
 }

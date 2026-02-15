@@ -121,6 +121,7 @@ void Engine::loop()
 void Engine::update() const
 {
     this->world->update(this->viewport.getAspectRatio());
+    this->playerController->update();
 }
 
 void Engine::render() const
@@ -138,7 +139,7 @@ void Engine::render() const
     this->world->render();
 
     // Render Player
-    this->playerController->renderGUI();
+    this->playerController->render();
 
     // Resolve MSAA and swap buffers
     this->viewport.endFrame();

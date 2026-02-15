@@ -19,6 +19,9 @@ void AWidget::clearDirty()
 
 bool AWidget::isAnyDirty() const
 {
+    if (!this->dirty && !this->visible)
+        return false;
+
     if (this->dirty)
         return true;
 
@@ -77,6 +80,8 @@ void AWidget::build(std::vector<GuiVertex>& out, const glm::vec2 parentOffset)
 
 void AWidget::tick()
 {
-    for (const auto& child : this->children)
-        child->tick();
+    for (const auto& child : this->children) {
+        if (child->isVisible())
+            child->tick();
+    }
 }

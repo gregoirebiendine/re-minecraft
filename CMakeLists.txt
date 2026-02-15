@@ -44,6 +44,8 @@ set(
     ${CMAKE_SOURCE_DIR}/src/Content/Chunks/ChunkMesh
     ${CMAKE_SOURCE_DIR}/src/Content/Chunks/ChunkMeshManager
     ${CMAKE_SOURCE_DIR}/src/Content/GUI
+    ${CMAKE_SOURCE_DIR}/src/Content/GUI/GUIController
+    ${CMAKE_SOURCE_DIR}/src/Content/GUI/GUIPanel
     ${CMAKE_SOURCE_DIR}/src/Content/GUI/Widgets
     ${CMAKE_SOURCE_DIR}/src/Content/GUI/Widgets/PanelWidget
     ${CMAKE_SOURCE_DIR}/src/Content/GUI/Widgets/TextWidget

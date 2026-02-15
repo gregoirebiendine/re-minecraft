@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <iostream>
+#include <ostream>
 
 #include <glm/glm.hpp>
 
@@ -42,6 +43,11 @@ struct ChunkPos {
         };
     }
 
+    ChunkPos operator*(const int mul) const
+    {
+        return {this->x * mul, this->y * mul, this->z * mul};
+    }
+
     bool operator<(const ChunkPos& other) const
     {
         if (x != other.x) return x < other.x;
@@ -58,7 +64,22 @@ struct ChunkPos {
     {
         return x != other.x || y != other.y || z != other.z;
     }
+
+    std::ostream& operator<<(std::ostream& os) const
+    {
+        return os << this->x << ", " << this->y << ", " << this->z;
+    }
+
+    // operator std::string() const
+    // {
+    //     return std::to_string(this->x) + ", " + std::to_string(this->y) + ", " + std::to_string(this->z);
+    // }
 };
+
+inline std::string operator+(const std::string &lhs, const ChunkPos & cp)
+{
+    return lhs + std::to_string(cp.x) + ", " + std::to_string(cp.y) + ", " + std::to_string(cp.z);
+}
 
 struct ChunkPosHash {
     std::size_t operator()(const ChunkPos& p) const noexcept {
@@ -68,15 +89,5 @@ struct ChunkPosHash {
         return h1 ^ (h2 << 1) ^ (h3 << 2);
     }
 };
-
-inline std::ostream& operator<<(std::ostream& os, const ChunkPos pos)
-{
-    return os << "(" << pos.x << ' ' << pos.y << ' ' << pos.z << ")";
-}
-
-inline ChunkPos operator*(const ChunkPos pos, const int mul)
-{
-    return {pos.x * mul, pos.y * mul, pos.z * mul};
-}
 
 #endif
