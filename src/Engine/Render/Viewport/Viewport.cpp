@@ -60,13 +60,6 @@ void Viewport::initWindow(InputState* inputs)
     // Setup STBI image load
     stbi_set_flip_vertically_on_load(true);
 
-    // Setup ImGui implementation
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGui::StyleColorsDark();
-    ImGui_ImplGlfw_InitForOpenGL(this->window, true);
-    ImGui_ImplOpenGL3_Init("#version 460");
-
     // Set window aspect ratio
     this->aspectRatio = static_cast<float>(viewportSize.x) / static_cast<float>(viewportSize.y);
 }
@@ -160,10 +153,6 @@ void Viewport::endFrame() const
 void Viewport::closeWindow()
 {
     deleteMSAABuffers();
-
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
 
     glfwDestroyWindow(this->window);
     glfwTerminate();

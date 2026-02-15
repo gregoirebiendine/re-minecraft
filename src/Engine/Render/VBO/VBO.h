@@ -8,7 +8,7 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
-#include "Vertex.h"
+#include "VAOVertices.h"
 
 class VBO {
     GLuint ID{};

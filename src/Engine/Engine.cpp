@@ -72,11 +72,19 @@ void Engine::loop()
     const auto targetFrameTime = this->settings.getFpsFrameTime();
     auto previousTime = Clock::now();
     double accumulator = 0.0;
+    double smoothFps = 0.0;
 
     while (!this->viewport.shouldClose())
     {
         auto frameStart = Clock::now();
         double frameTime = std::chrono::duration_cast<Duration>(frameStart - previousTime).count();
+
+        if (frameTime > 0.0) {
+            const double instantFps = 1.0 / frameTime;
+            smoothFps = smoothFps * 0.95 + instantFps * 0.05;
+            this->settings.setCurrentFps(smoothFps);
+        }
+
         if (frameTime > 0.25)
             frameTime = 0.25;
 

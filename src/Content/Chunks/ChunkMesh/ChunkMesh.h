@@ -7,8 +7,8 @@
 #include <atomic>
 
 #include "Chunk.h"
-#include "Vertex.h"
 #include "VAO.h"
+#include "VAOVertices.h"
 
 using MeshData = std::vector<PackedBlockVertex>;
 

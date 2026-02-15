@@ -17,7 +17,8 @@ namespace Inputs
         D = GLFW_KEY_D,
         Q = GLFW_KEY_Q,
         E = GLFW_KEY_E,
-        P = GLFW_KEY_P
+        P = GLFW_KEY_P,
+        F3 = GLFW_KEY_F3
     };
 
     enum class Mouse : uint8_t

@@ -59,6 +59,11 @@ void PlayerController::handleInputs(const InputState& inputs, const Viewport& vi
         cameraSystem.setMouseCaptured(!isCaptured);
     }
 
+    // Toggle debug screen
+    if (inputs.isKeyPressed(Inputs::Keys::F3)) {
+        this->getGUI().toggleDebugPanel();
+    }
+
     // FUN TEST
     if (inputs.isKeyPressed(Inputs::Keys::E)) {
         auto& vel = this->world.getECS().getComponent<ECS::Velocity>(this->world.getPlayerEntity());

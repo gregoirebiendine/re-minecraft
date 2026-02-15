@@ -5,7 +5,7 @@
 #include <glad/glad.h>
 
 #include "VAO.h"
-#include "Vertex.h"
+#include "VAOVertices.h"
 
 class EntityMeshData
 {

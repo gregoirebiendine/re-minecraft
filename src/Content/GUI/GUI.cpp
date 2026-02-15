@@ -1,33 +1,109 @@
 #include "GUI.h"
-#include "ChunkPos.h"
 #include "OutlineVertices.h"
 #include "CrosshairVertices.h"
+#include "ShapeWidget.h"
+#include "TextWidget.h"
 
 GUI::GUI(const Font& _font, const TextureRegistry& _textureRegistry, Settings& _settings) :
     font(_font),
     textureRegistry(_textureRegistry),
     settings(_settings),
     guiShader("/resources/shaders/UI/"),
-    outlineShader("/resources/shaders/Outline/"),
-    fontTexId(this->font.getTextureID())
+    outlineShader("/resources/shaders/Outline/")
 {
     const auto& viewportSize = this->settings.getViewportSize();
+    const auto vpX = static_cast<float>(viewportSize.x);
+    const auto vpY = static_cast<float>(viewportSize.y);
 
     // Set shader uniforms
     this->guiShader.use();
     this->guiShader.setUniformInt("Textures", 0);
 
-    // General GUI
-    this->data = getCrosshairVertices(viewportSize);
-    this->createRectangle(0, static_cast<float>(viewportSize.y) - 80, 400, 80, {20,20,20,0.6f});
-    this->createText(20, 600, "Bonjour je m'appelle Grégoire Biendiné, j'ai 23ans et j'ai un grand cœur");
-    this->createImage(static_cast<float>(viewportSize.x) / 2.f, static_cast<float>(viewportSize.y), "hotbar");
-    this->createImage(static_cast<float>(viewportSize.x) / 2.f, static_cast<float>(viewportSize.y), "hotbar_selection");
+    // Build widget tree
+    this->root = std::make_unique<PanelWidget>();
 
-    // Upload GUI data
-    this->guiVao.bind();
-    this->guiVao.storeGuiData(this->data);
-    this->guiVao.unbind();
+    // Crosshair
+    this->root->addChild(std::make_unique<ShapeWidget>(getCrosshairVertices(viewportSize)));
+
+    // Debug panel
+    this->debugPanel = dynamic_cast<PanelWidget*>(this->root->addChild(
+        std::make_unique<PanelWidget>(
+            glm::vec2{0.f, 0.f},
+            glm::vec2{450.f, 140.f},
+            RGBA{50, 50, 50, 0.25f}
+        )
+    ));
+
+    auto makeBoundText = [&](const float y, std::function<std::string()> fn) {
+        auto t = std::make_unique<TextWidget>(this->font, glm::vec2{10.f, y});
+        t->bind(std::move(fn));
+        return t;
+    };
+
+    this->debugPanel->addChild(makeBoundText(5.f, [this] {
+        std::ostringstream ss;
+        ss << std::fixed << std::setprecision(1) << this->settings.getCurrentFps();
+        return "FPS: " + ss.str();
+    }));
+
+    this->debugPanel->addChild(makeBoundText(30.f, [this] {
+        std::ostringstream ss;
+        ss << std::fixed << std::setprecision(2)
+           << this->currentPos.x << ", "
+           << this->currentPos.y << ", "
+           << this->currentPos.z;
+        return "Pos: " + ss.str();
+    }));
+
+    this->debugPanel->addChild(makeBoundText(55.f, [this] {
+        const ChunkPos cp{
+            static_cast<int>(this->currentPos.x) / 16,
+            static_cast<int>(this->currentPos.y) / 16,
+            static_cast<int>(this->currentPos.z) / 16
+        };
+        return "Chunk: " + std::to_string(cp.x) + ", "
+                         + std::to_string(cp.y) + ", "
+                         + std::to_string(cp.z);
+    }));
+
+    this->debugPanel->addChild(makeBoundText(80.f, [this] {
+        return "Facing: " + DirectionUtils::forwardVectorToCardinal(this->currentForward);
+    }));
+
+    this->debugPanel->addChild(makeBoundText(105.f, [this] {
+        return "Block: " + this->currentSelectedBlock;
+    }));
+
+    // Hotbar image
+    {
+        const auto texId = this->textureRegistry.getByName("hotbar");
+        const auto& slot = this->textureRegistry.getSlot(texId);
+        const float w = static_cast<float>(slot.width) * 1.5f;
+        const float h = static_cast<float>(slot.height) * 1.5f;
+        const float x = vpX / 2.f - w * 0.5f;
+        const float y = vpY - h - 20.f;
+        this->root->addChild(std::make_unique<ImageWidget>(
+            this->textureRegistry, "hotbar", glm::vec2{x, y}, glm::vec2{w, h}
+        ));
+    }
+
+    // Hotbar selection
+    {
+        const auto texId = this->textureRegistry.getByName("hotbar_selection");
+        const auto& slot = this->textureRegistry.getSlot(texId);
+        const float w = static_cast<float>(slot.width) * 1.5f;
+        const float h = static_cast<float>(slot.height) * 1.5f;
+        const float x = vpX / 2.f - w * 0.5f;
+        const float y = vpY - h - 20.f;
+        this->hotbarSelection = dynamic_cast<ImageWidget*>(
+            this->root->addChild(std::make_unique<ImageWidget>(
+                this->textureRegistry, "hotbar_selection", glm::vec2{x, y}, glm::vec2{w, h}
+            ))
+        );
+    }
+
+    // Initial build
+    this->rebuildVertexBuffer();
 
     // Upload Block Outline data
     this->outlineVao.bind();
@@ -46,88 +122,56 @@ glm::mat4 GUI::getGUIProjectionMatrix() const
     );
 }
 
-void GUI::createRectangle(const float x, const float y, const float width, const float height, const DigitalColor color)
+void GUI::onHotbarSlotChanged(const int slot) const
 {
-    const float x1 = x + width;
-    const float y1 = y + height;
+    if (!this->hotbarSelection)
+        return;
 
-    this->data.insert(this->data.end(), {
-        // First triangle
-        {{x, y}, {-1.f, -1.f}, color},
-        {{x, y1}, {-1.f, -1.f}, color},
-        {{x1, y1}, {-1.f, -1.f}, color},
+    const auto& viewportSize = this->settings.getViewportSize();
+    const auto vpX = static_cast<float>(viewportSize.x);
+    const auto vpY = static_cast<float>(viewportSize.y);
 
-        // Second triangle
-        {{x, y}, {-1.f, -1.f}, color},
-        {{x1, y1}, {-1.f, -1.f}, color},
-        {{x1, y}, {-1.f, -1.f}, color},
-    });
+    const auto texId = this->textureRegistry.getByName("hotbar_selection");
+    const auto& texSlot = this->textureRegistry.getSlot(texId);
+    const float w = static_cast<float>(texSlot.width) * 1.5f;
+    const float h = static_cast<float>(texSlot.height) * 1.5f;
+
+    // Offset selection by slot index (each slot is w wide)
+    const float x = vpX / 2.f - w * 0.5f + static_cast<float>(slot) * w;
+    const float y = vpY - h - 20.f;
+
+    this->hotbarSelection->setPosition(glm::vec2{x, y});
 }
 
-void GUI::createText(const float x, const float y, const std::string &text)
+void GUI::toggleDebugPanel() const
 {
-    constexpr float scale = 1.f;
-    const auto& uvs = this->font.getUVFromString(text);
-    const DigitalColor color{255, 255, 255, 1.f};
-    const float y1 = y + Font::CHAR_SIZE_Y * scale;
-
-    float curX = x;
-    for (const auto& uv : uvs) {
-        float charX1 = curX + Font::CHAR_SIZE_X * scale;
-        this->data.insert(this->data.end(), {
-            {{curX, y},    uv[0], color, this->fontTexId},
-            {{curX, y1},   uv[1], color, this->fontTexId},
-            {{charX1, y1}, uv[2], color, this->fontTexId},
-
-            {{curX, y},    uv[3], color, this->fontTexId},
-            {{charX1, y1}, uv[4], color, this->fontTexId},
-            {{charX1, y},  uv[5], color, this->fontTexId},
-        });
-        curX += Font::CHAR_SIZE_X * scale;
-    }
-}
-
-void GUI::createImage(float x, float y, const std::string &image)
-{
-    const auto textId = this->textureRegistry.getByName(image);
-    const auto& textSlot = this->textureRegistry.getSlot(textId);
-    const DigitalColor color{255, 255, 255, 1.f};
-
-    const float w = static_cast<float>(textSlot.width) * 1.5f;
-    const float h = static_cast<float>(textSlot.height) * 1.5f;
-
-    x -= w * 0.5f;
-    y -= h + 20;
-    const float x1 = x + w;
-    const float y1 = y + h;
-
-    this->data.insert(this->data.end(), {
-        // First triangle
-        {{x, y}, {0.f, 0.f}, color, textId},
-        {{x, y1}, {0.f, 1.f}, color, textId},
-        {{x1, y1}, {1.f, 1.f}, color, textId},
-
-        // Second triangle
-        {{x, y}, {0.f, 0.f}, color, textId},
-        {{x1, y1}, {1.f, 1.f}, color, textId},
-        {{x1, y}, {1.f, 0.f}, color, textId},
-    });
+    this->debugPanel->setVisible(!this->debugPanel->isVisible());
 }
 
 void GUI::render(const glm::vec3& pos, const glm::vec3& forward, const std::string& selectedBlockName)
 {
+    // Update per-frame data for bindings
+    this->currentPos = pos;
+    this->currentForward = forward;
+    this->currentSelectedBlock = selectedBlockName;
+
     glDisable(GL_DEPTH_TEST);
-    glEnable( GL_BLEND);
+    glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    createImGuiFrame();
-    renderImGuiFrame(pos, forward, selectedBlockName);
+    // Evaluates bindings
+    this->root->tick();
 
+    // Rebuild VBO only if something changed
+    if (this->root->isAnyDirty())
+        this->rebuildVertexBuffer();
+
+    // Draw
     this->guiShader.use();
     this->guiShader.setProjectionMatrix(this->getGUIProjectionMatrix());
 
     this->guiVao.bind();
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->data.size()));
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->vertexBuffer.size()));
     this->guiVao.unbind();
 
     glEnable(GL_DEPTH_TEST);
@@ -152,41 +196,13 @@ void GUI::renderBlockOutline(const glm::mat4& v, const glm::mat4& p, const glm::
     glEnable(GL_CULL_FACE);
 }
 
-void GUI::createImGuiFrame()
+void GUI::rebuildVertexBuffer()
 {
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-}
+    this->vertexBuffer.clear();
+    this->root->build(this->vertexBuffer, {0.f, 0.f});
+    this->root->clearDirty();
 
-void GUI::renderImGuiFrame(const glm::vec3 pos, const glm::vec3 forward, const std::string& selectedBlockName)
-{
-    const auto facing = DirectionUtils::forwardVectorToCardinal(forward);
-    const ChunkPos cp{
-        static_cast<int>(pos.x) / 16,
-        static_cast<int>(pos.y) / 16,
-        static_cast<int>(pos.z) / 16
-    };
-
-    ImGui::Begin("Debug");
-    ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
-    ImGui::Text("Position : %.2f, %.2f, %.2f", pos.x, pos.y, pos.z);
-    ImGui::Text("Chunk : %d, %d, %d", cp.x, cp.y, cp.z);
-    ImGui::Text("Facing : %s", facing.c_str());
-    ImGui::Text("Selected block : %s", selectedBlockName.c_str());
-    ImGui::End();
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
-// Statics
-float GUI::toScreenSpace(const float v, const float minIn, const float maxIn)
-{
-    const float res = -1 + (1 - (-1)) * ((v - minIn) / (maxIn - minIn));
-    return std::clamp(res, -1.0f, 1.0f);
-}
-
-float GUI::percent(const float baseValue, const float percentage)
-{
-    return baseValue * (percentage/100.0f);
+    this->guiVao.bind();
+    this->guiVao.storeGuiData(this->vertexBuffer);
+    this->guiVao.unbind();
 }

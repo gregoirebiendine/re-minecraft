@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "glm/vec3.hpp"
-#include "Vertex.h"
+#include "VAOVertices.h"
 
 const std::vector<EntityVertex> ZOMBIE_MESH =
 {

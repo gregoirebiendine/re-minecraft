@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "EntityMeshData.h"
-#include "Vertex.h"
+#include "VAOVertices.h"
 
 class MeshRegistry
 {

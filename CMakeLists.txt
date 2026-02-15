@@ -15,12 +15,6 @@ file(
 list(APPEND SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/glad/src/glad.c
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/stbi/stb_image.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/src/imgui.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/src/imgui_impl_opengl3.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/src/imgui_impl_glfw.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/src/imgui_draw.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/src/imgui_tables.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/src/imgui_widgets.cpp
 )
 
 #Headers
@@ -28,7 +22,6 @@ set(
     HEADERS
     ${CMAKE_SOURCE_DIR}/lib
     ${CMAKE_SOURCE_DIR}/lib/json
-    ${CMAKE_SOURCE_DIR}/lib/imgui
     ${CMAKE_SOURCE_DIR}/lib/fastnoiselite
 
     ${CMAKE_SOURCE_DIR}/src/Engine
@@ -45,11 +38,17 @@ set(
     ${CMAKE_SOURCE_DIR}/src/Engine/Utils
 
     ${CMAKE_SOURCE_DIR}/src/Content/
+    ${CMAKE_SOURCE_DIR}/src/Content/Vertices
     ${CMAKE_SOURCE_DIR}/src/Content/Chunks/Chunk
     ${CMAKE_SOURCE_DIR}/src/Content/Chunks/ChunkManager
     ${CMAKE_SOURCE_DIR}/src/Content/Chunks/ChunkMesh
     ${CMAKE_SOURCE_DIR}/src/Content/Chunks/ChunkMeshManager
     ${CMAKE_SOURCE_DIR}/src/Content/GUI
+    ${CMAKE_SOURCE_DIR}/src/Content/GUI/Widgets
+    ${CMAKE_SOURCE_DIR}/src/Content/GUI/Widgets/PanelWidget
+    ${CMAKE_SOURCE_DIR}/src/Content/GUI/Widgets/TextWidget
+    ${CMAKE_SOURCE_DIR}/src/Content/GUI/Widgets/ImageWidget
+    ${CMAKE_SOURCE_DIR}/src/Content/GUI/Widgets/ShapeWidget
     ${CMAKE_SOURCE_DIR}/src/Content/Meshes
     ${CMAKE_SOURCE_DIR}/src/Content/Meshes/EntityMeshData
     ${CMAKE_SOURCE_DIR}/src/Content/NeighborAccess

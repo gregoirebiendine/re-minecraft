@@ -5,8 +5,9 @@
 
 class Settings
 {
-    double fps{165.0};
-    double targetFrameTime{1.0 / fps};
+    double targetFrameRate{1.0};
+    double targetFrameTime{1.0};
+    double currentFps{0.0};
     bool vsync{true};
 
     uint8_t viewDistance{8};
@@ -20,6 +21,8 @@ class Settings
         void setFpsTarget(double target);
         [[nodiscard]] double getFpsTarget() const;
         [[nodiscard]] double getFpsFrameTime() const;
+        void setCurrentFps(double _fps);
+        [[nodiscard]] double getCurrentFps() const;
 
         void setViewportSize(glm::ivec2 size);
         [[nodiscard]] glm::ivec2 getViewportSize() const;

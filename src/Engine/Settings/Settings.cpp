@@ -15,18 +15,28 @@ void Settings::setFpsTarget(const double target)
     if (target == 0)
         return;
 
-    this->fps = target;
+    this->targetFrameRate = target;
     this->targetFrameTime =  1.0 / target;
 }
 
 double Settings::getFpsTarget() const
 {
-    return this->fps;
+    return this->targetFrameRate;
 }
 
 double Settings::getFpsFrameTime() const
 {
     return this->targetFrameTime;
+}
+
+void Settings::setCurrentFps(const double _fps)
+{
+    this->currentFps = _fps;
+}
+
+double Settings::getCurrentFps() const
+{
+    return this->currentFps;
 }
 
 void Settings::setViewportSize(const glm::ivec2 size)
