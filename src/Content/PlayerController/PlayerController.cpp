@@ -4,9 +4,9 @@
 #include "Components/Movements.h"
 #include "Components/Camera.h"
 
-PlayerController::PlayerController(World& _world, const Font& _font, const Settings& _settings) :
+PlayerController::PlayerController(World& _world, const Font& _font, const Viewport& _viewport) :
     world(_world),
-    gui(_font, this->world.getTextureRegistry(), _settings),
+    gui(_font, this->world.getTextureRegistry(), _viewport),
     selectedBlockId(_world.getBlockRegistry().getByName("core:oak_plank")),
     playerEntity(this->world.getPlayerEntity()),
     cameraSystem(this->world.getECSScheduler().getSystem<ECS::CameraSystem>())
@@ -25,10 +25,10 @@ void PlayerController::render()
     this->gui.render();
 
     if (this->lastRaycast.hasHitBlock())
-        this->gui.renderBlockOutline(cameraSystem.getViewMatrix(), cameraSystem.getProjectionMatrix(), this->lastRaycast.pos);
+        this->gui.renderBlockOutline(this->cameraSystem.getViewMatrix(), this->cameraSystem.getProjectionMatrix(), this->lastRaycast.pos);
 }
 
-void PlayerController::handleInputs(const InputState& inputs, const Viewport& viewport)
+void PlayerController::handleInputs(const InputState& inputs, Viewport& viewport)
 {
     const auto& pos = this->world.getECS().getComponent<ECS::Position>(this->playerEntity);
     const auto& camera = this->world.getECS().getComponent<ECS::Camera>(this->playerEntity);
@@ -61,10 +61,12 @@ void PlayerController::handleInputs(const InputState& inputs, const Viewport& vi
         cameraSystem.setMouseCaptured(!isCaptured);
     }
 
-    // Toggle debug screen
-    if (inputs.isKeyPressed(Inputs::Keys::F3)) {
+    // Toggle debug screen (F3)
+    if (inputs.isKeyPressed(Inputs::Keys::F3))
         this->getGUI().toggleDebugPanel();
-    }
+
+    if (inputs.isKeyPressed(Inputs::Keys::F11))
+        viewport.toggleFullscreen();
 
     // Launch player (robustness test)
     if (inputs.isKeyPressed(Inputs::Keys::E)) {

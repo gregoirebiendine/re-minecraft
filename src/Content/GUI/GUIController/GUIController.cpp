@@ -1,8 +1,8 @@
 #include "GUIController.h"
 #include "OutlineVertices.h"
 
-GUIController::GUIController(const Font& _font, const TextureRegistry& _textureRegistry, const Settings& _settings) :
-    panel(_font, _textureRegistry, _settings),
+GUIController::GUIController(const Font& _font, const TextureRegistry& _textureRegistry, const Viewport& _viewport) :
+    panel(_font, _textureRegistry, _viewport),
     shader("/resources/shaders/Outline/")
 {
     this->vao.bind();

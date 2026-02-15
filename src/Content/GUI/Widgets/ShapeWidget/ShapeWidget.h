@@ -10,6 +10,7 @@ class ShapeWidget : public AWidget
     public:
         explicit ShapeWidget(std::vector<GuiVertex> verts);
 
+        void setVertices(std::vector<GuiVertex> verts);
         void buildSelf(std::vector<GuiVertex>& out, glm::vec2 abs) override;
 };
 

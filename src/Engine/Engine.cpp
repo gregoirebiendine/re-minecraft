@@ -25,7 +25,7 @@ Engine::Engine() :
     this->meshRegistry = std::make_unique<MeshRegistry>();
     this->font = std::make_unique<Font>(this->textureRegistry.getByName("font"));
     this->world = std::make_unique<World>(this->blockRegistry, this->textureRegistry, this->prefabRegistry, *this->meshRegistry, this->inputs);
-    this->playerController = std::make_unique<PlayerController>(*this->world, *this->font, this->settings);
+    this->playerController = std::make_unique<PlayerController>(*this->world, *this->font, this->viewport);
 
     // Update view distance from settings
     this->world->getChunkManager().setViewDistance(this->settings.getViewDistance());
@@ -93,6 +93,7 @@ void Engine::loop()
 
         // INPUTS
         Viewport::pollEvents();
+        this->viewport.setSize(this->inputs.viewportSize);
         this->playerController->handleInputs(this->inputs, this->viewport);
 
         // UPDATES
@@ -111,7 +112,7 @@ void Engine::loop()
         auto frameEnd = Clock::now();
         const double elapsed = std::chrono::duration_cast<Duration>(frameEnd - frameStart).count();
 
-        if (!this->viewport.useVSync() && elapsed < targetFrameTime)
+        if (!this->viewport.isUsingVSync() && elapsed < targetFrameTime)
             this->preciseWait(targetFrameTime - elapsed);
     }
 
@@ -130,7 +131,7 @@ void Engine::render() const
     // this->viewport.beginFrame();
 
     // Clear window and buffer
-    glClearColor(0.509f, 0.784f, 0.898f, 1.0f);
+    glClearColor(0.509f, 0.784f, 0.898f, 1.0f); // Skybox color
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Render World

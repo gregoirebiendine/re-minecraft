@@ -1,15 +1,15 @@
 #include "GUIPanel.h"
 #include "CrosshairVertices.h"
 
-GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, const Settings& _settings) :
+GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, const Viewport& _viewport) :
     font(_font),
     textureRegistry(_textureRegistry),
-    settings(_settings),
+    viewport(_viewport),
     shader("/resources/shaders/UI/")
 {
-    const auto& viewportSize = this->settings.getViewportSize();
-    const auto vpX = static_cast<float>(viewportSize.x);
-    const auto vpY = static_cast<float>(viewportSize.y);
+    const auto& vpSize = this->viewport.getSize();
+    const auto vpX = static_cast<float>(vpSize.x);
+    const auto vpY = static_cast<float>(vpSize.y);
 
     // Set shader uniforms
     this->shader.use();
@@ -19,7 +19,9 @@ GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, c
     this->root = std::make_unique<PanelWidget>();
 
     // Crosshair
-    this->root->addChild(std::make_unique<ShapeWidget>(getCrosshairVertices(viewportSize)));
+    this->crosshair = dynamic_cast<ShapeWidget*>(
+        this->root->addChild(std::make_unique<ShapeWidget>(getCrosshairVertices(vpSize)))
+    );
 
     // Debug panel
     this->debugPanel = dynamic_cast<PanelWidget*>(this->root->addChild(
@@ -39,13 +41,13 @@ GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, c
 
     this->debugPanel->addChild(makeBoundText(5.f, [this] {
         std::ostringstream ss;
-        ss << std::fixed << std::setprecision(1) << this->settings.getCurrentFps();
+        ss << std::fixed << std::setprecision(1) << this->viewport.getSettings().getCurrentFps();
         return "FPS: " + ss.str();
     }));
 
     this->debugPanel->addChild(makeBoundText(30.f, [this] {
         std::ostringstream ss;
-        ss << std::fixed << std::setprecision(2)
+        ss << std::fixed << std::setprecision(1)
            << this->currentPos.x << ", "
            << this->currentPos.y << ", "
            << this->currentPos.z;
@@ -77,9 +79,9 @@ GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, c
         const float h = static_cast<float>(slot.height) * 1.5f;
         const float x = vpX / 2.f - w * 0.5f;
         const float y = vpY - h - 20.f;
-        this->root->addChild(std::make_unique<ImageWidget>(
+        this->hotbar = dynamic_cast<ImageWidget*>(this->root->addChild(std::make_unique<ImageWidget>(
             this->textureRegistry, "hotbar", glm::vec2{x, y}, glm::vec2{w, h}
-        ));
+        )));
     }
 
     // Hotbar selection
@@ -96,6 +98,9 @@ GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, c
             ))
         );
     }
+
+    // Track viewport size for resize handling
+    this->cachedViewportSize = vpSize;
 
     // Initial build
     this->rebuildVertexBuffer();
@@ -114,17 +119,51 @@ void GUIPanel::rebuildVertexBuffer()
 
 glm::mat4 GUIPanel::getGUIProjectionMatrix() const
 {
-    const auto& viewportSize = this->settings.getViewportSize();
+    const auto& vpSize = this->viewport.getSize();
 
     return glm::ortho(
-        0.0f, static_cast<float>(viewportSize.x),
-        static_cast<float>(viewportSize.y), 0.0f,
+        0.0f, static_cast<float>(vpSize.x),
+        static_cast<float>(vpSize.y), 0.0f,
         -1.f, 1.0f
     );
 }
 
+void GUIPanel::onViewportResize(const glm::ivec2 newSize) const
+{
+    // Crosshair: vertices depend on viewport center
+    this->crosshair->setVertices(getCrosshairVertices(newSize));
+
+    const auto vpX = static_cast<float>(newSize.x);
+    const auto vpY = static_cast<float>(newSize.y);
+
+    // Hotbar: centered horizontally, anchored to bottom
+    {
+        const auto texId = this->textureRegistry.getByName("hotbar");
+        const auto& slot = this->textureRegistry.getSlot(texId);
+        const float w = static_cast<float>(slot.width) * 1.5f;
+        const float h = static_cast<float>(slot.height) * 1.5f;
+        this->hotbar->setPosition({vpX / 2.f - w * 0.5f, vpY - h - 20.f});
+    }
+
+    // Hotbar selection: same positioning
+    {
+        const auto texId = this->textureRegistry.getByName("hotbar_selection");
+        const auto& slot = this->textureRegistry.getSlot(texId);
+        const float w = static_cast<float>(slot.width) * 1.5f;
+        const float h = static_cast<float>(slot.height) * 1.5f;
+        this->hotbarSelection->setPosition({vpX / 2.f - w * 0.5f, vpY - h - 20.f});
+    }
+}
+
 void GUIPanel::render()
 {
+    // Check for viewport resize
+    const auto currentVp = this->viewport.getSize();
+    if (currentVp != this->cachedViewportSize) {
+        this->cachedViewportSize = currentVp;
+        this->onViewportResize(currentVp);
+    }
+
     // Evaluates bindings
     this->root->tick();
 

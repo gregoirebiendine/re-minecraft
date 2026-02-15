@@ -8,7 +8,7 @@
 #include "Shader.h"
 #include "VAO.h"
 #include "Font.h"
-#include "Settings.h"
+#include "Viewport.h"
 #include "TextureRegistry.h"
 #include "GUIPanel.h"
 
@@ -20,7 +20,7 @@ class GUIController
     VAO vao;
 
     public:
-        explicit GUIController(const Font& _font, const TextureRegistry& _textureRegistry, const Settings& _settings);
+        explicit GUIController(const Font& _font, const TextureRegistry& _textureRegistry, const Viewport& _viewport);
 
         void onHotbarSlotChanged(int slot) const;
         void toggleDebugPanel() const;

@@ -1,12 +1,11 @@
 #ifndef FARFIELD_PLAYERCONTROLLER_H
 #define FARFIELD_PLAYERCONTROLLER_H
 
-#include "../GUI/GUIController/GUIController.h"
 #include "Raycast.h"
 #include "InputState.h"
 #include "World.h"
 #include "Viewport.h"
-#include "Settings.h"
+#include "GUIController.h"
 #include "Systems/CameraSystem.h"
 
 class PlayerController
@@ -25,11 +24,11 @@ class PlayerController
     void placeBlock(const glm::vec3& forward) const;
 
     public:
-        explicit PlayerController(World& _world, const Font& _font, const Settings& _settings);
+        explicit PlayerController(World& _world, const Font& _font, const Viewport& _viewport);
 
         void update();
         void render();
-        void handleInputs(const InputState& inputs, const Viewport& viewport);
+        void handleInputs(const InputState& inputs, Viewport& viewport);
 
         GUIController& getGUI() { return this->gui; };
 };

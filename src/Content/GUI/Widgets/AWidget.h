@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <functional>
 #include <glm/glm.hpp>
 
 #include "VAOVertices.h"
@@ -13,6 +14,8 @@ class AWidget
     glm::vec2 size{0.f};
     bool visible{true};
     bool dirty{true};
+
+    std::function<glm::vec2()> positionBinding;
 
     std::vector<std::unique_ptr<AWidget>> children;
 
@@ -25,6 +28,7 @@ class AWidget
         bool isAnyDirty() const;
 
         void setPosition(glm::vec2 pos);
+        void bindPosition(std::function<glm::vec2()> fn);
 
         void setSize(glm::vec2 s);
         [[nodiscard]] glm::vec2 getSize() const;

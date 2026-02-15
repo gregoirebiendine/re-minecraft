@@ -37,6 +37,11 @@ void AWidget::setPosition(const glm::vec2 pos)
     this->markDirty();
 }
 
+void AWidget::bindPosition(std::function<glm::vec2()> fn)
+{
+    this->positionBinding = std::move(fn);
+}
+
 void AWidget::setSize(const glm::vec2 s)
 {
     this->size = s;
@@ -80,6 +85,14 @@ void AWidget::build(std::vector<GuiVertex>& out, const glm::vec2 parentOffset)
 
 void AWidget::tick()
 {
+    if (this->positionBinding) {
+        const auto newPos = this->positionBinding();
+        if (newPos != this->position) {
+            this->position = newPos;
+            this->markDirty();
+        }
+    }
+
     for (const auto& child : this->children) {
         if (child->isVisible())
             child->tick();

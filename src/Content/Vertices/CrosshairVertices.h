@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <glm/glm.hpp>
+#include <VAOVertices.h>
 
 inline constexpr float CH_SIZE = 20.f;
 inline constexpr float CH_THICKNESS = 4.f;

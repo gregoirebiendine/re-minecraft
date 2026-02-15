@@ -21,11 +21,9 @@ void Viewport::initGLFW()
 
 void Viewport::initWindow(InputState* inputs)
 {
-    const auto viewportSize = this->settings.getViewportSize();
-
     initGLFW();
 
-    this->window = glfwCreateWindow(viewportSize.x, viewportSize.y, "Farfield", nullptr, nullptr);
+    this->window = glfwCreateWindow(this->size.x, this->size.y, "Farfield", nullptr, nullptr);
     if (!this->window) {
         glfwTerminate();
         throw std::runtime_error("Failed to open GLFW window");
@@ -34,14 +32,14 @@ void Viewport::initWindow(InputState* inputs)
     glfwMakeContextCurrent(this->window);
 
     // Center window
-    const auto videoMode = getVideoMode();
-    glfwSetWindowPos(this->window, (videoMode->width / 2) - (viewportSize.x / 2),  (videoMode->height / 2) - (viewportSize.y / 2));
+    const auto* videoMode = getVideoMode();
+    this->centerWindow(videoMode);
 
     // Set fps target to screen refresh rate
     this->settings.setFpsTarget(videoMode->refreshRate);
 
     // VSync
-    glfwSwapInterval(this->settings.isVSync());
+    this->useVSync(true);
 
     // Enable RAW mouse input
     if (glfwRawMouseMotionSupported())
@@ -55,6 +53,7 @@ void Viewport::initWindow(InputState* inputs)
     glfwSetCursorPosCallback(this->window, InputState::mouseInputCallback);
     glfwSetMouseButtonCallback(this->window, InputState::mouseButtonInputCallback);
     glfwSetScrollCallback(this->window, InputState::mouseScrollInputCallback);
+    glfwSetFramebufferSizeCallback(this->window, InputState::viewportResizeCallback);
 
     // Initialize GLAD Manager
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
@@ -64,15 +63,13 @@ void Viewport::initWindow(InputState* inputs)
     stbi_set_flip_vertically_on_load(true);
 
     // Set window aspect ratio
-    this->aspectRatio = static_cast<float>(viewportSize.x) / static_cast<float>(viewportSize.y);
+    this->aspectRatio = static_cast<float>(this->size.x) / static_cast<float>(this->size.y);
 }
 
-void Viewport::initViewport()
+void Viewport::initViewport() const
 {
-    const auto viewportSize = this->settings.getViewportSize();
-
     // Create viewport
-    glViewport(0, 0, viewportSize.x, viewportSize.y);
+    glViewport(0, 0, this->size.x, this->size.y);
 
     // Change transparency function
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -156,17 +153,12 @@ void Viewport::endFrame() const
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Viewport::closeWindow()
+void Viewport::closeWindow() const
 {
     // deleteMSAABuffers();
 
     glfwDestroyWindow(this->window);
     glfwTerminate();
-}
-
-GLFWwindow* Viewport::getWindow() const
-{
-    return this->window;
 }
 
 bool Viewport::shouldClose() const
@@ -184,15 +176,41 @@ void Viewport::swapBuffers() const
     glfwSwapBuffers(this->window);
 }
 
-void Viewport::setVSyncUsage(const bool useVSync) const
+void Viewport::centerWindow(const GLFWvidmode* videoMode) const
 {
-    this->settings.setVSync(useVSync);
-    glfwSwapInterval(useVSync);
+    glfwSetWindowPos(this->window, (videoMode->width / 2) - (this->size.x / 2),  (videoMode->height / 2) - (this->size.y / 2));
 }
 
-bool Viewport::useVSync() const
+void Viewport::setSize(const glm::ivec2 _size)
 {
-    return this->settings.isVSync();
+    if (_size == glm::ivec2(0))
+        return;
+
+    this->size = _size;
+    this->setAspectRatio(static_cast<float>(_size.x) / static_cast<float>(_size.y));
+
+    glViewport(0, 0, _size.x, _size.y);
+}
+
+glm::ivec2 Viewport::getSize() const
+{
+    return this->size;
+}
+
+void Viewport::useVSync(const bool use) const
+{
+    this->settings.useVSync(use);
+    glfwSwapInterval(use ? 1 : 0);
+}
+
+bool Viewport::isUsingVSync() const
+{
+    return this->settings.isUsingVSync();
+}
+
+void Viewport::setAspectRatio(const float aspect)
+{
+    this->aspectRatio = aspect;
 }
 
 float Viewport::getAspectRatio() const
@@ -203,6 +221,25 @@ float Viewport::getAspectRatio() const
 void Viewport::setCursorVisibility(const bool showCursor) const
 {
     glfwSetInputMode(this->window, GLFW_CURSOR, showCursor ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+}
+
+void Viewport::toggleFullscreen()
+{
+    const auto* videoMode = this->getVideoMode();
+    const bool wouldBeFullscreen = !this->settings.isFullscreen();
+
+    this->settings.setFullscreen(wouldBeFullscreen);
+
+    if (wouldBeFullscreen) {
+        GLFWmonitor *monitor = this->getMonitor();
+        glfwSetWindowMonitor(this->window, monitor, 0, 0, videoMode->width, videoMode->height, videoMode->refreshRate);
+        this->setSize({videoMode->width, videoMode->height});
+    }
+    else {
+        glfwSetWindowMonitor(this->window, nullptr, 0, 0, this->baseSize.x, this->baseSize.y, videoMode->refreshRate);
+        this->setSize(this->baseSize);
+        this->centerWindow(videoMode);
+    }
 }
 
 // Statics

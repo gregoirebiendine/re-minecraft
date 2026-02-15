@@ -16,7 +16,10 @@ class Viewport
     GLFWwindow *window{nullptr};
     Settings& settings;
 
-    float aspectRatio{};
+    // Windows state
+    const glm::ivec2 baseSize{1600, 900};
+    glm::ivec2 size{baseSize};
+    float aspectRatio{static_cast<float>(size.x) / static_cast<float>(size.y)};
 
     // MSAA FBO
     GLuint msaaFBO{0};
@@ -28,6 +31,8 @@ class Viewport
     static GLFWmonitor *getMonitor();
     static const GLFWvidmode *getVideoMode();
 
+    void centerWindow(const GLFWvidmode* videoMode) const;
+
     void createMSAABuffers();
     void deleteMSAABuffers();
 
@@ -37,26 +42,33 @@ class Viewport
         explicit Viewport(Settings& _settings);
 
         void initWindow(InputState* inputs);
-        void initViewport();
-        void closeWindow();
+        void initViewport() const;
+        void closeWindow() const;
 
-        [[nodiscard]] GLFWwindow *getWindow() const;
+        [[nodiscard]] Settings& getSettings() const { return this->settings; };
+        [[nodiscard]] GLFWwindow* getWindow() const { return this->window; };
+
         [[nodiscard]] bool shouldClose() const;
         static void pollEvents();
         void swapBuffers() const;
+
+        // Resize update
+        void setSize(glm::ivec2 _size);
+        [[nodiscard]] glm::ivec2 getSize() const;
 
         // MSAA methods
         void beginFrame() const;
         void endFrame() const;
 
-        void setVSyncUsage(bool useVSync) const;
-        [[nodiscard]] bool useVSync() const;
+        void useVSync(bool use) const;
+        [[nodiscard]] bool isUsingVSync() const;
 
+        void setAspectRatio(float aspect);
         [[nodiscard]] float getAspectRatio() const;
 
         void setCursorVisibility(bool showCursor) const;
 
-
+        void toggleFullscreen();
 };
 
 #endif

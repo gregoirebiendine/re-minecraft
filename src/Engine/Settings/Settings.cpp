@@ -1,11 +1,11 @@
 #include "Settings.h"
 
-void Settings::setVSync(const bool useVSync)
+void Settings::useVSync(const bool use)
 {
-    this->vsync = useVSync;
+    this->vsync = use;
 }
 
-bool Settings::isVSync() const
+bool Settings::isUsingVSync() const
 {
     return this->vsync;
 }
@@ -39,16 +39,6 @@ double Settings::getCurrentFps() const
     return this->currentFps;
 }
 
-void Settings::setViewportSize(const glm::ivec2 size)
-{
-    this->viewportSize = size;
-}
-
-glm::ivec2 Settings::getViewportSize() const
-{
-    return this->viewportSize;
-}
-
 void Settings::setViewDistance(const uint8_t distance)
 {
     this->viewDistance = distance;
@@ -67,4 +57,14 @@ void Settings::setFOV(const uint8_t _fov)
 uint8_t Settings::getFOV() const
 {
     return this->fov;
+}
+
+void Settings::setFullscreen(const bool full)
+{
+    this->fullscreen = full;
+}
+
+bool Settings::isFullscreen() const
+{
+    return this->fullscreen;
 }

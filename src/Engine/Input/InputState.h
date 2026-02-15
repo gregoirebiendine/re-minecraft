@@ -18,7 +18,8 @@ namespace Inputs
         Q = GLFW_KEY_Q,
         E = GLFW_KEY_E,
         P = GLFW_KEY_P,
-        F3 = GLFW_KEY_F3
+        F3 = GLFW_KEY_F3,
+        F11 = GLFW_KEY_F11
     };
 
     enum class Mouse : uint8_t
@@ -38,17 +39,23 @@ namespace Inputs
 
 struct InputState
 {
+    // Keyboard keys
     bool keyDown[GLFW_KEY_LAST + 1]{};
     bool keyPressed[GLFW_KEY_LAST + 1]{};
     bool keyReleased[GLFW_KEY_LAST + 1]{};
 
+    // Mouse buttons
     bool mouseDown[GLFW_MOUSE_BUTTON_LAST + 1]{};
     bool mousePressed[GLFW_MOUSE_BUTTON_LAST + 1]{};
     bool mouseReleased[GLFW_MOUSE_BUTTON_LAST + 1]{};
+    Inputs::Scroll scroll{Inputs::Scroll::NONE};
 
+    // Mouse position
     double mouseX{};
     double mouseY{};
-    Inputs::Scroll scroll{Inputs::Scroll::NONE};
+
+    // Viewport size
+    glm::ivec2 viewportSize{0};
 
     [[nodiscard]] bool isKeyDown(const Inputs::Keys key) const { return keyDown[std::to_underlying(key)]; };
     [[nodiscard]] bool isKeyPressed(const Inputs::Keys key) const { return keyPressed[std::to_underlying(key)]; };
@@ -65,6 +72,7 @@ struct InputState
         std::fill_n(mousePressed, sizeof(mousePressed), false);
         std::fill_n(mouseReleased, sizeof(mouseReleased), false);
         this->scroll = Inputs::Scroll::NONE;
+        this->viewportSize = glm::ivec2(0);
     }
 
     static void keyInputCallback(GLFWwindow* window, const int key, [[maybe_unused]] const int scancode, const int action, [[maybe_unused]] const int mods)
@@ -129,6 +137,17 @@ struct InputState
         auto* input = static_cast<InputState*>(glfwPointer);
 
         input->scroll = yoffset < 0 ? Inputs::Scroll::DOWN : Inputs::Scroll::UP;
+    }
+    static void viewportResizeCallback(GLFWwindow* window, const int width, const int height)
+    {
+        const auto glfwPointer = glfwGetWindowUserPointer(window);
+
+        if (glfwPointer == nullptr)
+            return;
+
+        auto* input = static_cast<InputState*>(glfwPointer);
+
+        input->viewportSize = glm::ivec2(width, height);
     }
 };
 

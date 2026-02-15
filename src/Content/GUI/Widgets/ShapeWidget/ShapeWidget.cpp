@@ -5,6 +5,12 @@ ShapeWidget::ShapeWidget(std::vector<GuiVertex> verts) :
 {
 }
 
+void ShapeWidget::setVertices(std::vector<GuiVertex> verts)
+{
+    this->vertices = std::move(verts);
+    this->markDirty();
+}
+
 void ShapeWidget::buildSelf(std::vector<GuiVertex>& out, const glm::vec2 abs)
 {
     for (auto v : this->vertices) {

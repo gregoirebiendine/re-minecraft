@@ -14,7 +14,8 @@
 #include "Shader.h"
 #include "VAO.h"
 #include "Font.h"
-#include "Settings.h"
+// #include "Settings.h"
+#include "Viewport.h"
 #include "TextureRegistry.h"
 #include "PanelWidget.h"
 #include "ImageWidget.h"
@@ -29,7 +30,7 @@ class GUIPanel
     // Classes from Engine
     const Font& font;
     const TextureRegistry& textureRegistry;
-    const Settings& settings;
+    const Viewport& viewport;
 
     // Render storage
     Shader shader;
@@ -38,8 +39,13 @@ class GUIPanel
 
     // Widget references
     std::unique_ptr<PanelWidget> root;
+    ShapeWidget* crosshair = nullptr;
+    ImageWidget* hotbar = nullptr;
     ImageWidget* hotbarSelection = nullptr;
     PanelWidget* debugPanel = nullptr;
+
+    // Viewport tracking
+    glm::ivec2 cachedViewportSize{0};
 
     // Outside variables cache
     glm::vec3 currentPos{0.f};
@@ -49,11 +55,14 @@ class GUIPanel
     // Rebuild UI every frame
     void rebuildVertexBuffer();
 
+    // Events
+    void onViewportResize(glm::ivec2 newSize) const;
+
     // Calculate GUI Projection Matrix for shader
     [[nodiscard]] glm::mat4 getGUIProjectionMatrix() const;
 
     public:
-        explicit GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, const Settings& _settings);
+        explicit GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, const Viewport& _viewport);
 
         void toggleDebugPanel() const;
 
