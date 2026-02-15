@@ -127,7 +127,7 @@ void Engine::update() const
 void Engine::render() const
 {
     // Begin MSAA rendering
-    this->viewport.beginFrame();
+    // this->viewport.beginFrame();
 
     // Clear window and buffer
     glClearColor(0.509f, 0.784f, 0.898f, 1.0f);
@@ -142,6 +142,6 @@ void Engine::render() const
     this->playerController->render();
 
     // Resolve MSAA and swap buffers
-    this->viewport.endFrame();
+    // this->viewport.endFrame();
     this->viewport.swapBuffers();
 }

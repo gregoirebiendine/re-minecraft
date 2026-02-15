@@ -14,6 +14,9 @@ void Viewport::initGLFW()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
+    // MSAA Samples
+    glfwWindowHint(GLFW_SAMPLES, 4);
 }
 
 void Viewport::initWindow(InputState* inputs)
@@ -82,10 +85,13 @@ void Viewport::initViewport()
     glCullFace(GL_BACK);
     glEnable(GL_CULL_FACE);
 
-    // Create MSAA framebuffer
-    fbWidth = viewportSize.x;
-    fbHeight = viewportSize.y;
-    createMSAABuffers();
+    // Disable integrated MSAA (will be used only for block outlines)
+    glDisable(GL_MULTISAMPLE);
+
+    // Create MSAA framebuffer (should be removed because of weird texture artifacts)
+    // fbWidth = viewportSize.x;
+    // fbHeight = viewportSize.y;
+    // createMSAABuffers();
 }
 
 void Viewport::createMSAABuffers()
@@ -152,7 +158,7 @@ void Viewport::endFrame() const
 
 void Viewport::closeWindow()
 {
-    deleteMSAABuffers();
+    // deleteMSAABuffers();
 
     glfwDestroyWindow(this->window);
     glfwTerminate();

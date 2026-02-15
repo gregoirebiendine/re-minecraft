@@ -55,6 +55,7 @@ void GUIController::render()
 
 void GUIController::renderBlockOutline(const glm::mat4& v, const glm::mat4& p, const glm::vec3& pos)
 {
+    glEnable(GL_MULTISAMPLE);
     glDisable(GL_CULL_FACE);
     glPolygonOffset(-1, -1);
 
@@ -69,4 +70,5 @@ void GUIController::renderBlockOutline(const glm::mat4& v, const glm::mat4& p, c
 
     glPolygonOffset(0, 0);
     glEnable(GL_CULL_FACE);
+    glDisable(GL_MULTISAMPLE);
 }

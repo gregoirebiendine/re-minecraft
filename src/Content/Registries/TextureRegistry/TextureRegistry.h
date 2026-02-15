@@ -36,7 +36,7 @@ struct alignas(16) GpuTextureSlot {
 class AtlasLayer {
     public:
         static constexpr int SIZE = 2048;
-        static constexpr int PADDING = 2;
+        static constexpr int PADDING = 0;
 
         struct FreeRect {
             int x, y, width, height;
@@ -52,7 +52,7 @@ class AtlasLayer {
 class TextureRegistry
 {
     static constexpr int LAYER_SIZE = 2048;
-    static constexpr int BORDER = 2;
+    static constexpr int BORDER = 1;
 
     GLuint ID{};
     GLuint slotsSSBO{};
