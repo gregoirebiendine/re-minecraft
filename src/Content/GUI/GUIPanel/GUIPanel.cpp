@@ -1,4 +1,5 @@
 #include "GUIPanel.h"
+#include "CrosshairVertices.h"
 
 GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, const Settings& _settings) :
     font(_font),

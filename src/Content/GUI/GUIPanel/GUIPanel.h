@@ -8,7 +8,6 @@
 #include <sstream>
 #include <iomanip>
 
-#include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -21,7 +20,6 @@
 #include "ImageWidget.h"
 #include "ShapeWidget.h"
 #include "TextWidget.h"
-#include "CrosshairVertices.h"
 #include "ChunkPos.h"
 #include "DirectionUtils.h"
 #include "RGBA.h"

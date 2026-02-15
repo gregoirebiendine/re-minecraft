@@ -9,11 +9,10 @@
 class ImageWidget : public AWidget
 {
     const TextureRegistry& texRegistry;
-    std::string textureName;
+    const TextureId texId;
 
     public:
-        ImageWidget(const TextureRegistry& texRegistry, const std::string& textureName,
-                    glm::vec2 position, glm::vec2 size);
+        ImageWidget(const TextureRegistry& texRegistry, const std::string& textureName, glm::vec2 position, glm::vec2 size);
 
         void buildSelf(std::vector<GuiVertex>& out, glm::vec2 abs) override;
 };

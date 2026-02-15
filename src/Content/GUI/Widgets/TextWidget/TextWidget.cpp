@@ -1,7 +1,8 @@
 #include "TextWidget.h"
 
 TextWidget::TextWidget(const Font& font, const glm::vec2 position) :
-    font(font)
+    font(font),
+    fontTexId(this->font.getTextureID())
 {
     this->setPosition(position);
 }
@@ -37,8 +38,6 @@ void TextWidget::buildSelf(std::vector<GuiVertex>& out, const glm::vec2 abs)
         return;
 
     const auto& uvs = this->font.getUVFromString(this->cachedText);
-    const glm::vec4 c = this->color;
-    const auto& fontTexId = this->font.getTextureID();
     const float y = abs.y;
     const float y1 = y + Font::CHAR_SIZE_Y;
 
@@ -47,13 +46,13 @@ void TextWidget::buildSelf(std::vector<GuiVertex>& out, const glm::vec2 abs)
         const float charX1 = curX + Font::CHAR_SIZE_X;
 
         out.insert(out.end(), {
-            {{curX, y},     uv[0], c, fontTexId},
-            {{curX, y1},    uv[1], c, fontTexId},
-            {{charX1, y1},  uv[2], c, fontTexId},
+            {{curX, y},     uv[0], this->color, this->fontTexId},
+            {{curX, y1},    uv[1], this->color, this->fontTexId},
+            {{charX1, y1},  uv[2], this->color, this->fontTexId},
 
-            {{curX, y},     uv[3], c, fontTexId},
-            {{charX1, y1},  uv[4], c, fontTexId},
-            {{charX1, y},   uv[5], c, fontTexId},
+            {{curX, y},     uv[0], this->color, this->fontTexId},
+            {{charX1, y1},  uv[2], this->color, this->fontTexId},
+            {{charX1, y},   uv[3], this->color, this->fontTexId},
         });
         curX += Font::CHAR_SIZE_X;
     }

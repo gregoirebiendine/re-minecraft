@@ -3,25 +3,13 @@
 
 #pragma once
 
-#include <vector>
-#include <memory>
-#include <sstream>
-#include <iomanip>
-
-#include <glad/glad.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 #include "Shader.h"
 #include "VAO.h"
 #include "Font.h"
-#include "ChunkPos.h"
-#include "DirectionUtils.h"
-#include "RGBA.h"
 #include "Settings.h"
 #include "TextureRegistry.h"
-#include "PanelWidget.h"
-#include "ImageWidget.h"
 #include "GUIPanel.h"
 
 class GUIController

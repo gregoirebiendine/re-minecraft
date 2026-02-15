@@ -13,7 +13,7 @@
 #include "TextureRegistry.h"
 #include "Utils.h"
 
-using FontUVArray = std::array<glm::vec2, 6>;
+using FontUVArray = std::array<glm::vec2, 4>;
 
 class Font
 {

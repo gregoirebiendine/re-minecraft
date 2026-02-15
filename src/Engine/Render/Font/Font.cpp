@@ -10,13 +10,8 @@ Font::Font(const TextureId _textureID) :
         char32_t cp = decodeUtf8(this->CHARS, i);
 
         const FontUVArray uvs = {
-            // Triangle 1: TL, BL, BR
             glm::vec2{ rangeX(p.x), rangeY(p.y) },
             glm::vec2{ rangeX(p.x), rangeY(p.y + CHAR_SIZE_Y) },
-            glm::vec2{ rangeX(p.x + CHAR_SIZE_X), rangeY(p.y + CHAR_SIZE_Y) },
-
-            // Triangle 2: TL, BR, TR
-            glm::vec2{ rangeX(p.x), rangeY(p.y) },
             glm::vec2{ rangeX(p.x + CHAR_SIZE_X), rangeY(p.y + CHAR_SIZE_Y) },
             glm::vec2{ rangeX(p.x + CHAR_SIZE_X), rangeY(p.y) },
         };

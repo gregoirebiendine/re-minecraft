@@ -11,6 +11,8 @@
 class TextWidget : public AWidget
 {
     const Font& font;
+    const TextureId& fontTexId;
+
     std::string cachedText;
     RGBA color{255, 255, 255, 1.f};
     std::function<std::string()> textBinding;

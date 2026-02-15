@@ -2,7 +2,7 @@
 
 ImageWidget::ImageWidget(const TextureRegistry& texRegistry, const std::string& textureName, const glm::vec2 position, const glm::vec2 size) :
     texRegistry(texRegistry),
-    textureName(textureName)
+    texId(this->texRegistry.getByName(textureName))
 {
     this->setPosition(position);
     this->setSize(size);
@@ -11,7 +11,6 @@ ImageWidget::ImageWidget(const TextureRegistry& texRegistry, const std::string& 
 void ImageWidget::buildSelf(std::vector<GuiVertex>& out, const glm::vec2 abs)
 {
     constexpr glm::vec4 color{1.f};
-    const auto texId = this->texRegistry.getByName(this->textureName);
     const glm::vec2 s = this->getSize();
 
     const float x = abs.x;
@@ -20,12 +19,12 @@ void ImageWidget::buildSelf(std::vector<GuiVertex>& out, const glm::vec2 abs)
     const float y1 = y + s.y;
 
     out.insert(out.end(), {
-        {{x, y},   {0.f, 0.f}, color, texId},
-        {{x, y1},  {0.f, 1.f}, color, texId},
-        {{x1, y1}, {1.f, 1.f}, color, texId},
+        {{x, y},   {0.f, 0.f}, color, this->texId},
+        {{x, y1},  {0.f, 1.f}, color, this->texId},
+        {{x1, y1}, {1.f, 1.f}, color, this->texId},
 
-        {{x, y},   {0.f, 0.f}, color, texId},
-        {{x1, y1}, {1.f, 1.f}, color, texId},
-        {{x1, y},  {1.f, 0.f}, color, texId},
+        {{x, y},   {0.f, 0.f}, color, this->texId},
+        {{x1, y1}, {1.f, 1.f}, color, this->texId},
+        {{x1, y},  {1.f, 0.f}, color, this->texId},
     });
 }
