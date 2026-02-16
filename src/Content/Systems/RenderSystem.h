@@ -4,6 +4,7 @@
 #include "Shader.h"
 #include "EntityMeshData.h"
 #include "ECS/ISystem.h"
+#include "Components/Movements.h"
 #include "Components/MeshRef.h"
 
 namespace ECS
@@ -32,26 +33,16 @@ namespace ECS
 
             void render(Handler& handler) override
             {
-                auto view = handler.query<Position, MeshRef>();
-                auto& rotationPool = handler.getPool<Rotation>();
+                auto view = handler.query<Position, Rotation, MeshRef>();
 
                 this->shader.use();
-                view.forEach([&]([[maybe_unused]] EntityId id, const Position& pos, const MeshRef& ref)
+                view.forEach([&]([[maybe_unused]] EntityId id, const Position& pos, const Rotation& rot, const MeshRef& ref)
                 {
                     if (!ref.mesh)
                         return;
 
                     glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
-
-                    if (const auto* rot = rotationPool.tryGet(id)) {
-                        model = glm::rotate(model, glm::radians(-rot->y - 90.f), glm::vec3(0.f, 1.f, 0.f));
-
-                        // TODO: Remove debug rotation
-                        model = glm::translate(model, {0.375, 1.75f, 0.0});
-                        model = glm::rotate(model, glm::radians(rot->x + 15.f), glm::vec3(1.f, 0.f, 0.f));
-                        model = glm::translate(model, {-0.375, -1.75f, 0.0});
-                    }
-
+                    model = glm::rotate(model, glm::radians(rot.y), {0.0f, 1.0f, 0.0f});
                     this->shader.setModelMatrix(model);
                     this->shader.setUniformUInt("LayerId", ref.texId);
                     ref.mesh->render();

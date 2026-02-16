@@ -10,8 +10,38 @@ class World;
 #include "Components/Movements.h"
 #include "Components/CollisionBox.h"
 
+#include <cmath>
+#include <glm/glm.hpp>
+
 namespace ECS
 {
+    inline glm::vec3 computeRotatedHalfExtents(const glm::vec3& halfExtents, float yawDegrees)
+    {
+        const float rad = glm::radians(yawDegrees);
+        const float cosA = std::abs(std::cos(rad));
+        const float sinA = std::abs(std::sin(rad));
+
+        return {
+            halfExtents.x * cosA + halfExtents.z * sinA,
+            halfExtents.y,
+            halfExtents.x * sinA + halfExtents.z * cosA
+        };
+    }
+
+    struct AABB
+    {
+        glm::vec3 min;
+        glm::vec3 max;
+    };
+
+    inline AABB computeAABB(const Position& pos, const glm::vec3& rotatedHalf)
+    {
+        return {
+            { pos.x - rotatedHalf.x, pos.y, pos.z - rotatedHalf.z },
+            { pos.x + rotatedHalf.x, pos.y + rotatedHalf.y * 2.0f, pos.z + rotatedHalf.z }
+        };
+    }
+
     class CollisionSystem : public ISystem
     {
         World& world;
@@ -19,90 +49,79 @@ namespace ECS
         public:
             explicit CollisionSystem(World& _world) : world(_world) {};
 
-            bool resolveAxis(Position& pos, Velocity& velocity, const CollisionBox& box, const int axis, const float prePos) const
+            bool resolveAxis(Position& pos, Velocity& vel, const glm::vec3& halfExt, const int axis, const float preAxisPos = std::numeric_limits<float>::quiet_NaN()) const
             {
-                constexpr float EPSILON = 0.001f;
-                constexpr float CORNER_THRESHOLD = 0.01f;
+                AABB entity = computeAABB(pos, halfExt);
 
-                glm::vec3 min = {pos.x - box.halfExtents.x, pos.y, pos.z - box.halfExtents.z};
-                glm::vec3 max = {pos.x + box.halfExtents.x, pos.y + box.halfExtents.y * 2, pos.z + box.halfExtents.z};
+                const glm::ivec3 minBlock = glm::ivec3(glm::floor(entity.min));
+                const glm::ivec3 maxBlock = glm::ivec3(glm::floor(entity.max));
 
-                const glm::ivec3 minBlock = glm::floor(min);
-                const glm::ivec3 maxBlock = glm::floor(max);
+                const bool checkPreOverlap = !std::isnan(preAxisPos);
+                float preMin = 0.0f, preMax = 0.0f;
+                if (checkPreOverlap)
+                {
+                    if (axis == 1) { preMin = preAxisPos; preMax = preAxisPos + halfExt.y * 2.0f; }
+                    else if (axis == 0) { preMin = preAxisPos - halfExt.x; preMax = preAxisPos + halfExt.x; }
+                    else { preMin = preAxisPos - halfExt.z; preMax = preAxisPos + halfExt.z; }
+                }
 
                 bool collided = false;
 
-                for (int z = minBlock.z; z <= maxBlock.z; z++) {
-                    for (int y = minBlock.y; y <= maxBlock.y; y++) {
-                        for (int x = minBlock.x; x <= maxBlock.x; x++) {
-                            if (this->world.isAir(x, y, z))
+                for (int bz = minBlock.z; bz <= maxBlock.z; ++bz)
+                {
+                    for (int by = minBlock.y; by <= maxBlock.y; ++by)
+                    {
+                        for (int bx = minBlock.x; bx <= maxBlock.x; ++bx)
+                        {
+                            if (this->world.isAir(bx, by, bz))
                                 continue;
 
-                            const glm::vec3 blockMinVec = {static_cast<float>(x), static_cast<float>(y), static_cast<float>(z)};
-                            const glm::vec3 blockMaxVec = {static_cast<float>(x + 1), static_cast<float>(y + 1), static_cast<float>(z + 1)};
+                            const glm::vec3 blockMin = { static_cast<float>(bx), static_cast<float>(by), static_cast<float>(bz) };
+                            const glm::vec3 blockMax = { static_cast<float>(bx + 1), static_cast<float>(by + 1), static_cast<float>(bz + 1) };
 
-                            // Check for full 3D AABB overlap
-                            if (max.x <= blockMinVec.x || min.x >= blockMaxVec.x)
+                            if (entity.max.x <= blockMin.x || entity.min.x >= blockMax.x)
                                 continue;
-                            if (max.y <= blockMinVec.y || min.y >= blockMaxVec.y)
+                            if (entity.max.y <= blockMin.y || entity.min.y >= blockMax.y)
                                 continue;
-                            if (max.z <= blockMinVec.z || min.z >= blockMaxVec.z)
+                            if (entity.max.z <= blockMin.z || entity.min.z >= blockMax.z)
                                 continue;
 
-                            if (axis == 1)
+                            // Skip blocks already overlapping on this axis before the move
+                            if (checkPreOverlap)
                             {
-                                // Y resolver: skip if entity was already overlapping on Y before movement
-                                // (prevents walking beside a wall and getting pushed up)
-                                const float preMin = prePos;
-                                const float preMax = prePos + box.halfExtents.y * 2;
-                                const float blockAxisMin = blockMinVec.y;
-                                const float blockAxisMax = blockMaxVec.y;
+                                const float bMin = (axis == 0) ? blockMin.x : (axis == 1) ? blockMin.y : blockMin.z;
+                                const float bMax = (axis == 0) ? blockMax.x : (axis == 1) ? blockMax.y : blockMax.z;
 
-                                if (preMax - blockAxisMin > EPSILON && blockAxisMax - preMin > EPSILON)
-                                    continue;
-
-                                // Y resolver: skip if cross-axis overlap is tiny
-                                // (prevents catching on block corners while falling)
-                                const float overlapX = std::min(max.x - blockMinVec.x, blockMaxVec.x - min.x);
-                                const float overlapZ = std::min(max.z - blockMinVec.z, blockMaxVec.z - min.z);
-
-                                if (overlapX < CORNER_THRESHOLD || overlapZ < CORNER_THRESHOLD)
+                                if (preMax > bMin && bMax > preMin)
                                     continue;
                             }
 
-                            const float blockAxisMin = (axis == 0) ? blockMinVec.x : ((axis == 1) ? blockMinVec.y : blockMinVec.z);
-                            const float blockAxisMax = (axis == 0) ? blockMaxVec.x : ((axis == 1) ? blockMaxVec.y : blockMaxVec.z);
-                            const float playerMin = (axis == 0) ? min.x : ((axis == 1) ? min.y : min.z);
-                            const float playerMax = (axis == 0) ? max.x : ((axis == 1) ? max.y : max.z);
+                            const float penPos = (axis == 0) ? entity.max.x - blockMin.x
+                                               : (axis == 1) ? entity.max.y - blockMin.y
+                                                             : entity.max.z - blockMin.z;
+                            const float penNeg = (axis == 0) ? blockMax.x - entity.min.x
+                                               : (axis == 1) ? blockMax.y - entity.min.y
+                                                             : blockMax.z - entity.min.z;
 
-                            const float penPositive = playerMax - blockAxisMin;
-                            const float penNegative = blockAxisMax - playerMin;
+                            const float velOnAxis = (axis == 0) ? vel.x : (axis == 1) ? vel.y : vel.z;
+                            float push;
 
-                            const float velocityOnAxis = (axis == 0) ? velocity.x : ((axis == 1) ? velocity.y : velocity.z);
-                            float pushAmount;
-
-                            if (velocityOnAxis > 0.0001f)
-                                pushAmount = -penPositive;
-                            else if (velocityOnAxis < -0.0001f)
-                                pushAmount = penNegative;
+                            if (velOnAxis > 0.0001f)
+                                push = -penPos;
+                            else if (velOnAxis < -0.0001f)
+                                push = penNeg;
                             else
-                                pushAmount = (penPositive < penNegative) ? -penPositive : penNegative;
+                                push = (penPos < penNeg) ? -penPos : penNeg;
 
-                            // Apply correction
-                            if (axis == 0) {
-                                pos.x += pushAmount;
-                                velocity.x = 0.f;
-                            } else if (axis == 1) {
-                                pos.y += pushAmount;
-                                velocity.y = 0.f;
-                            } else {
-                                pos.z += pushAmount;
-                                velocity.z = 0.f;
-                            }
+                            if (axis == 0) pos.x += push;
+                            else if (axis == 1) pos.y += push;
+                            else pos.z += push;
 
-                            min = {pos.x - box.halfExtents.x, pos.y, pos.z - box.halfExtents.z};
-                            max = {pos.x + box.halfExtents.x, pos.y + box.halfExtents.y * 2, pos.z + box.halfExtents.z};
+                            if (axis == 0) vel.x = 0.0f;
+                            else if (axis == 1) vel.y = 0.0f;
+                            else vel.z = 0.0f;
 
+                            entity = computeAABB(pos, halfExt);
                             collided = true;
                         }
                     }
@@ -117,18 +136,19 @@ namespace ECS
 
                 view.forEach([&]([[maybe_unused]] EntityId id, Position& pos, Velocity& vel, CollisionBox& box)
                 {
+                    const glm::vec3& halfExt = box.halfExtents;
+
+                    const bool wasGoingDown = vel.y < 0.0f;
                     const float preY = pos.y;
+
                     pos.y += vel.y;
-                    const bool wasGoingDown = vel.y < 0.f;
-                    const bool hitY = this->resolveAxis(pos, vel, box, 1, preY);
+                    const bool hitY = resolveAxis(pos, vel, halfExt, 1, preY);
 
-                    const float preX = pos.x;
                     pos.x += vel.x;
-                    this->resolveAxis(pos, vel, box, 0, preX);
+                    resolveAxis(pos, vel, halfExt, 0);
 
-                    const float preZ = pos.z;
                     pos.z += vel.z;
-                    this->resolveAxis(pos, vel, box, 2, preZ);
+                    resolveAxis(pos, vel, halfExt, 2);
 
                     box.isGrounded = wasGoingDown && hitY;
                 });

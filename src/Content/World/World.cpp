@@ -6,6 +6,8 @@
 #include "Systems/CameraSystem.h"
 #include "Systems/RenderSystem.h"
 #include "Systems/GravitySystem.h"
+#include "Systems/FacingSystem.h"
+#include "Systems/MovementSystem.h"
 #include "Systems/CollisionSystem.h"
 
 #include "Components/Movements.h"
@@ -38,6 +40,8 @@ World::World(
     this->scheduler.registerSystem<ECS::CameraSystem>(this->inputs);
     this->scheduler.registerSystem<ECS::GravitySystem>();
     this->scheduler.registerSystem<ECS::PlayerMovementSystem>();
+    this->scheduler.registerSystem<ECS::FacingSystem>();
+    this->scheduler.registerSystem<ECS::MovementSystem>();
     this->scheduler.registerSystem<ECS::CollisionSystem>(*this);
     this->scheduler.registerSystem<ECS::RenderSystem>();
 
@@ -46,8 +50,8 @@ World::World(
     // const auto playerTexture = this->textureRegistry.getByName("player");
     this->player = this->ecs.createEntity();
     this->ecs.addComponent(this->player, ECS::Position{8.5f, 73.f, 8.5f});
-    this->ecs.addComponent(this->player, ECS::Velocity{0.f, 0.f, 0.f});
-    this->ecs.addComponent(this->player, ECS::Rotation{0.f, 0.f, 0.f});
+    this->ecs.addComponent(this->player, ECS::Velocity());
+    this->ecs.addComponent(this->player, ECS::Rotation());
     this->ecs.addComponent(this->player, ECS::Camera{});
     this->ecs.addComponent(this->player, ECS::PlayerInput{});
     this->ecs.addComponent(this->player, ECS::Gravity{});
@@ -60,8 +64,8 @@ World::World(
     const auto zombieTexture = this->textureRegistry.getByName("zombie");
     const auto zombie = this->ecs.createEntity();
     this->ecs.addComponent(zombie, ECS::Position{7.5f, 73.f, 7.5f});
-    this->ecs.addComponent(zombie, ECS::Velocity{0.f, 0.f, 0.f});
-    this->ecs.addComponent(zombie, ECS::Rotation{0.f, 0.f, 0.f});
+    this->ecs.addComponent(zombie, ECS::Rotation());
+    this->ecs.addComponent(zombie, ECS::Velocity());
     this->ecs.addComponent(zombie, ECS::Gravity());
     this->ecs.addComponent(zombie, ECS::CollisionBox{{0.45f, 1.f, 0.45f}});
     this->ecs.addComponent(zombie, ECS::MeshRef{ zombieMesh, zombieTexture });
@@ -147,13 +151,16 @@ bool World::isEntityAt(const glm::ivec3 blockPos)
     bool found = false;
 
     auto view = this->ecs.query<ECS::Position, ECS::CollisionBox>();
-    view.forEach([&]([[maybe_unused]] ECS::EntityId id, const ECS::Position& pos, const ECS::CollisionBox& box) {
-        const glm::vec3 eMin = { pos.x - box.halfExtents.x, pos.y, pos.z - box.halfExtents.z };
-        const glm::vec3 eMax = { pos.x + box.halfExtents.x, pos.y + box.halfExtents.y * 2, pos.z + box.halfExtents.z };
+    auto& rotPool = this->ecs.getPool<ECS::Rotation>();
 
-        if (blockMin.x < eMax.x && blockMax.x > eMin.x &&
-            blockMin.y < eMax.y && blockMax.y > eMin.y &&
-            blockMin.z < eMax.z && blockMax.z > eMin.z)
+    view.forEach([&]([[maybe_unused]] ECS::EntityId id, const ECS::Position& pos, const ECS::CollisionBox& box) {
+        const float yaw = rotPool.has(id) ? rotPool.get(id).y : 0.0f;
+        const glm::vec3 halfExt = ECS::computeRotatedHalfExtents(box.halfExtents, yaw);
+        const ECS::AABB aabb = ECS::computeAABB(pos, halfExt);
+
+        if (blockMin.x < aabb.max.x && blockMax.x > aabb.min.x &&
+            blockMin.y < aabb.max.y && blockMax.y > aabb.min.y &&
+            blockMin.z < aabb.max.z && blockMax.z > aabb.min.z)
         {
             found = true;
         }

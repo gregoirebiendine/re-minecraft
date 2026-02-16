@@ -4,7 +4,7 @@
 namespace ECS {
     struct Friction {
         float ground = 0.8f;
-        float air = 0.98f;
+        float air = 0.95f;
     };
 }
 
