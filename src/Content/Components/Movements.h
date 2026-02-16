@@ -12,7 +12,7 @@ namespace ECS
 
         friend std::ostream& operator<<(std::ostream& os, const Position& pos)
         {
-            return os << "(" << pos.x << ", " << pos.y << ", " << pos.z << ")";
+            return os << "P(" << pos.x << ", " << pos.y << ", " << pos.z << ")";
         }
     };
 
@@ -22,7 +22,7 @@ namespace ECS
 
         friend std::ostream& operator<<(std::ostream& os, const Velocity& vel)
         {
-            return os << "(" << vel.x << ", " << vel.y << ", " << vel.z << ")";
+            return os << "V(" << vel.x << ", " << vel.y << ", " << vel.z << ")";
         }
     };
 
@@ -32,7 +32,7 @@ namespace ECS
 
         friend std::ostream& operator<<(std::ostream& os, const Rotation& rot)
         {
-            return os << "(" << rot.x << ", " << rot.y << ", " << rot.z << ")";
+            return os << "R(" << rot.x << ", " << rot.y << ", " << rot.z << ")";
         }
     };
 }

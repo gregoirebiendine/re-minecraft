@@ -35,7 +35,7 @@ namespace ECS
                 for (int z = minBlock.z; z <= maxBlock.z; z++) {
                     for (int y = minBlock.y; y <= maxBlock.y; y++) {
                         for (int x = minBlock.x; x <= maxBlock.x; x++) {
-                            if (world.isAir(x, y, z))
+                            if (this->world.isAir(x, y, z))
                                 continue;
 
                             const glm::vec3 blockMinVec = {static_cast<float>(x), static_cast<float>(y), static_cast<float>(z)};

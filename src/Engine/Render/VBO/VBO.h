@@ -28,4 +28,4 @@ class VBO {
         void unbind() const;
 };
 
-#endif //VBO_H
+#endif

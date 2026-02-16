@@ -17,7 +17,7 @@ class Viewport
     Settings& settings;
 
     // Windows state
-    const glm::ivec2 baseSize{1600, 900};
+    const glm::ivec2 baseSize{1920, 1080};
     glm::ivec2 size{baseSize};
     float aspectRatio{static_cast<float>(size.x) / static_cast<float>(size.y)};
 

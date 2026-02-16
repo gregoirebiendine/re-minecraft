@@ -61,6 +61,7 @@ World::World(
     const auto zombie = this->ecs.createEntity();
     this->ecs.addComponent(zombie, ECS::Position{7.5f, 73.f, 7.5f});
     this->ecs.addComponent(zombie, ECS::Velocity{0.f, 0.f, 0.f});
+    this->ecs.addComponent(zombie, ECS::Rotation{0.f, 0.f, 0.f});
     this->ecs.addComponent(zombie, ECS::Gravity());
     this->ecs.addComponent(zombie, ECS::CollisionBox{{0.45f, 1.f, 0.45f}});
     this->ecs.addComponent(zombie, ECS::MeshRef{ zombieMesh, zombieTexture });

@@ -72,4 +72,4 @@ class World {
         void render();
 };
 
-#endif //WORLD_H
+#endif
