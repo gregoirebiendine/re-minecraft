@@ -22,12 +22,12 @@ enum class ChunkState
 };
 
 // Helper to check if terrain is complete
-inline bool hasTerrainComplete(ChunkState state) {
+inline bool hasTerrainComplete(const ChunkState state) {
     return state >= ChunkState::TERRAIN_DONE;
 }
 
 // Helper to check if fully generated
-inline bool isFullyGenerated(ChunkState state) {
+inline bool isFullyGenerated(const ChunkState state) {
     return state >= ChunkState::DECOR_DONE;
 }
 

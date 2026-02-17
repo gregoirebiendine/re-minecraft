@@ -47,7 +47,7 @@ void PlayerController::handleInputs(const InputState& inputs, Viewport& viewport
     // Middle Mouse Button (Get targeted block in inventory)
     if (inputs.isMouseButtonPressed(Inputs::Mouse::MIDDLE) && this->lastRaycast.hasHitBlock()) {
         const Material mat = this->world.getBlock(this->lastRaycast.pos.x, this->lastRaycast.pos.y, this->lastRaycast.pos.z);
-        this->selectedBlockId = BlockData::getBlockId(mat);
+        this->selectedBlockId = mat.getBlockId();
     }
 
     // Scroll
@@ -108,6 +108,6 @@ void PlayerController::placeBlock(const glm::vec3& forward) const
             break;
     }
 
-    const Material packedMaterial = BlockData::packBlockData(selectedBlockId, rotation);
+    const Material packedMaterial = Material::pack(selectedBlockId, rotation);
     world.setBlock(this->lastRaycast.previousPos.x, this->lastRaycast.previousPos.y, this->lastRaycast.previousPos.z, packedMaterial);
 }

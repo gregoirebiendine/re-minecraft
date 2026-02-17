@@ -28,13 +28,13 @@ void TerrainGenerator::generate(Chunk& chunk) const
 
                 Material mat;
                 if (wy < 2)
-                    mat = this->blockRegistry.getByName("core:stone");
+                    mat = Material::pack(this->blockRegistry.getByName("core:stone"), 0);
                 else if (wy < height)
-                    mat = this->blockRegistry.getByName("core:dirt");
+                    mat = Material::pack(this->blockRegistry.getByName("core:dirt"), 0);
                 else if (wy == height)
-                    mat = this->blockRegistry.getByName("core:grass");
+                    mat = Material::pack(this->blockRegistry.getByName("core:grass"), 0);
                 else
-                    mat = this->blockRegistry.getByName("core:air");
+                    mat = Material::pack(this->blockRegistry.getByName("core:air"), 0);
 
                 chunk.setBlockDirect(x, y, z, mat);
             }
@@ -81,7 +81,7 @@ void TerrainGenerator::placePrefab(NeighborAccess& neighbors, const std::string&
 
         const Material groundBlock = neighbors.getBlock(worldX, groundY, worldZ);
 
-        if (!this->blockRegistry.isEqual(BlockData::getBlockId(groundBlock), "core:grass"))
+        if (!this->blockRegistry.isEqual(groundBlock.getBlockId(), "core:grass"))
             continue;
 
         for (const auto& block : prefab.blocks) {
@@ -91,7 +91,7 @@ void TerrainGenerator::placePrefab(NeighborAccess& neighbors, const std::string&
 
             const Material existing = neighbors.getBlock(bx, by, bz);
 
-            if (BlockData::getBlockId(existing) == 0)
+            if (this->blockRegistry.isAir(existing.getBlockId()))
                 neighbors.setBlock(bx, by, bz, block.mat);
         }
     }
@@ -100,7 +100,7 @@ void TerrainGenerator::placePrefab(NeighborAccess& neighbors, const std::string&
 int TerrainGenerator::findGroundLevel(const NeighborAccess& neighbors, const int worldX, const int worldZ)
 {
     for (int y = 128; y >= 0; y--) {
-        if (const Material mat = neighbors.getBlock(worldX, y, worldZ); BlockData::getBlockId(mat) != 0)
+        if (const Material mat = neighbors.getBlock(worldX, y, worldZ); mat.getBlockId() != 0)
             return y;
     }
     return -1;

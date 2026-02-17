@@ -84,7 +84,7 @@ namespace Raycast
         while (t < dist) {
             glm::ivec3 pos = glm::floor(origin + dir * t);
 
-            if (world.getBlock(pos)) {
+            if (!world.isAir(pos.x, pos.y, pos.z)) {
                 const glm::ivec3 previousPos = glm::floor(origin + dir * (t - STEP));
                 const glm::ivec3 diff = pos - previousPos;
                 const MaterialFace hitFace = calculateHitFace(diff);

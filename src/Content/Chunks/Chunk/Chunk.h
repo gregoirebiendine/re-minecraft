@@ -3,11 +3,13 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 
-#include <atomic>
-#include <thread>
-#include <array>
-#include <algorithm>
+#pragma once
+
 #include <iostream>
+#include <algorithm>
+#include <thread>
+#include <atomic>
+#include <array>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
@@ -29,7 +31,6 @@ class Chunk {
         Chunk& operator=(const Chunk&) = delete;
         Chunk(Chunk&& other) noexcept;
         Chunk& operator=(Chunk&& other) noexcept;
-
 
         uint8_t acquireRead() const;
         void releaseRead() const;
@@ -74,7 +75,8 @@ class Chunk {
         std::atomic<uint64_t> generationID{0};
         std::atomic<bool> dirty{false};
 
-        [[nodiscard]] uint8_t getWriteIndex() const {
+        [[nodiscard]] uint8_t getWriteIndex() const
+        {
             return 1 - this->bufferReadIndex.load(std::memory_order_acquire);
         }
 };

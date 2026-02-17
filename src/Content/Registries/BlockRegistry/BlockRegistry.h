@@ -80,6 +80,7 @@ class BlockRegistry
         const BlockMeta& get(BlockId id) const;
         BlockId getByName(const std::string& name) const;
         bool isEqual(BlockId id, const std::string& name) const;
+        bool isAir(BlockId id) const;
 
         std::vector<BlockId> getAll() const;
 };

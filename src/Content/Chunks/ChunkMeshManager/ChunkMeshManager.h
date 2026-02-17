@@ -34,6 +34,9 @@ class ChunkMeshManager {
         static void buildFaceMesh(MeshData& mesh, const glm::ivec3& pos, MaterialFace face, uint16_t texId, BlockRotation rotation);
         static std::string getTextureFromRotation(const BlockMeta& meta, MaterialFace face, BlockRotation rotation);
 
+        static MaterialFace remapFaceForRotation(MaterialFace face, BlockRotation rotation);
+        static MaterialFace remapFaceForAxisRotation(MaterialFace face, BlockRotation rotation);
+
         void buildMeshJob(const ChunkJob& job);
         bool isTransparentAtSnapshot(BlockId blockId) const;
         bool isAirAtSnapshot(const BlockStorage& blockData, const NeighborData neighbors[6], int x, int y, int z) const;

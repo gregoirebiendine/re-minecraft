@@ -91,6 +91,13 @@ bool BlockRegistry::isEqual(const BlockId id, const std::string& name) const
     return this->blocks[id].getFullName() == name;
 }
 
+bool BlockRegistry::isAir(const BlockId id) const
+{
+    if (id >= this->blocks.size())
+        throw std::out_of_range("[BlockRegistry::isAir] Out of range BlockID : " + std::to_string(id));
+    return this->blocks[id].getFullName() == "core:air";
+}
+
 std::vector<BlockId> BlockRegistry::getAll() const
 {
     std::vector<BlockId> allBlocks;

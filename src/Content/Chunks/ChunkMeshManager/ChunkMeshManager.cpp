@@ -102,14 +102,13 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
     data.reserve(36 * Chunk::VOLUME);
 
     for (int i = 0; i < Chunk::VOLUME; i++) {
-        auto [x, y, z] = ChunkCoords::indexToLocalCoords(i);
-        const BlockId blockId = BlockData::getBlockId(blockData[i]);
-
-        if (blockId == 0) // Skip AIR
+        if (this->world.getBlockRegistry().isAir(blockData[i].getBlockId())) // Skip AIR
             continue;
 
-        const BlockMeta& meta = world.getBlockRegistry().get(blockId);
-        const BlockRotation rotation = BlockData::getRotation(blockData[i]);
+        const auto [x, y, z] = ChunkPos::indexToLocalCoords(i);
+        const BlockId blockId = blockData[i].getBlockId();
+        const BlockRotation rotation = blockData[i].getRotation();
+        const BlockMeta& meta = this->world.getBlockRegistry().get(blockId);
 
         // NORTH face
         if (isAirAtSnapshot(blockData, neighbors, x, y, z - 1)) {
@@ -203,7 +202,7 @@ bool ChunkMeshManager::isAirAtSnapshot(
 {
     // Inside current chunk
     if (x >= 0 && x < Chunk::SIZE && y >= 0 && y < Chunk::SIZE && z >= 0 && z < Chunk::SIZE) {
-        const BlockId blockId = BlockData::getBlockId(blockData[ChunkCoords::localCoordsToIndex(x, y, z)]);
+        const BlockId blockId = blockData[ChunkPos::localCoordsToIndex(x, y, z)].getBlockId();
         return blockId == 0 || this->isTransparentAtSnapshot(blockId);
     }
 
@@ -211,37 +210,37 @@ bool ChunkMeshManager::isAirAtSnapshot(
     if (z < 0) {  // NORTH
         if (!neighbors[0].exists)
             return true;
-        const BlockId blockId = BlockData::getBlockId(neighbors[0].blocks[ChunkCoords::localCoordsToIndex(x, y, z + Chunk::SIZE)]);
+        const BlockId blockId = neighbors[0].blocks[ChunkPos::localCoordsToIndex(x, y, z + Chunk::SIZE)].getBlockId();
         return blockId == 0 || this->isTransparentAtSnapshot(blockId);
     }
     if (z >= Chunk::SIZE) {  // SOUTH
         if (!neighbors[1].exists)
             return true;
-        const BlockId blockId = BlockData::getBlockId(neighbors[1].blocks[ChunkCoords::localCoordsToIndex(x, y, z - Chunk::SIZE)]);
+        const BlockId blockId = neighbors[1].blocks[ChunkPos::localCoordsToIndex(x, y, z - Chunk::SIZE)].getBlockId();
         return blockId == 0 || this->isTransparentAtSnapshot(blockId);
     }
     if (x >= Chunk::SIZE) {  // EAST
         if (!neighbors[2].exists)
             return true;
-        const BlockId blockId = BlockData::getBlockId(neighbors[2].blocks[ChunkCoords::localCoordsToIndex(x - Chunk::SIZE, y, z)]);
+        const BlockId blockId = neighbors[2].blocks[ChunkPos::localCoordsToIndex(x - Chunk::SIZE, y, z)].getBlockId();
         return blockId == 0 || this->isTransparentAtSnapshot(blockId);
     }
     if (x < 0) {  // WEST
         if (!neighbors[3].exists)
             return true;
-        const BlockId blockId = BlockData::getBlockId(neighbors[3].blocks[ChunkCoords::localCoordsToIndex(x + Chunk::SIZE, y, z)]);
+        const BlockId blockId = neighbors[3].blocks[ChunkPos::localCoordsToIndex(x + Chunk::SIZE, y, z)].getBlockId();
         return blockId == 0 || this->isTransparentAtSnapshot(blockId);
     }
     if (y >= Chunk::SIZE) {  // UP
         if (!neighbors[4].exists)
             return true;
-        const BlockId blockId = BlockData::getBlockId(neighbors[4].blocks[ChunkCoords::localCoordsToIndex(x, y - Chunk::SIZE, z)]);
+        const BlockId blockId = neighbors[4].blocks[ChunkPos::localCoordsToIndex(x, y - Chunk::SIZE, z)].getBlockId();
         return blockId == 0 || this->isTransparentAtSnapshot(blockId);
     }
     if (y < 0) {  // DOWN
         if (!neighbors[5].exists)
             return true;
-        const BlockId blockId = BlockData::getBlockId(neighbors[5].blocks[ChunkCoords::localCoordsToIndex(x, y + Chunk::SIZE, z)]);
+        const BlockId blockId = neighbors[5].blocks[ChunkPos::localCoordsToIndex(x, y + Chunk::SIZE, z)].getBlockId();
         return blockId == 0 || this->isTransparentAtSnapshot(blockId);
     }
     return true;
@@ -287,6 +286,52 @@ std::string ChunkMeshManager::getTextureFromRotation(const BlockMeta& meta, cons
     if (meta.rotation == RotationType::NONE)
         return meta.getFaceTexture(face);
     if (meta.rotation == RotationType::HORIZONTAL)
-        return meta.getFaceTexture(BlockData::remapFaceForRotation(face, rotation));
-    return meta.getFaceTexture(BlockData::remapFaceForAxisRotation(face, rotation));
+        return meta.getFaceTexture(remapFaceForRotation(face, rotation));
+    return meta.getFaceTexture(remapFaceForAxisRotation(face, rotation));
+}
+
+MaterialFace ChunkMeshManager::remapFaceForRotation(const MaterialFace face, const BlockRotation rotation)
+{
+    if (face == UP or face == DOWN)
+        return face;
+
+    constexpr MaterialFace FACE_REMAP[4][4] = {
+        {NORTH, SOUTH, WEST, EAST},
+        {SOUTH, NORTH, EAST, WEST},
+        {EAST, WEST, NORTH, SOUTH},
+        {WEST, EAST, SOUTH, NORTH}
+    };
+
+    return FACE_REMAP[rotation][face];
+}
+
+MaterialFace ChunkMeshManager::remapFaceForAxisRotation(const MaterialFace face, const BlockRotation rotation)
+{
+    // Rotation 4 = Y-axis (vertical, no remapping needed)
+    if (rotation == 4)
+        return face;
+
+    // Rotation 5 = Z-axis (log pointing N/S)
+    if (rotation == 5)
+        switch (face)
+        {
+        case UP:    return SOUTH;
+        case DOWN:  return NORTH;
+        case NORTH: return DOWN;
+        case SOUTH: return UP;
+        default:    return face;
+        }
+
+    // Rotation 6 = X-axis (log pointing E/W)
+    if (rotation == 6)
+        switch (face)
+        {
+        case UP:    return EAST;
+        case DOWN:  return WEST;
+        case EAST:  return DOWN;
+        case WEST:  return UP;
+        default:    return face;
+        }
+
+    return face;
 }

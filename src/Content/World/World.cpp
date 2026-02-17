@@ -93,7 +93,7 @@ Material World::getBlock(const int wx, const int wy, const int wz)
     const Chunk* chunk = this->chunkManager.getChunk(cx, cy, cz);
 
     if (!chunk)
-        return this->blockRegistry.getByName("core:air");
+        return Material::pack(this->blockRegistry.getByName("core:air"), 0);
 
     const auto [x, y, z] = BlockPos::fromWorld(wx, wy, wz);
     return chunk->getBlock(x, y, z);
@@ -106,8 +106,7 @@ Material World::getBlock(const glm::ivec3 pos)
 
 bool World::isAir(const int wx, const int wy, const int wz)
 {
-    const auto mat = this->getBlock(wx, wy, wz);
-    return this->blockRegistry.isEqual(BlockData::getBlockId(mat), "core:air");
+    return this->blockRegistry.isAir(this->getBlock(wx, wy, wz).getBlockId());
 }
 
 void World::setBlock(const int wx, const int wy, const int wz, const Material mat)
@@ -130,7 +129,7 @@ void World::setBlock(const int wx, const int wy, const int wz, const std::string
 {
     const BlockId id = this->blockRegistry.getByName(blockName);
 
-    this->setBlock(wx, wy, wz, BlockData::packBlockData(id, 0));
+    this->setBlock(wx, wy, wz, Material::pack(id, 0));
 }
 
 void World::fill(const glm::ivec3 from, const glm::ivec3 to, const Material mat)

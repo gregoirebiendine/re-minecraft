@@ -3,8 +3,8 @@
 Chunk::Chunk(const ChunkPos pos) :
     position(pos)
 {
-    this->blockBuffers[0].fill(0);
-    this->blockBuffers[1].fill(0);
+    this->blockBuffers[0].fill(Material());
+    this->blockBuffers[1].fill(Material());
 }
 
 Chunk::Chunk(Chunk&& other) noexcept :
@@ -16,9 +16,7 @@ Chunk::Chunk(Chunk&& other) noexcept :
     state(other.state.load()),
     generationID(other.generationID.load()),
     dirty(other.dirty.load())
-{
-    // Empty
-}
+{}
 
 Chunk& Chunk::operator=(Chunk&& other) noexcept
 {
@@ -65,12 +63,12 @@ BlockStorage Chunk::getBlockSnapshot() const
 }
 
 
-
 void Chunk::setBlock(const uint8_t x, const uint8_t y, const uint8_t z, const Material mat)
 {
     const uint8_t writeIdx = getWriteIndex();
-    blockBuffers[writeIdx][ChunkCoords::localCoordsToIndex(x, y, z)] = mat;
-    pendingChanges.store(true, std::memory_order_release);
+
+    this->blockBuffers[writeIdx][ChunkPos::localCoordsToIndex(x, y, z)] = mat;
+    this->pendingChanges.store(true, std::memory_order_release);
 }
 
 void Chunk::fill(const glm::ivec3 from, const glm::ivec3 to, const Material mat)
@@ -80,7 +78,7 @@ void Chunk::fill(const glm::ivec3 from, const glm::ivec3 to, const Material mat)
     for (int z = from.z; z <= to.z; ++z) {
         for (int y = from.y; y <= to.y; ++y) {
             for (int x = from.x; x <= to.x; ++x) {
-                this->blockBuffers[writeIdx][ChunkCoords::localCoordsToIndex(x, y, z)] = mat;
+                this->blockBuffers[writeIdx][ChunkPos::localCoordsToIndex(x, y, z)] = mat;
             }
         }
     }
@@ -90,7 +88,7 @@ void Chunk::fill(const glm::ivec3 from, const glm::ivec3 to, const Material mat)
 
 void Chunk::setBlockDirect(const uint8_t x, const uint8_t y, const uint8_t z, const Material mat)
 {
-    this->blockBuffers[0][ChunkCoords::localCoordsToIndex(x, y, z)] = mat;
+    this->blockBuffers[0][ChunkPos::localCoordsToIndex(x, y, z)] = mat;
 }
 
 void Chunk::fillDirect(const glm::ivec3 from, const glm::ivec3 to, const Material mat)
@@ -143,15 +141,18 @@ void Chunk::finalizeGeneration()
 Material Chunk::getBlock(const uint8_t x, const uint8_t y, const uint8_t z) const
 {
     const uint8_t readIdx = bufferReadIndex.load(std::memory_order_acquire);
-    return blockBuffers[readIdx][ChunkCoords::localCoordsToIndex(x, y, z)];
+    const int blockIdx = ChunkPos::localCoordsToIndex(x, y, z);
+
+    return blockBuffers[readIdx][blockIdx];
 }
 
 bool Chunk::isAir(const uint8_t x, const uint8_t y, const uint8_t z) const
 {
-    const uint8_t readIdx = bufferReadIndex.load(std::memory_order_acquire);
-    return blockBuffers[readIdx][ChunkCoords::localCoordsToIndex(x, y, z)] == 0;
-}
+    const uint8_t readIdx = this->bufferReadIndex.load(std::memory_order_acquire);
+    const int blockIdx = ChunkPos::localCoordsToIndex(x, y, z);
 
+    return this->blockBuffers[readIdx][blockIdx].getBlockId() == 0;
+}
 
 
 glm::mat4 Chunk::getChunkModel() const

@@ -39,7 +39,7 @@ PrefabId PrefabRegistry::registerPrefab(const std::string& prefabFile)
     {
         const auto blockName = content["block"].get<std::string>();
         const auto rotation = content["rotation"].get<int>();
-        const auto mat = BlockData::packBlockData( this->blockRegistry.getByName(blockName), rotation);
+        const auto mat = Material::pack(this->blockRegistry.getByName(blockName), rotation);
 
         if (!content.contains("command"))
         {

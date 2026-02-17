@@ -50,7 +50,7 @@ Material NeighborAccess::getBlock(const int wx, const int wy, const int wz) cons
     const Chunk* chunk = getChunkForWorldPos(wx, wy, wz);
 
     if (!chunk)
-        return 0;
+        return Material();
 
     const auto [x, y, z] = BlockPos::fromWorld(wx, wy, wz);
     return chunk->getBlock(x, y, z);

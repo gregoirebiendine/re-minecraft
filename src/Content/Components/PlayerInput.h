@@ -3,7 +3,6 @@
 
 #include <cstdint>
 #include <glm/glm.hpp>
-#include "Material.h"
 
 namespace ECS
 {
