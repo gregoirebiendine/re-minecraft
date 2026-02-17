@@ -9,6 +9,7 @@
 #include "Systems/FacingSystem.h"
 #include "Systems/MovementSystem.h"
 #include "Systems/CollisionSystem.h"
+#include "Systems/DebugAABBSystem.h" // DEBUG - AABB outline renderer
 
 #include "Components/Movements.h"
 #include "Components/Gravity.h"
@@ -44,19 +45,20 @@ World::World(
     this->scheduler.registerSystem<ECS::MovementSystem>();
     this->scheduler.registerSystem<ECS::CollisionSystem>(*this);
     this->scheduler.registerSystem<ECS::RenderSystem>();
+    // this->scheduler.registerSystem<ECS::DebugAABBSystem>();
 
     // Create player entity
     // const auto playerMesh = this->meshRegistry.get("player");
     // const auto playerTexture = this->textureRegistry.getByName("player");
     this->player = this->ecs.createEntity();
-    this->ecs.addComponent(this->player, ECS::Position{8.5f, 73.f, 8.5f});
+    this->ecs.addComponent(this->player, ECS::Position{11.5f, 73.f, 11.5f});
     this->ecs.addComponent(this->player, ECS::Velocity());
     this->ecs.addComponent(this->player, ECS::Rotation());
     this->ecs.addComponent(this->player, ECS::Camera{});
     this->ecs.addComponent(this->player, ECS::PlayerInput{});
     this->ecs.addComponent(this->player, ECS::Gravity{});
     this->ecs.addComponent(this->player, ECS::Friction{});
-    this->ecs.addComponent(this->player, ECS::CollisionBox{{0.3f, 0.9f, 0.3f}});
+    this->ecs.addComponent(this->player, ECS::CollisionBox{{0.4f, 0.9f, 0.4f}});
     // this->ecs.addComponent(this->player, ECS::MeshRef{ playerMesh, playerTexture });
 
     // Create a Zombie entity
@@ -67,7 +69,7 @@ World::World(
     this->ecs.addComponent(zombie, ECS::Rotation());
     this->ecs.addComponent(zombie, ECS::Velocity());
     this->ecs.addComponent(zombie, ECS::Gravity());
-    this->ecs.addComponent(zombie, ECS::CollisionBox{{0.45f, 1.f, 0.45f}});
+    this->ecs.addComponent(zombie, ECS::CollisionBox{{0.45f, 1.f, 0.3f}});
     this->ecs.addComponent(zombie, ECS::MeshRef{ zombieMesh, zombieTexture });
     this->entities.emplace_back(zombie);
 
@@ -195,6 +197,11 @@ void World::update(const float aspect)
     renderSystem.setViewMatrix(v);
     this->shader.setProjectionMatrix(p);
     this->shader.setViewMatrix(v);
+
+    // DEBUG - Update AABB debug renderer matrices
+    // auto& debugAABB = this->scheduler.getSystem<ECS::DebugAABBSystem>();
+    // debugAABB.setProjectionMatrix(p);
+    // debugAABB.setViewMatrix(v);
 
     // Swap chunks pending changes
     {
