@@ -17,6 +17,7 @@
 #include "Components/MeshRef.h"
 #include "Components/PlayerInput.h"
 #include "Components/Friction.h"
+#include "ECS/EntityCreator.h"
 
 World::World(
     const BlockRegistry& _blockRegistry,
@@ -47,31 +48,9 @@ World::World(
     this->scheduler.registerSystem<ECS::RenderSystem>();
     // this->scheduler.registerSystem<ECS::DebugAABBSystem>();
 
-    // Create player entity
-    // const auto playerMesh = this->meshRegistry.get("player");
-    // const auto playerTexture = this->textureRegistry.getByName("player");
-    this->player = this->ecs.createEntity();
-    this->ecs.addComponent(this->player, ECS::Position{11.5f, 73.f, 11.5f});
-    this->ecs.addComponent(this->player, ECS::Velocity());
-    this->ecs.addComponent(this->player, ECS::Rotation());
-    this->ecs.addComponent(this->player, ECS::Camera{});
-    this->ecs.addComponent(this->player, ECS::PlayerInput{});
-    this->ecs.addComponent(this->player, ECS::Gravity{});
-    this->ecs.addComponent(this->player, ECS::Friction{});
-    this->ecs.addComponent(this->player, ECS::CollisionBox{{0.4f, 0.9f, 0.4f}});
-    // this->ecs.addComponent(this->player, ECS::MeshRef{ playerMesh, playerTexture });
-
-    // Create a Zombie entity
-    const auto zombieMesh = this->meshRegistry.get("zombie");
-    const auto zombieTexture = this->textureRegistry.getByName("zombie");
-    const auto zombie = this->ecs.createEntity();
-    this->ecs.addComponent(zombie, ECS::Position{7.5f, 73.f, 7.5f});
-    this->ecs.addComponent(zombie, ECS::Rotation());
-    this->ecs.addComponent(zombie, ECS::Velocity());
-    this->ecs.addComponent(zombie, ECS::Gravity());
-    this->ecs.addComponent(zombie, ECS::CollisionBox{{0.45f, 1.f, 0.3f}});
-    this->ecs.addComponent(zombie, ECS::MeshRef{ zombieMesh, zombieTexture });
-    this->entities.emplace_back(zombie);
+    // Create entities entity
+    this->player = ECS::Creator::createPlayer(this->ecs, *this);
+    this->entities.emplace_back(ECS::Creator::createZombie(this->ecs, *this));
 
     // Set WorldShader uniform to use loaded textures
     this->shader.use();
@@ -233,26 +212,4 @@ void World::render()
 
     // Render ECS
     this->scheduler.render(this->ecs);
-}
-
-
-// Others
-const BlockRegistry& World::getBlockRegistry() const
-{
-    return this->blockRegistry;
-}
-
-const TextureRegistry& World::getTextureRegistry() const
-{
-    return this->textureRegistry;
-}
-
-ChunkManager& World::getChunkManager()
-{
-    return this->chunkManager;
-}
-
-Shader& World::getShader()
-{
-    return this->shader;
 }

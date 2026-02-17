@@ -37,6 +37,11 @@ void AWidget::setPosition(const glm::vec2 pos)
     this->markDirty();
 }
 
+glm::vec2 AWidget::getPosition() const
+{
+    return this->position;
+}
+
 void AWidget::bindPosition(std::function<glm::vec2()> fn)
 {
     this->positionBinding = std::move(fn);
@@ -59,6 +64,11 @@ void AWidget::setVisible(const bool v)
     this->markDirty();
 }
 
+void AWidget::bindVisibility(std::function<bool()> fn)
+{
+    this->visibilityBinding = std::move(fn);
+}
+
 bool AWidget::isVisible() const
 {
     return this->visible;
@@ -69,6 +79,12 @@ AWidget* AWidget::addChild(std::unique_ptr<AWidget> child)
     AWidget* ptr = child.get();
     this->children.push_back(std::move(child));
     return ptr;
+}
+
+void AWidget::clearChildren()
+{
+    this->children.clear();
+    this->markDirty();
 }
 
 void AWidget::build(std::vector<GuiVertex>& out, const glm::vec2 parentOffset)
@@ -93,8 +109,14 @@ void AWidget::tick()
         }
     }
 
-    for (const auto& child : this->children) {
-        if (child->isVisible())
-            child->tick();
+    if (this->visibilityBinding) {
+        const bool newVis = this->visibilityBinding();
+        if (newVis != this->visible) {
+            this->visible = newVis;
+            this->markDirty();
+        }
     }
+
+    for (const auto& child : this->children)
+        child->tick();
 }

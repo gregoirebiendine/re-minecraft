@@ -1,8 +1,8 @@
 #include "GUIController.h"
 #include "OutlineVertices.h"
 
-GUIController::GUIController(const Font& _font, const TextureRegistry& _textureRegistry, const Viewport& _viewport) :
-    panel(_font, _textureRegistry, _viewport),
+GUIController::GUIController(const Font& _font, const TextureRegistry& _textureRegistry, const BlockRegistry& _blockRegistry, const Viewport& _viewport) :
+    panel(_font, _textureRegistry, _blockRegistry, _viewport),
     shader("/resources/shaders/Outline/")
 {
     this->vao.bind();
@@ -12,23 +12,7 @@ GUIController::GUIController(const Font& _font, const TextureRegistry& _textureR
 
 void GUIController::onHotbarSlotChanged(const int slot) const
 {
-    // if (!this->hotbarSelection)
-    //     return;
-    //
-    // const auto& viewportSize = this->settings.getViewportSize();
-    // const auto vpX = static_cast<float>(viewportSize.x);
-    // const auto vpY = static_cast<float>(viewportSize.y);
-    //
-    // const auto texId = this->textureRegistry.getByName("hotbar_selection");
-    // const auto& texSlot = this->textureRegistry.getSlot(texId);
-    // const float w = static_cast<float>(texSlot.width) * 1.5f;
-    // const float h = static_cast<float>(texSlot.height) * 1.5f;
-    //
-    // // Offset selection by slot index (each slot is w wide)
-    // const float x = vpX / 2.f - w * 0.5f + static_cast<float>(slot) * w;
-    // const float y = vpY - h - 20.f;
-    //
-    // this->hotbarSelection->setPosition(glm::vec2{x, y});
+    this->panel.onHotbarSlotChanged(slot);
 }
 
 void GUIController::toggleDebugPanel() const
@@ -36,9 +20,9 @@ void GUIController::toggleDebugPanel() const
     this->panel.toggleDebugPanel();
 }
 
-void GUIController::update(const glm::vec3 &pos, const glm::vec3 &forward, const std::string &selectedBlockName)
+void GUIController::update(const glm::vec3 &pos, const glm::vec3 &forward, const std::string &selectedBlockName, const ECS::Hotbar& hotbarInv)
 {
-    this->panel.update(pos, forward, selectedBlockName);
+    this->panel.update(pos, forward, selectedBlockName, hotbarInv);
 }
 
 void GUIController::render()

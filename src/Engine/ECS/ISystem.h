@@ -163,7 +163,7 @@ namespace ECS
                     if (auto* ptr = dynamic_cast<T*>(system.get()))
                         return *ptr;
 
-                throw std::runtime_error("[Farfield::ECS] System not registered");
+                throw std::runtime_error("[Farfield::ECS::getSystem] System not registered");
             }
 
             void update(Handler& handler, const float dt) const

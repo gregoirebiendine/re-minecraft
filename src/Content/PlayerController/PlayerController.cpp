@@ -3,21 +3,23 @@
 #include "Systems/CameraSystem.h"
 #include "Components/Movements.h"
 #include "Components/Camera.h"
+#include "Components/Inventory.h"
 
 PlayerController::PlayerController(World& _world, const Font& _font, const Viewport& _viewport) :
     world(_world),
-    gui(_font, this->world.getTextureRegistry(), _viewport),
-    selectedBlockId(_world.getBlockRegistry().getByName("core:oak_plank")),
+    gui(_font, this->world.getTextureRegistry(), this->world.getBlockRegistry(), _viewport),
     playerEntity(this->world.getPlayerEntity()),
-    cameraSystem(this->world.getECSScheduler().getSystem<ECS::CameraSystem>())
+    cameraSystem(this->world.getECSScheduler().getSystem<ECS::CameraSystem>()),
+    hotbarComponent(this->world.getECS().getComponent<ECS::Hotbar>(this->playerEntity))
 {}
 
 void PlayerController::update()
 {
     const auto& pos = this->world.getECS().getComponent<ECS::Position>(this->playerEntity);
     const auto& camera = this->world.getECS().getComponent<ECS::Camera>(this->playerEntity);
+    const auto& hotbarInv = this->world.getECS().getComponent<ECS::Hotbar>(this->playerEntity);
 
-    this->gui.update(pos, ECS::CameraSystem::getForwardVector(camera), this->world.getBlockRegistry().get(selectedBlockId).getName());
+    this->gui.update(pos, ECS::CameraSystem::getForwardVector(camera), "no name", hotbarInv);
 }
 
 void PlayerController::render()
@@ -47,12 +49,15 @@ void PlayerController::handleInputs(const InputState& inputs, Viewport& viewport
     // Middle Mouse Button (Get targeted block in inventory)
     if (inputs.isMouseButtonPressed(Inputs::Mouse::MIDDLE) && this->lastRaycast.hasHitBlock()) {
         const Material mat = this->world.getBlock(this->lastRaycast.pos.x, this->lastRaycast.pos.y, this->lastRaycast.pos.z);
-        this->selectedBlockId = mat.getBlockId();
+        this->hotbarComponent.items[this->selectedSlot].item = mat;
+        this->hotbarComponent.items[this->selectedSlot].amount = 1;
     }
 
     // Scroll
-    if (inputs.scroll != Inputs::Scroll::NONE)
-        this->changeSelectedMaterial(inputs.scroll);
+    if (inputs.scroll != Inputs::Scroll::NONE) {
+        this->selectedSlot = (this->selectedSlot + std::to_underlying(inputs.scroll) + 9) % 9;
+        this->gui.onHotbarSlotChanged(this->selectedSlot);
+    }
 
     // Toggle mouse capture
     if (inputs.isKeyPressed(Inputs::Keys::P)) {
@@ -65,30 +70,35 @@ void PlayerController::handleInputs(const InputState& inputs, Viewport& viewport
     if (inputs.isKeyPressed(Inputs::Keys::F3))
         this->getGUI().toggleDebugPanel();
 
+    // Toggle fullscreen
     if (inputs.isKeyPressed(Inputs::Keys::F11))
         viewport.toggleFullscreen();
 
-    // Launch player (robustness test)
+    // Debug inv
     if (inputs.isKeyPressed(Inputs::Keys::E)) {
-        auto& vel = this->world.getECS().getComponent<ECS::Velocity>(this->world.getPlayerEntity());
-        vel.x = 10.f;
-        vel.y = 0.5f;
-        vel.z = 10.f;
+        this->hotbarComponent.items[8].item = Material::pack(this->world.getBlockRegistry().getByName("core:diamond_ore"), 0);
     }
 }
 
 void PlayerController::changeSelectedMaterial(const Inputs::Scroll dir)
 {
-    const auto allBlocks = this->world.getBlockRegistry().getAll();
-
-    this->selectedBlockId = (this->selectedBlockId + std::to_underlying(dir) + allBlocks.size()) % allBlocks.size();
-    if (this->selectedBlockId == 0)
-        this->selectedBlockId = (this->selectedBlockId + std::to_underlying(dir) + allBlocks.size()) % allBlocks.size();
+    // const auto allBlocks = this->world.getBlockRegistry().getAll();
+    //
+    // this->selectedBlockId = (this->selectedBlockId + std::to_underlying(dir) + allBlocks.size()) % allBlocks.size();
+    // if (this->selectedBlockId == 0)
+    //     this->selectedBlockId = (this->selectedBlockId + std::to_underlying(dir) + allBlocks.size()) % allBlocks.size();
 }
 
 void PlayerController::placeBlock(const glm::vec3& forward) const
 {
-    const auto& selectedBlockMeta = this->world.getBlockRegistry().get(this->selectedBlockId);
+    const auto&[items] = this->world.getECS().getComponent<ECS::Hotbar>(this->world.getPlayerEntity());
+    const auto&[amount, item] = items[selectedSlot];
+
+    if (amount == 0)
+        return;
+
+    const auto& blockId = item.getBlockId();
+    const auto& selectedBlockMeta = this->world.getBlockRegistry().get(blockId);
     BlockRotation rotation = 0;
 
     switch (selectedBlockMeta.rotation) {
@@ -108,6 +118,6 @@ void PlayerController::placeBlock(const glm::vec3& forward) const
             break;
     }
 
-    const Material packedMaterial = Material::pack(selectedBlockId, rotation);
-    world.setBlock(this->lastRaycast.previousPos.x, this->lastRaycast.previousPos.y, this->lastRaycast.previousPos.z, packedMaterial);
+    const Material packedMaterial = Material::pack(blockId, rotation);
+    this->world.setBlock(this->lastRaycast.previousPos.x, this->lastRaycast.previousPos.y, this->lastRaycast.previousPos.z, packedMaterial);
 }

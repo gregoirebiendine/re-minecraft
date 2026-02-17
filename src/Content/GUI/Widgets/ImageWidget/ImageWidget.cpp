@@ -8,6 +8,23 @@ ImageWidget::ImageWidget(const TextureRegistry& texRegistry, const std::string& 
     this->setSize(size);
 }
 
+void ImageWidget::bind(std::function<TextureId()> fn)
+{
+    this->textureBinding = std::move(fn);
+}
+
+void ImageWidget::tick()
+{
+    if (this->textureBinding) {
+        const TextureId newId = this->textureBinding();
+        if (newId != this->texId) {
+            this->texId = newId;
+            this->markDirty();
+        }
+    }
+    AWidget::tick();
+}
+
 void ImageWidget::buildSelf(std::vector<GuiVertex>& out, const glm::vec2 abs)
 {
     constexpr glm::vec4 color{1.f};

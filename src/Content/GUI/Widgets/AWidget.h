@@ -16,6 +16,7 @@ class AWidget
     bool dirty{true};
 
     std::function<glm::vec2()> positionBinding;
+    std::function<bool()> visibilityBinding;
 
     std::vector<std::unique_ptr<AWidget>> children;
 
@@ -28,15 +29,18 @@ class AWidget
         bool isAnyDirty() const;
 
         void setPosition(glm::vec2 pos);
+        [[nodiscard]] glm::vec2 getPosition() const;
         void bindPosition(std::function<glm::vec2()> fn);
 
         void setSize(glm::vec2 s);
         [[nodiscard]] glm::vec2 getSize() const;
 
         void setVisible(bool v);
+        void bindVisibility(std::function<bool()> fn);
         [[nodiscard]] bool isVisible() const;
 
         AWidget* addChild(std::unique_ptr<AWidget> child);
+        void clearChildren();
 
         void build(std::vector<GuiVertex>& out, glm::vec2 parentOffset);
         virtual void buildSelf(std::vector<GuiVertex>& out, glm::vec2 absolutePos) = 0;

@@ -53,10 +53,11 @@ class World {
         ECS::SystemScheduler& getECSScheduler() { return this->scheduler; }
         ECS::IEntity& getPlayerEntity() { return this->player; }
 
-        const BlockRegistry& getBlockRegistry() const;
-        const TextureRegistry& getTextureRegistry() const;
-        Shader& getShader();
-        ChunkManager& getChunkManager();
+        const BlockRegistry& getBlockRegistry() const { return this->blockRegistry; };
+        const TextureRegistry& getTextureRegistry() const { return this->textureRegistry; };
+        const MeshRegistry& getMeshRegistry() const { return this->meshRegistry; };
+        ChunkManager& getChunkManager() { return this->chunkManager; };
+        Shader& getShader() { return this->shader; };
 
         // Lifecycle
         void fill(glm::ivec3 from, glm::ivec3 to, Material mat);
