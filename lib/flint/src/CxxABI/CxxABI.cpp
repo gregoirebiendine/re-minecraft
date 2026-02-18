@@ -4,6 +4,10 @@ namespace Flint
 {
     std::string CxxABI::demangle(const char* name)
     {
+#ifdef _WIN32
+        std::cerr << "Called demangle on windows. This is not supported (lol yall have a weird a$$ abi)" << std::cerr;
+        return "";
+#else
         int   status = -4;
         char* _out   = abi::__cxa_demangle(name, nullptr, nullptr, &status);
         if (status != 0 && _out) free(_out);
@@ -11,12 +15,17 @@ namespace Flint
         std::string result(_out);
         free(_out);
         return result;
+#endif
     }
 
     std::pair<std::string, std::size_t>
       CxxABI::getFuncInfos(const char* symbolInfos)
     {
         std::pair<std::string, std::size_t> output;
+#ifdef _WIN32
+        std::cerr << "Called getFuncInfos on windows. This is not supported (would have worked on rust tbh)" << std::cerr;
+        return output;
+#else
         std::string                         entry(symbolInfos);
 
         std::size_t openP  = entry.find('(');
@@ -38,6 +47,7 @@ namespace Flint
         ss >> output.second;
 
         return output;
+#endif
     }
 
     // std::vector<std::pair<std::pair<std::string, std::size_t>, std::string>>
@@ -45,6 +55,10 @@ namespace Flint
     std::vector<std::pair<std::string, std::size_t>> CxxABI::getBacktrace()
     {
         std::vector<std::pair<std::string, std::size_t>> out;
+#ifdef _WIN32
+        std::cerr << "Called getBacktrace on windows. This is not supported (because of shitty abi)" << std::cerr;
+        return out;
+#else
         int                                              TRACE_CHUNCK = 128;
 
         int size = 0, out_size = 0;
@@ -68,5 +82,6 @@ namespace Flint
         }
 
         return out;
+#endif
     }
 }
