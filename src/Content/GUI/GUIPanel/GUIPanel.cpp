@@ -72,23 +72,36 @@ GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, c
 
     // Hotbar
     {
-        const auto texId = this->textureRegistry.getByName("hotbar");
-        const auto& slot = this->textureRegistry.getSlot(texId);
-        const float w = static_cast<float>(slot.width) * 2.f;
-        const float h = static_cast<float>(slot.height) * 2.f;
-        const float x = vpX / 2.f - w * 0.5f;
-        const float y = vpY - h;
+        const auto hotbarTexId = this->textureRegistry.getByName("hotbar");
+        const auto& hotbarSlot = this->textureRegistry.getSlot(hotbarTexId);
+        const float hotbarW = static_cast<float>(hotbarSlot.width) * 2.f;
+        const float hotbarH = static_cast<float>(hotbarSlot.height) * 2.f;
+        const float x = vpX / 2.f - hotbarW * 0.5f;
+        const float y = vpY - hotbarH;
         this->hotbar = dynamic_cast<ImageWidget*>(this->root->addChild(std::make_unique<ImageWidget>(
-            this->textureRegistry, "hotbar", glm::vec2{x, y}, glm::vec2{w, h}
+            this->textureRegistry, "hotbar", glm::vec2{x, y}, glm::vec2{hotbarW, hotbarH}
         )));
 
+        // Hotbar selection
         {
-            const float invSlotW = 80.f;
-            const auto texSize = glm::vec2{48.f, 48.f};
+            const auto texId = this->textureRegistry.getByName("hotbar_selection");
+            const auto& slot = this->textureRegistry.getSlot(texId);
+            const float w = static_cast<float>(slot.width) * 2.f;
+            const float h = static_cast<float>(slot.height) * 2.f;
+            this->hotbarSelection = dynamic_cast<ImageWidget*>(
+                this->hotbar->addChild(std::make_unique<ImageWidget>(
+                    this->textureRegistry, "hotbar_selection", glm::vec2{-3.5f, -3.5f}, glm::vec2{w, h}
+                ))
+            );
+        }
 
+        // Items
+        {
+            constexpr auto texSize = glm::vec2{48.f, 48.f};
             for (int i = 0; i < 9; i++) {
+                constexpr float invSlotW = 80.f;
                 const float slotX = 1.f + (invSlotW * static_cast<float>(i) + (invSlotW * 0.5f) - (texSize.x * 0.5f));
-                const float slotY = (h * 0.5f) - (texSize.y * 0.5f);
+                const float slotY = (hotbarH * 0.5f) - (texSize.y * 0.5f);
 
                 auto icon = std::make_unique<ImageWidget>(
                     this->textureRegistry, TextureRegistry::MISSING, glm::vec2{slotX, slotY}, texSize
@@ -109,8 +122,10 @@ GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, c
                 // Stack Size text
                 {
                     auto stackSizeText = dynamic_cast<TextWidget*>(icon->addChild(
-                        std::make_unique<TextWidget>(this->font, glm::vec2{texSize.x - 16.f, texSize.y - 16.f})
+                        std::make_unique<TextWidget>(this->font, glm::vec2{texSize.x + 8.f, texSize.y - 16.f})
                     ));
+
+                    stackSizeText->setAlignment(TextAlign::Right);
 
                     stackSizeText->bind([this, i]() -> std::string {
                         return std::to_string(this->hotbarInventory.items[i].stackSize);
@@ -124,19 +139,6 @@ GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, c
                 this->hotbar->addChild(std::move(icon));
             }
         }
-    }
-
-    // Hotbar selection
-    {
-        const auto texId = this->textureRegistry.getByName("hotbar_selection");
-        const auto& slot = this->textureRegistry.getSlot(texId);
-        const float w = static_cast<float>(slot.width) * 2.f;
-        const float h = static_cast<float>(slot.height) * 2.f;
-        this->hotbarSelection = dynamic_cast<ImageWidget*>(
-            this->hotbar->addChild(std::make_unique<ImageWidget>(
-                this->textureRegistry, "hotbar_selection", glm::vec2{-3.5f, -3.5f}, glm::vec2{w, h}
-            ))
-        );
     }
 
     // Track viewport size for resize handling

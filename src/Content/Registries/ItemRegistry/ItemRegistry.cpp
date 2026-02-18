@@ -3,10 +3,15 @@
 ItemRegistry::ItemRegistry(const TextureRegistry& _textureRegistry) :
     textureRegistry(_textureRegistry)
 {
-    const auto& itemTex = this->textureRegistry.getByName("iron_ingot");
+    const auto& ironIngotTex = this->textureRegistry.getByName("iron_ingot");
+    const auto& ironSwordTex = this->textureRegistry.getByName("iron_sword");
 
     this->registerItem(
-        std::make_unique<Item>(NamespaceIdentifier{"iron_ingot"}, "Iron Ingot", "", itemTex, 64)
+        std::make_unique<Item>(NamespaceIdentifier{"iron_ingot"}, "Iron Ingot", "", ironIngotTex, 64)
+    );
+
+    this->registerItem(
+        std::make_unique<SwordItem>(NamespaceIdentifier{"iron_sword"}, "Iron Sword", "", ironSwordTex, 10)
     );
 }
 
@@ -54,6 +59,22 @@ ItemId ItemRegistry::getIdByName(const std::string& name) const
     return this->nameToId.at(name);
 }
 
+ItemStack ItemRegistry::createStack(const ItemId id, const uint8_t count) const
+{
+    const auto& item = this->get(id);
+    const uint8_t clamped = std::min(count, static_cast<uint8_t>(item.getMaxStackSize()));
+
+    return ItemStack(id, clamped);
+}
+
+ItemStack ItemRegistry::createStack(const std::string &identifier, const uint8_t count) const
+{
+    const auto& item = this->get(identifier);
+    const auto& id = this->getIdByName(identifier);
+    const uint8_t clamped = std::min(count, static_cast<uint8_t>(item.getMaxStackSize()));
+
+    return ItemStack(id, clamped);
+}
 
 std::vector<ItemId> ItemRegistry::getAll() const
 {

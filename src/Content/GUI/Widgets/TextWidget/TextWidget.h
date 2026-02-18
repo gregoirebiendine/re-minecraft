@@ -8,6 +8,8 @@
 #include "RGBA.h"
 #include "Font.h"
 
+enum class TextAlign { Left, Center, Right };
+
 class TextWidget : public AWidget
 {
     const Font& font;
@@ -15,6 +17,7 @@ class TextWidget : public AWidget
 
     std::string cachedText;
     RGBA color{255, 255, 255, 1.f};
+    TextAlign align{TextAlign::Left};
     std::function<std::string()> textBinding;
 
     public:
@@ -22,6 +25,7 @@ class TextWidget : public AWidget
 
         void setText(const std::string& text);
         void bind(std::function<std::string()> fn);
+        void setAlignment(TextAlign a);
 
         void tick() override;
         void buildSelf(std::vector<GuiVertex>& out, glm::vec2 abs) override;

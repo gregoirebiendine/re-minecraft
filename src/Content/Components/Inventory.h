@@ -5,7 +5,7 @@
 #include <array>
 #include <utility>
 
-#include "Item.h"
+#include "ItemRegistry.h"
 
 namespace ECS
 {

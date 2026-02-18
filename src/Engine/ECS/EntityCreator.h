@@ -38,13 +38,9 @@ namespace ECS::Creator
         handler.addComponent(player, Equipments{});
         // handler.addComponent(player, ECS::MeshRef{ mesh, texture });
 
-        handler.getComponent<Hotbar>(player).items[0] = ItemStack{world.getItemRegistry().getIdByName("core:iron_ingot"), 1};
-        handler.getComponent<Hotbar>(player).items[1] = ItemStack{world.getItemRegistry().getIdByName("core:iron_ingot"), 2};
-        handler.getComponent<Hotbar>(player).items[2] = ItemStack{world.getItemRegistry().getIdByName("core:iron_ingot"), 4};
-        handler.getComponent<Hotbar>(player).items[3] = ItemStack{world.getItemRegistry().getIdByName("core:iron_ingot"), 8};
-        handler.getComponent<Hotbar>(player).items[4] = ItemStack{world.getItemRegistry().getIdByName("core:iron_ingot"), 16};
-        handler.getComponent<Hotbar>(player).items[5] = ItemStack{world.getItemRegistry().getIdByName("core:iron_ingot"), 32};
-        handler.getComponent<Hotbar>(player).items[6] = ItemStack{world.getItemRegistry().getIdByName("core:iron_ingot"), 64};
+        handler.getComponent<Hotbar>(player).items[0] = world.getItemRegistry().createStack("core:iron_ingot", 2);
+        handler.getComponent<Hotbar>(player).items[1] = world.getItemRegistry().createStack("core:iron_sword", 1);
+        handler.getComponent<Hotbar>(player).items[2] = world.getItemRegistry().createStack("core:iron_sword", 58);
 
         return player;
     }

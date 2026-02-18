@@ -20,6 +20,12 @@ void TextWidget::bind(std::function<std::string()> fn)
     this->textBinding = std::move(fn);
 }
 
+void TextWidget::setAlignment(const TextAlign a)
+{
+    this->align = a;
+    this->markDirty();
+}
+
 void TextWidget::tick()
 {
     if (this->textBinding) {
@@ -40,8 +46,14 @@ void TextWidget::buildSelf(std::vector<GuiVertex>& out, const glm::vec2 abs)
     const auto& uvs = this->font.getUVFromString(this->cachedText);
     const float y = abs.y;
     const float y1 = y + Font::CHAR_SIZE_Y;
+    const float textWidth = static_cast<float>(uvs.size()) * Font::CHAR_SIZE_X;
 
     float curX = abs.x;
+    if (this->align == TextAlign::Center)
+        curX -= textWidth / 2.f;
+    else if (this->align == TextAlign::Right)
+        curX -= textWidth;
+
     for (const auto& uv : uvs) {
         const float charX1 = curX + Font::CHAR_SIZE_X;
 

@@ -9,6 +9,13 @@
 #include "Item.h"
 #include "TextureRegistry.h"
 
+struct ItemStack
+{
+    ItemId itemId = 0;
+    std::uint8_t stackSize = 0;
+    std::uint16_t durability = 0;
+};
+
 class ItemRegistry
 {
     const TextureRegistry& textureRegistry;
@@ -24,6 +31,9 @@ class ItemRegistry
         const Item& get(ItemId id) const;
         const Item& get(const std::string& name) const;
         ItemId getIdByName(const std::string& name) const;
+
+        ItemStack createStack(ItemId id, uint8_t count = 1) const;
+        ItemStack createStack(const std::string& identifier, uint8_t count = 1) const;
 
         std::vector<ItemId> getAll() const;
 };

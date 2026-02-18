@@ -169,11 +169,4 @@ class PickaxeItem : public ADurableItem
         }
 };
 
-struct ItemStack
-{
-    ItemId itemId = 0;
-    std::uint8_t stackSize = 0;
-    std::uint16_t durability = 0;
-};
-
 #endif
