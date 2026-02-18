@@ -15,6 +15,7 @@
 #include "ChunkManager.h"
 #include "ChunkMeshManager.h"
 #include "InputState.h"
+#include "ItemRegistry.h"
 #include "Shader.h"
 #include "ECS/ISystem.h"
 
@@ -25,6 +26,7 @@ class World {
 
     const BlockRegistry& blockRegistry;
     const TextureRegistry& textureRegistry;
+    const ItemRegistry& itemRegistry;
     const MeshRegistry& meshRegistry;
     const InputState& inputs;
 
@@ -45,6 +47,7 @@ class World {
             const BlockRegistry& _blockRegistry,
             const TextureRegistry& _textureRegistry,
             const PrefabRegistry& _prefabRegistry,
+            const ItemRegistry& _itemRegistry,
             const MeshRegistry& _meshRegistry,
             const InputState& _inputs
         );
@@ -53,11 +56,12 @@ class World {
         ECS::SystemScheduler& getECSScheduler() { return this->scheduler; }
         ECS::IEntity& getPlayerEntity() { return this->player; }
 
-        const BlockRegistry& getBlockRegistry() const { return this->blockRegistry; };
-        const TextureRegistry& getTextureRegistry() const { return this->textureRegistry; };
-        const MeshRegistry& getMeshRegistry() const { return this->meshRegistry; };
-        ChunkManager& getChunkManager() { return this->chunkManager; };
-        Shader& getShader() { return this->shader; };
+        const BlockRegistry& getBlockRegistry() const { return this->blockRegistry; }
+        const TextureRegistry& getTextureRegistry() const { return this->textureRegistry; }
+        const ItemRegistry& getItemRegistry() const { return this->itemRegistry; }
+        const MeshRegistry& getMeshRegistry() const { return this->meshRegistry; }
+        ChunkManager& getChunkManager() { return this->chunkManager; }
+        Shader& getShader() { return this->shader; }
 
         // Lifecycle
         void fill(glm::ivec3 from, glm::ivec3 to, Material mat);

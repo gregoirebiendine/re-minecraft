@@ -15,14 +15,12 @@ class PlayerController
     GUIController gui;
     int selectedSlot = 0;
 
-
     // Cache
     Raycast::Hit lastRaycast{};
     ECS::IEntity& playerEntity;
     ECS::CameraSystem& cameraSystem;
     ECS::Hotbar& hotbarComponent;
 
-    void changeSelectedMaterial(Inputs::Scroll dir);
     void placeBlock(const glm::vec3& forward) const;
 
     public:

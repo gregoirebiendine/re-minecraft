@@ -14,9 +14,9 @@
 #include "Shader.h"
 #include "VAO.h"
 #include "Font.h"
-#include "BlockRegistry.h"
 #include "Viewport.h"
 #include "TextureRegistry.h"
+#include "ItemRegistry.h"
 #include "PanelWidget.h"
 #include "ImageWidget.h"
 #include "ShapeWidget.h"
@@ -31,7 +31,7 @@ class GUIPanel
     // Classes from Engine
     const Font& font;
     const TextureRegistry& textureRegistry;
-    const BlockRegistry& blockRegistry;
+    const ItemRegistry& itemRegistry;
     const Viewport& viewport;
 
     // Render storage
@@ -52,7 +52,6 @@ class GUIPanel
     // Outside variables cache
     glm::vec3 currentPos{0.f};
     glm::vec3 currentForward{0.f, 0.f, -1.f};
-    std::string currentSelectedBlock;
     ECS::Hotbar hotbarInventory{};
 
     // Rebuild UI every frame
@@ -65,12 +64,12 @@ class GUIPanel
     [[nodiscard]] glm::mat4 getGUIProjectionMatrix() const;
 
     public:
-        explicit GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, const BlockRegistry& _blockRegistry, const Viewport& _viewport);
+        explicit GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, const ItemRegistry& _itemRegistry, const Viewport& _viewport);
 
         void toggleDebugPanel() const;
-        void onHotbarSlotChanged(const int slot) const;
+        void onHotbarSlotChanged(int slot) const;
 
-        void update(const glm::vec3& pos, const glm::vec3& forward, const std::string& selectedBlockName, const ECS::Hotbar& hotbarInv);
+        void update(const glm::vec3& pos, const glm::vec3& forward, const ECS::Hotbar& hotbarInv);
         void render();
 };
 

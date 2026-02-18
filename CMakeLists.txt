@@ -61,6 +61,7 @@ set(
     ${CMAKE_SOURCE_DIR}/src/Content/Registries/TextureRegistry
     ${CMAKE_SOURCE_DIR}/src/Content/Registries/PrefabRegistry
     ${CMAKE_SOURCE_DIR}/src/Content/Registries/MeshRegistry
+    ${CMAKE_SOURCE_DIR}/src/Content/Registries/ItemRegistry
 )
 
 #add_subdirectory(lib/flint) # Comment for now as the lib won't compile on Windows

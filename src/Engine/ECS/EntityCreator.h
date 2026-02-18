@@ -38,10 +38,13 @@ namespace ECS::Creator
         handler.addComponent(player, Equipments{});
         // handler.addComponent(player, ECS::MeshRef{ mesh, texture });
 
-        handler.getComponent<Hotbar>(player).items[0] = {1, Material::pack(world.getBlockRegistry().getByName("core:oak_log"), 0)};
-        handler.getComponent<Hotbar>(player).items[1] = {1, Material::pack(world.getBlockRegistry().getByName("core:oak_plank"), 0)};
-        handler.getComponent<Hotbar>(player).items[5] = {1, Material::pack(world.getBlockRegistry().getByName("core:coal_block"), 0)};
-        handler.getComponent<Hotbar>(player).items[8] = {1, Material::pack(world.getBlockRegistry().getByName("core:furnace"), 0)};
+        handler.getComponent<Hotbar>(player).items[0] = ItemStack{world.getItemRegistry().getIdByName("core:iron_ingot"), 1};
+        handler.getComponent<Hotbar>(player).items[1] = ItemStack{world.getItemRegistry().getIdByName("core:iron_ingot"), 2};
+        handler.getComponent<Hotbar>(player).items[2] = ItemStack{world.getItemRegistry().getIdByName("core:iron_ingot"), 4};
+        handler.getComponent<Hotbar>(player).items[3] = ItemStack{world.getItemRegistry().getIdByName("core:iron_ingot"), 8};
+        handler.getComponent<Hotbar>(player).items[4] = ItemStack{world.getItemRegistry().getIdByName("core:iron_ingot"), 16};
+        handler.getComponent<Hotbar>(player).items[5] = ItemStack{world.getItemRegistry().getIdByName("core:iron_ingot"), 32};
+        handler.getComponent<Hotbar>(player).items[6] = ItemStack{world.getItemRegistry().getIdByName("core:iron_ingot"), 64};
 
         return player;
     }

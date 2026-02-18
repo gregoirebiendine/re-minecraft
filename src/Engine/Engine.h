@@ -17,6 +17,7 @@
 #include "Viewport.h"
 #include "InputState.h"
 #include "BlockRegistry.h"
+#include "ItemRegistry.h"
 #include "TextureRegistry.h"
 #include "PrefabRegistry.h"
 #include "World.h"
@@ -35,9 +36,10 @@ class Engine {
     mutable Viewport viewport;
     InputState inputs;
     
-    BlockRegistry blockRegistry;
     TextureRegistry textureRegistry;
+    BlockRegistry blockRegistry;
     PrefabRegistry prefabRegistry;
+    std::unique_ptr<ItemRegistry> itemRegistry;
     std::unique_ptr<MeshRegistry> meshRegistry;
 
     std::unique_ptr<Font> font;

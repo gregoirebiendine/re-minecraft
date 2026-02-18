@@ -1,10 +1,10 @@
 #include "GUIPanel.h"
 #include "CrosshairVertices.h"
 
-GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, const BlockRegistry& _blockRegistry, const Viewport& _viewport) :
+GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, const ItemRegistry& _itemRegistry, const Viewport& _viewport) :
     font(_font),
     textureRegistry(_textureRegistry),
-    blockRegistry(_blockRegistry),
+    itemRegistry(_itemRegistry),
     viewport(_viewport),
     shader("/resources/shaders/UI/")
 {
@@ -68,10 +68,6 @@ GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, c
         this->debugPanel->addChild(makeBoundText(80.f, [this] {
             return "Facing: " + DirectionUtils::forwardVectorToCardinal(this->currentForward);
         }));
-
-        this->debugPanel->addChild(makeBoundText(105.f, [this] {
-            return "Block: " + this->currentSelectedBlock;
-        }));
     }
 
     // Hotbar
@@ -100,15 +96,31 @@ GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, c
 
                 icon->bind([this, i]() -> TextureId {
                     const auto& stack = this->hotbarInventory.items[i];
-                    const auto& meta = this->blockRegistry.get(stack.item.getBlockId());
-                    return this->textureRegistry.getByName(meta.getFaceTexture(UP));
+                    const auto& itemMeta = this->itemRegistry.get(stack.itemId);
+                    return itemMeta.getIcon();
                 });
 
                 icon->bindVisibility([this, i]() -> bool {
-                    return this->hotbarInventory.items[i].amount > 0;
+                    return this->hotbarInventory.items[i].stackSize > 0;
                 });
 
                 icon->setVisible(false);
+
+                // Stack Size text
+                {
+                    auto stackSizeText = dynamic_cast<TextWidget*>(icon->addChild(
+                        std::make_unique<TextWidget>(this->font, glm::vec2{texSize.x - 16.f, texSize.y - 16.f})
+                    ));
+
+                    stackSizeText->bind([this, i]() -> std::string {
+                        return std::to_string(this->hotbarInventory.items[i].stackSize);
+                    });
+
+                    stackSizeText->bindVisibility([this, i]() -> bool {
+                        return this->hotbarInventory.items[i].stackSize > 1;
+                    });
+                }
+
                 this->hotbar->addChild(std::move(icon));
             }
         }
@@ -195,6 +207,13 @@ void GUIPanel::onHotbarSlotChanged(const int slot) const
     this->hotbarSelection->setPosition({x, y});
 }
 
+void GUIPanel::update(const glm::vec3 &pos, const glm::vec3 &forward ,const ECS::Hotbar& hotbarInv)
+{
+    this->currentPos = pos;
+    this->currentForward = forward;
+    this->hotbarInventory = hotbarInv;
+}
+
 void GUIPanel::render()
 {
     // Check for viewport resize
@@ -218,14 +237,6 @@ void GUIPanel::render()
     this->vao.bind();
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->vertexBuffer.size()));
     this->vao.unbind();
-}
-
-void GUIPanel::update(const glm::vec3 &pos, const glm::vec3 &forward, const std::string &selectedBlockName, const ECS::Hotbar& hotbarInv)
-{
-    this->currentPos = pos;
-    this->currentForward = forward;
-    this->currentSelectedBlock = selectedBlockName;
-    this->hotbarInventory = hotbarInv;
 }
 
 void GUIPanel::toggleDebugPanel() const

@@ -56,4 +56,5 @@ void TextWidget::buildSelf(std::vector<GuiVertex>& out, const glm::vec2 abs)
         });
         curX += Font::CHAR_SIZE_X;
     }
+    this->setSize({uvs.size() * Font::CHAR_SIZE_X, Font::CHAR_SIZE_Y});
 }

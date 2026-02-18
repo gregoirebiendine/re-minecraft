@@ -23,11 +23,13 @@ World::World(
     const BlockRegistry& _blockRegistry,
     const TextureRegistry& _textureRegistry,
     const PrefabRegistry& _prefabRegistry,
+    const ItemRegistry& _itemRegistry,
     const MeshRegistry& _meshRegistry,
     const InputState& _inputs
 ) :
     blockRegistry(_blockRegistry),
     textureRegistry(_textureRegistry),
+    itemRegistry(_itemRegistry),
     meshRegistry(_meshRegistry),
     inputs(_inputs),
     shader("/resources/shaders/World/"),

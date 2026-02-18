@@ -92,6 +92,7 @@ std::pair<int, int> AtlasLayer::tryInsert(int w, int h)
 TextureRegistry::TextureRegistry()
 {
     this->registerTextureFromFolder("/resources/textures/blocks");
+    this->registerTextureFromFolder("/resources/textures/items");
     this->registerTextureFromFolder("/resources/textures/entities");
     this->registerTextureFromFolder("/resources/textures/gui");
 }
@@ -237,17 +238,17 @@ TextureId TextureRegistry::registerTexture(const std::string& name, const std::s
 
     // Enforce max ID range
     if (this->pending.size() >= std::numeric_limits<TextureId>::max())
-        throw std::runtime_error("TextureRegistry overflow");
+        throw std::runtime_error("[TextureRegistry::registerTexture] TextureRegistry overflow");
 
     // Load image to get dimensions
     int w, h, channels;
     stbi_uc* data = stbi_load(path.c_str(), &w, &h, &channels, 4);
 
     if (!data)
-        throw std::runtime_error("stbi_load failed on texture: " + path);
+        throw std::runtime_error("[TextureRegistry::registerTexture] stbi_load failed on texture: " + path);
 
     if (w > AtlasLayer::SIZE || h > AtlasLayer::SIZE)
-        throw std::runtime_error("Texture too large (max 1024x1024): " + path);
+        throw std::runtime_error("[TextureRegistry::registerTexture] Texture too large (max 1024x1024): " + path);
 
     auto id = static_cast<TextureId>(this->pending.size());
 
@@ -275,7 +276,7 @@ void TextureRegistry::registerTextureFromFolder(const std::string &folderPath)
 const TextureSlot& TextureRegistry::getSlot(const TextureId id) const
 {
     if (id >= this->textureSlots.size())
-        throw std::out_of_range("Invalid TextureId");
+        throw std::out_of_range("[TextureRegistry::getSlot] Invalid TextureId");
 
     return this->textureSlots[id];
 }

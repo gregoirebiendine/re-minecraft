@@ -1,8 +1,8 @@
 #include "GUIController.h"
 #include "OutlineVertices.h"
 
-GUIController::GUIController(const Font& _font, const TextureRegistry& _textureRegistry, const BlockRegistry& _blockRegistry, const Viewport& _viewport) :
-    panel(_font, _textureRegistry, _blockRegistry, _viewport),
+GUIController::GUIController(const Font& _font, const TextureRegistry& _textureRegistry, const ItemRegistry& _itemRegistry, const Viewport& _viewport) :
+    panel(_font, _textureRegistry, _itemRegistry, _viewport),
     shader("/resources/shaders/Outline/")
 {
     this->vao.bind();
@@ -20,9 +20,9 @@ void GUIController::toggleDebugPanel() const
     this->panel.toggleDebugPanel();
 }
 
-void GUIController::update(const glm::vec3 &pos, const glm::vec3 &forward, const std::string &selectedBlockName, const ECS::Hotbar& hotbarInv)
+void GUIController::update(const glm::vec3 &pos, const glm::vec3 &forward, const ECS::Hotbar& hotbarInv)
 {
-    this->panel.update(pos, forward, selectedBlockName, hotbarInv);
+    this->panel.update(pos, forward, hotbarInv);
 }
 
 void GUIController::render()
