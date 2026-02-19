@@ -97,14 +97,14 @@ GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, c
 
         // Items
         {
-            constexpr auto texSize = glm::vec2{48.f, 48.f};
+            constexpr auto itemTexSize = glm::vec2{64.f};
             for (int i = 0; i < 9; i++) {
                 constexpr float invSlotW = 80.f;
-                const float slotX = 1.f + (invSlotW * static_cast<float>(i) + (invSlotW * 0.5f) - (texSize.x * 0.5f));
-                const float slotY = (hotbarH * 0.5f) - (texSize.y * 0.5f);
+                const float slotX = 1.f + (invSlotW * static_cast<float>(i) + (invSlotW * 0.5f) - (itemTexSize.x * 0.5f));
+                const float slotY = (hotbarH * 0.5f) - (itemTexSize.y * 0.5f);
 
                 auto icon = std::make_unique<ImageWidget>(
-                    this->textureRegistry, TextureRegistry::MISSING, glm::vec2{slotX, slotY}, texSize
+                    this->textureRegistry, TextureRegistry::MISSING, glm::vec2{slotX, slotY}, itemTexSize
                 );
 
                 icon->bind([this, i]() -> TextureId {
@@ -122,7 +122,7 @@ GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, c
                 // Stack Size text
                 {
                     auto stackSizeText = dynamic_cast<TextWidget*>(icon->addChild(
-                        std::make_unique<TextWidget>(this->font, glm::vec2{texSize.x + 8.f, texSize.y - 16.f})
+                        std::make_unique<TextWidget>(this->font, glm::vec2{itemTexSize.x + 8.f, itemTexSize.y - 32.f}, 1.5f)
                     ));
 
                     stackSizeText->setAlignment(TextAlign::Right);

@@ -153,12 +153,12 @@ class SwordItem : public ADurableItem
         }
 };
 
-class PickaxeItem : public ADurableItem
+class ADiggerItem : public ADurableItem
 {
     std::uint16_t miningSpeed;
 
     public:
-        PickaxeItem(const NamespaceIdentifier& _identifier, const std::string& _displayName, const std::string& _lore, const TextureId texId, const std::uint16_t _miningSpeed) :
+        ADiggerItem(const NamespaceIdentifier& _identifier, const std::string& _displayName, const std::string& _lore, const TextureId texId, const std::uint16_t _miningSpeed) :
             ADurableItem(_identifier, _displayName, _lore, texId, 100),
             miningSpeed(_miningSpeed)
         {}
@@ -167,6 +167,14 @@ class PickaxeItem : public ADurableItem
         {
             // Break blocks
         }
+};
+
+class PickaxeItem : public ADiggerItem
+{
+    public:
+        PickaxeItem(const NamespaceIdentifier& _identifier, const std::string& _displayName, const std::string& _lore, const TextureId texId, const std::uint16_t _miningSpeed) :
+            ADiggerItem(_identifier, _displayName, _lore, texId, 100)
+        {}
 };
 
 #endif

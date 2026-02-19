@@ -1,8 +1,9 @@
 #include "TextWidget.h"
 
-TextWidget::TextWidget(const Font& font, const glm::vec2 position) :
+TextWidget::TextWidget(const Font& font, const glm::vec2 position, const float scale) :
     font(font),
-    fontTexId(this->font.getTextureID())
+    fontTexId(this->font.getTextureID()),
+    scale(scale)
 {
     this->setPosition(position);
 }
@@ -44,9 +45,11 @@ void TextWidget::buildSelf(std::vector<GuiVertex>& out, const glm::vec2 abs)
         return;
 
     const auto& uvs = this->font.getUVFromString(this->cachedText);
+    const float charW = Font::CHAR_SIZE_X * this->scale;
+    const float charH = Font::CHAR_SIZE_Y * this->scale;
     const float y = abs.y;
-    const float y1 = y + Font::CHAR_SIZE_Y;
-    const float textWidth = static_cast<float>(uvs.size()) * Font::CHAR_SIZE_X;
+    const float y1 = y + charH;
+    const auto textWidth = static_cast<float>(uvs.size()) * charW;
 
     float curX = abs.x;
     if (this->align == TextAlign::Center)
@@ -55,7 +58,7 @@ void TextWidget::buildSelf(std::vector<GuiVertex>& out, const glm::vec2 abs)
         curX -= textWidth;
 
     for (const auto& uv : uvs) {
-        const float charX1 = curX + Font::CHAR_SIZE_X;
+        const float charX1 = curX + charW;
 
         out.insert(out.end(), {
             {{curX, y},     uv[0], this->color, this->fontTexId},
@@ -66,7 +69,7 @@ void TextWidget::buildSelf(std::vector<GuiVertex>& out, const glm::vec2 abs)
             {{charX1, y1},  uv[2], this->color, this->fontTexId},
             {{charX1, y},   uv[3], this->color, this->fontTexId},
         });
-        curX += Font::CHAR_SIZE_X;
+        curX += charW;
     }
-    this->setSize({uvs.size() * Font::CHAR_SIZE_X, Font::CHAR_SIZE_Y});
+    this->setSize({textWidth, charH});
 }

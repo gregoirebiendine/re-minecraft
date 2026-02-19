@@ -6,7 +6,7 @@ Font::Font(const TextureId _textureID) :
     size_t i = 0;
     size_t glyphIndex = 0;
     while (i < this->CHARS.size()) {
-        const glm::vec2 p{ (glyphIndex % COL) * CHAR_SIZE_X, (glyphIndex / COL) * CHAR_SIZE_Y };
+        const glm::vec2 p{ glyphIndex % COL * CHAR_SIZE_X, glyphIndex / COL * CHAR_SIZE_Y };
         char32_t cp = decodeUtf8(this->CHARS, i);
 
         const FontUVArray uvs = {
@@ -46,13 +46,13 @@ std::vector<FontUVArray> Font::getUVFromString(const std::string &str) const
 // Statics
 float Font::rangeX(const float &v)
 {
-    static constexpr float W = static_cast<float>(COL) * CHAR_SIZE_X;
+    static constexpr float W = COL * CHAR_SIZE_X;
     return Maths::mapRange(v, 0.f, W, 0.f, 1.f);
 }
 
 float Font::rangeY(const float &v)
 {
-    static constexpr float H = static_cast<float>(ROW) * CHAR_SIZE_Y;
+    static constexpr float H = ROW * CHAR_SIZE_Y;
     return Maths::mapRange(v, 0.f, H, 0.f, 1.f);
 }
 

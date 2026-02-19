@@ -29,8 +29,8 @@ class Font
     static char32_t decodeUtf8(const std::string& s, size_t& i);
 
     public:
-        static constexpr float CHAR_SIZE_X = 16.f;
-        static constexpr float CHAR_SIZE_Y = 26.f;
+        static constexpr int CHAR_SIZE_X = 16;
+        static constexpr int CHAR_SIZE_Y = 32;
 
         explicit Font(TextureId _textureID);
 

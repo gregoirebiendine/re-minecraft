@@ -33,8 +33,8 @@ void GUIController::render()
 
     this->panel.render();
 
-    glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
 }
 
 void GUIController::renderBlockOutline(const glm::mat4& v, const glm::mat4& p, const glm::vec3& pos)

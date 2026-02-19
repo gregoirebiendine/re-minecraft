@@ -18,10 +18,11 @@ class TextWidget : public AWidget
     std::string cachedText;
     RGBA color{255, 255, 255, 1.f};
     TextAlign align{TextAlign::Left};
+    float scale{1.f};
     std::function<std::string()> textBinding;
 
     public:
-        TextWidget(const Font& font, glm::vec2 position);
+        TextWidget(const Font& font, glm::vec2 position, float scale = 1.f);
 
         void setText(const std::string& text);
         void bind(std::function<std::string()> fn);
