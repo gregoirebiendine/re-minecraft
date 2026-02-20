@@ -5,6 +5,7 @@
 #include "InputState.h"
 #include "World.h"
 #include "Viewport.h"
+#include "MsdfFont.h"
 #include "GUIController.h"
 #include "Systems/CameraSystem.h"
 
@@ -24,7 +25,7 @@ class PlayerController
     void placeBlock(const glm::vec3& forward) const;
 
     public:
-        explicit PlayerController(World& _world, const Font& _font, const Viewport& _viewport);
+        explicit PlayerController(World& _world, const MsdfFont& _font, const Viewport& _viewport);
 
         void update();
         void render();

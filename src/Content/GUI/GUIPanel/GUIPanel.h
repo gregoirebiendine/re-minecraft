@@ -13,7 +13,7 @@
 
 #include "Shader.h"
 #include "VAO.h"
-#include "Font.h"
+#include "MsdfFont.h"
 #include "Viewport.h"
 #include "TextureRegistry.h"
 #include "ItemRegistry.h"
@@ -29,15 +29,19 @@
 class GUIPanel
 {
     // Classes from Engine
-    const Font& font;
+    const MsdfFont& font;
     const TextureRegistry& textureRegistry;
     const ItemRegistry& itemRegistry;
     const Viewport& viewport;
 
     // Render storage
-    Shader shader;
     VAO vao;
+    Shader shader;
     std::vector<GuiVertex> vertexBuffer;
+
+    VAO fontVao;
+    Shader fontShader;
+    std::vector<MSDFVertex> fontBuffer;
 
     // Widget references
     std::unique_ptr<PanelWidget> root;
@@ -57,16 +61,15 @@ class GUIPanel
     // Rebuild UI every frame
     void rebuildVertexBuffer();
 
-    // Events
-    void onViewportResize(glm::ivec2 newSize) const;
-
     // Calculate GUI Projection Matrix for shader
     [[nodiscard]] glm::mat4 getGUIProjectionMatrix() const;
 
     public:
-        explicit GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, const ItemRegistry& _itemRegistry, const Viewport& _viewport);
+        explicit GUIPanel(const MsdfFont& _font, const TextureRegistry& _textureRegistry, const ItemRegistry& _itemRegistry, const Viewport& _viewport);
 
+        // Events
         void toggleDebugPanel() const;
+        void onViewportResize(glm::ivec2 newSize) const;
         void onHotbarSlotChanged(int slot) const;
 
         void update(const glm::vec3& pos, const glm::vec3& forward, const ECS::Hotbar& hotbarInv);

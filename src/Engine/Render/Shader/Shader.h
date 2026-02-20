@@ -21,12 +21,13 @@ class Shader {
     GLint modelMatrixUniform{-1};
     GLint viewMatrixUniform{-1};
     GLint projectionMatrixUniform{-1};
+    GLint textureSamplerUniform{-1};
 
     static std::string loadFile(const std::string& path);
     static void checkCompileErrors(GLuint shader, const char* name);
 
     public:
-        Shader(const std::string& folder);
+        explicit Shader(const std::string& folder);
         ~Shader();
 
         Shader(const Shader&) = delete;
@@ -43,6 +44,7 @@ class Shader {
         void setModelMatrix(const glm::mat4& modelMatrix);
         void setViewMatrix(const glm::mat4& viewMatrix);
         void setProjectionMatrix(const glm::mat4& projectionMatrix);
+        void setTextureSamplerId(int samplerId);
 };
 
 #endif

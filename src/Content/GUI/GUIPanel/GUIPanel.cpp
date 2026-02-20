@@ -1,20 +1,21 @@
 #include "GUIPanel.h"
 #include "CrosshairVertices.h"
 
-GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, const ItemRegistry& _itemRegistry, const Viewport& _viewport) :
+GUIPanel::GUIPanel(const MsdfFont& _font, const TextureRegistry& _textureRegistry, const ItemRegistry& _itemRegistry, const Viewport& _viewport) :
     font(_font),
     textureRegistry(_textureRegistry),
     itemRegistry(_itemRegistry),
     viewport(_viewport),
-    shader("/resources/shaders/UI/")
+    shader("/resources/shaders/UI/"),
+    fontShader("/resources/shaders/UI/Font/")
 {
     const auto& vpSize = this->viewport.getSize();
     const auto vpX = static_cast<float>(vpSize.x);
     const auto vpY = static_cast<float>(vpSize.y);
 
-    // Set shader uniforms
-    this->shader.use();
-    this->shader.setUniformInt("Textures", 0);
+    // Set texture uniform
+    this->shader.setTextureSamplerId(0);
+    this->fontShader.setTextureSamplerId(1);
 
     // Build widget tree
     this->root = std::make_unique<PanelWidget>();
@@ -30,7 +31,7 @@ GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, c
             std::make_unique<PanelWidget>(
                 glm::vec2{0.f, 0.f},
                 glm::vec2{450.f, 140.f},
-                RGBA{50, 50, 50, 0.25f}
+                RGBA::fromRGB(50, 50, 50, 0.25f)
             )
         ));
         this->debugPanel->setVisible(false);
@@ -38,6 +39,7 @@ GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, c
         auto makeBoundText = [&](const float y, std::function<std::string()> fn) {
             auto t = std::make_unique<TextWidget>(this->font, glm::vec2{10.f, y});
             t->bind(std::move(fn));
+            t->setShadow(false);
             return t;
         };
 
@@ -47,7 +49,7 @@ GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, c
             return "FPS: " + ss.str();
         }));
 
-        this->debugPanel->addChild(makeBoundText(30.f, [this] {
+        this->debugPanel->addChild(makeBoundText(35.f, [this] {
             std::ostringstream ss;
             ss << std::fixed << std::setprecision(1)
                << this->currentPos.x << ", "
@@ -56,7 +58,7 @@ GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, c
             return "Pos: " + ss.str();
         }));
 
-        this->debugPanel->addChild(makeBoundText(55.f, [this] {
+        this->debugPanel->addChild(makeBoundText(65.f, [this] {
             const ChunkPos cp{
                 static_cast<int>(this->currentPos.x) / 16,
                 static_cast<int>(this->currentPos.y) / 16,
@@ -65,7 +67,7 @@ GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, c
             return "Chunk: " + cp;
         }));
 
-        this->debugPanel->addChild(makeBoundText(80.f, [this] {
+        this->debugPanel->addChild(makeBoundText(95.f, [this] {
             return "Facing: " + DirectionUtils::forwardVectorToCardinal(this->currentForward);
         }));
     }
@@ -121,8 +123,8 @@ GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, c
 
                 // Stack Size text
                 {
-                    auto stackSizeText = dynamic_cast<TextWidget*>(icon->addChild(
-                        std::make_unique<TextWidget>(this->font, glm::vec2{itemTexSize.x + 8.f, itemTexSize.y - 32.f}, 1.5f)
+                    const auto stackSizeText = dynamic_cast<TextWidget*>(icon->addChild(
+                        std::make_unique<TextWidget>(this->font, glm::vec2{itemTexSize.x + 6.f, itemTexSize.y - 28.f}, 0.7f)
                     ));
 
                     stackSizeText->setAlignment(TextAlign::Right);
@@ -148,17 +150,6 @@ GUIPanel::GUIPanel(const Font& _font, const TextureRegistry& _textureRegistry, c
     this->rebuildVertexBuffer();
 }
 
-void GUIPanel::rebuildVertexBuffer()
-{
-    this->vertexBuffer.clear();
-    this->root->build(this->vertexBuffer, {0.f, 0.f});
-    this->root->clearDirty();
-
-    this->vao.bind();
-    this->vao.storeGuiData(this->vertexBuffer);
-    this->vao.unbind();
-}
-
 glm::mat4 GUIPanel::getGUIProjectionMatrix() const
 {
     const auto& vpSize = this->viewport.getSize();
@@ -170,6 +161,72 @@ glm::mat4 GUIPanel::getGUIProjectionMatrix() const
     );
 }
 
+void GUIPanel::rebuildVertexBuffer()
+{
+    // Build widgets
+    this->vertexBuffer.clear();
+    this->root->build(this->vertexBuffer, {0.f, 0.f});
+    this->root->clearDirty();
+    this->vao.bind();
+    this->vao.storeGuiData(this->vertexBuffer);
+    this->vao.unbind();
+
+    // Build MSDF
+    this->fontBuffer.clear();
+    this->root->buildMsdfTree(this->fontBuffer, {0.f, 0.f});
+    this->fontVao.bind();
+    this->fontVao.storeMsdfData(this->fontBuffer);
+    this->fontVao.unbind();
+}
+
+void GUIPanel::update(const glm::vec3 &pos, const glm::vec3 &forward ,const ECS::Hotbar& hotbarInv)
+{
+    this->currentPos = pos;
+    this->currentForward = forward;
+    this->hotbarInventory = hotbarInv;
+}
+
+void GUIPanel::render()
+{
+    // Check for viewport resize
+    const auto currentVp = this->viewport.getSize();
+    if (currentVp != this->cachedViewportSize) {
+        this->cachedViewportSize = currentVp;
+        this->onViewportResize(currentVp);
+    }
+
+    // Evaluates bindings
+    this->root->tick();
+
+    // Rebuild VBO only if something changed
+    if (this->root->isAnyDirty())
+        this->rebuildVertexBuffer();
+
+    const auto& projMatrix = this->getGUIProjectionMatrix();
+
+    // Draw
+    this->shader.use();
+    this->shader.setProjectionMatrix(projMatrix);
+
+    this->vao.bind();
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->vertexBuffer.size()));
+    this->vao.unbind();
+
+    if (!this->fontBuffer.empty()) {
+        this->fontShader.use();
+        this->fontShader.setProjectionMatrix(projMatrix);
+        this->fontShader.setUniformFloat("ScreenPxRange", this->font.getDistanceRange());
+
+        this->font.bindTexture();
+
+        this->fontVao.bind();
+        glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->fontBuffer.size()));
+        this->fontVao.unbind();
+    }
+}
+
+
+// Events
 void GUIPanel::onViewportResize(const glm::ivec2 newSize) const
 {
     this->crosshair->setVertices(getCrosshairVertices(newSize));
@@ -207,38 +264,6 @@ void GUIPanel::onHotbarSlotChanged(const int slot) const
     const float y = this->hotbarSelection->getPosition().y;
 
     this->hotbarSelection->setPosition({x, y});
-}
-
-void GUIPanel::update(const glm::vec3 &pos, const glm::vec3 &forward ,const ECS::Hotbar& hotbarInv)
-{
-    this->currentPos = pos;
-    this->currentForward = forward;
-    this->hotbarInventory = hotbarInv;
-}
-
-void GUIPanel::render()
-{
-    // Check for viewport resize
-    const auto currentVp = this->viewport.getSize();
-    if (currentVp != this->cachedViewportSize) {
-        this->cachedViewportSize = currentVp;
-        this->onViewportResize(currentVp);
-    }
-
-    // Evaluates bindings
-    this->root->tick();
-
-    // Rebuild VBO only if something changed
-    if (this->root->isAnyDirty())
-        this->rebuildVertexBuffer();
-
-    // Draw
-    this->shader.use();
-    this->shader.setProjectionMatrix(this->getGUIProjectionMatrix());
-
-    this->vao.bind();
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->vertexBuffer.size()));
-    this->vao.unbind();
 }
 
 void GUIPanel::toggleDebugPanel() const

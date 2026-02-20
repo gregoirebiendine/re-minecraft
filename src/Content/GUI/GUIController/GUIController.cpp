@@ -1,7 +1,7 @@
 #include "GUIController.h"
 #include "OutlineVertices.h"
 
-GUIController::GUIController(const Font& _font, const TextureRegistry& _textureRegistry, const ItemRegistry& _itemRegistry, const Viewport& _viewport) :
+GUIController::GUIController(const MsdfFont& _font, const TextureRegistry& _textureRegistry, const ItemRegistry& _itemRegistry, const Viewport& _viewport) :
     panel(_font, _textureRegistry, _itemRegistry, _viewport),
     shader("/resources/shaders/Outline/")
 {

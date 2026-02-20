@@ -67,6 +67,22 @@ void VAO::storeEntityMeshData(const std::vector<EntityVertex>& data) const
     this->vbo.unbind();
 }
 
+void VAO::storeMsdfData(const std::vector<MSDFVertex>& data) const
+{
+    this->vbo.addData<MSDFVertex>(data);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(MSDFVertex), reinterpret_cast<void*>(offsetof(MSDFVertex, position)));
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(MSDFVertex), reinterpret_cast<void *>( offsetof(MSDFVertex, uv) ));
+
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(MSDFVertex), reinterpret_cast<void *>( offsetof(MSDFVertex, color) ));
+
+    this->vbo.unbind();
+}
+
 void VAO::bind() const
 {
     glBindVertexArray(this->ID);

@@ -24,7 +24,7 @@ Engine::Engine() :
     // Instantiate members
     this->meshRegistry = std::make_unique<MeshRegistry>();
     this->itemRegistry = std::make_unique<ItemRegistry>(this->textureRegistry);
-    this->font = std::make_unique<Font>(this->textureRegistry.getByName("font"));
+    this->font = std::make_unique<MsdfFont>("../resources/textures/font/font.json", "../resources/textures/font/font.png");
     this->world = std::make_unique<World>(this->blockRegistry, this->textureRegistry, this->prefabRegistry, *this->itemRegistry, *this->meshRegistry, this->inputs);
     this->playerController = std::make_unique<PlayerController>(*this->world, *this->font, this->viewport);
 
@@ -124,9 +124,6 @@ void Engine::update() const
 
 void Engine::render() const
 {
-    // Begin MSAA rendering
-    // this->viewport.beginFrame();
-
     // Clear window and buffer
     glClearColor(0.509f, 0.784f, 0.898f, 1.0f); // Skybox color
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -139,7 +136,6 @@ void Engine::render() const
     // Render Player
     this->playerController->render();
 
-    // Resolve MSAA and swap buffers
-    // this->viewport.endFrame();
+    // Swap buffers
     this->viewport.swapBuffers();
 }

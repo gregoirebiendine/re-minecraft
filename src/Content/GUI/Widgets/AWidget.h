@@ -23,10 +23,10 @@ class AWidget
     public:
         virtual ~AWidget() = default;
 
+        [[nodiscard]] bool isDirty() const;
+        [[nodiscard]] bool isAnyDirty() const;
         void markDirty();
-        bool isDirty() const;
         void clearDirty();
-        bool isAnyDirty() const;
 
         void setPosition(glm::vec2 pos);
         [[nodiscard]] glm::vec2 getPosition() const;
@@ -44,6 +44,9 @@ class AWidget
 
         void build(std::vector<GuiVertex>& out, glm::vec2 parentOffset);
         virtual void buildSelf(std::vector<GuiVertex>& out, glm::vec2 absolutePos) = 0;
+
+        void buildMsdfTree(std::vector<MSDFVertex>& out, glm::vec2 parentOffset);
+        virtual void buildMsdf(std::vector<MSDFVertex>& out, glm::vec2 abs) {}
 
         virtual void tick();
 };

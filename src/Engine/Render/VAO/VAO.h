@@ -21,6 +21,7 @@ class VAO {
         void storeGuiData(const std::vector<GuiVertex> &data) const;
         void storeEntityMeshData(const std::vector<EntityVertex> &data) const;
         void storeOutlineData(const std::vector<GLfloat> &data) const;
+        void storeMsdfData(const std::vector<MSDFVertex>& data) const;
 
         void bind() const;
         void unbind() const;

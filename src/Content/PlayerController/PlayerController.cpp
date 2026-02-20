@@ -5,7 +5,7 @@
 #include "Components/Camera.h"
 #include "Components/Inventory.h"
 
-PlayerController::PlayerController(World& _world, const Font& _font, const Viewport& _viewport) :
+PlayerController::PlayerController(World& _world, const MsdfFont& _font, const Viewport& _viewport) :
     world(_world),
     gui(_font, this->world.getTextureRegistry(), this->world.getItemRegistry(), _viewport),
     playerEntity(this->world.getPlayerEntity()),

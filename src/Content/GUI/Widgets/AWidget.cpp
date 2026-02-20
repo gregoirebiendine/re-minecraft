@@ -89,16 +89,27 @@ void AWidget::clearChildren()
 
 void AWidget::build(std::vector<GuiVertex>& out, const glm::vec2 parentOffset)
 {
-    if (!visible)
+    if (!this->visible)
         return;
 
     const glm::vec2 abs = parentOffset + this->position;
 
-    buildSelf(out, abs);
+    this->buildSelf(out, abs);
     for (const auto& child : this->children)
         child->build(out, abs);
 }
 
+void AWidget::buildMsdfTree(std::vector<MSDFVertex> &out, const glm::vec2 parentOffset)
+{
+    if (!this->visible)
+        return;
+
+    const glm::vec2 abs = parentOffset + this->position;
+
+    this->buildMsdf(out, abs);
+    for (const auto& child : this->children)
+        child->buildMsdfTree(out, abs);
+}
 void AWidget::tick()
 {
     if (this->positionBinding) {

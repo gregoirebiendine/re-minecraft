@@ -225,13 +225,13 @@ void Viewport::setCursorVisibility(const bool showCursor) const
 
 void Viewport::toggleFullscreen()
 {
-    const auto* videoMode = this->getVideoMode();
+    const auto* videoMode = getVideoMode();
     const bool wouldBeFullscreen = !this->settings.isFullscreen();
 
     this->settings.setFullscreen(wouldBeFullscreen);
 
     if (wouldBeFullscreen) {
-        GLFWmonitor *monitor = this->getMonitor();
+        GLFWmonitor *monitor = getMonitor();
         glfwSetWindowMonitor(this->window, monitor, 0, 0, videoMode->width, videoMode->height, videoMode->refreshRate);
         this->setSize({videoMode->width, videoMode->height});
     }

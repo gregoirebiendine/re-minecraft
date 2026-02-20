@@ -14,9 +14,10 @@ Shader::Shader(const std::string& folder)
             vertContent = loadFile(entry.path().string());
         else if (ext == ".frag")
             fragContent = loadFile(entry.path().string());
-        else
-            throw std::runtime_error("[Farfield::Shader] Unsupported shader extension: " + ext.string());
     }
+
+    if (vertContent.empty() || fragContent.empty())
+        throw std::runtime_error("[Farfield::Shader] Failed to load one or more shaders");
 
     const char *vertexShaderSource = vertContent.c_str();
     const char *fragmentShaderSource = fragContent.c_str();
@@ -47,6 +48,7 @@ Shader::Shader(const std::string& folder)
     this->projectionMatrixUniform = glGetUniformLocation(this->ID, "ProjectionMatrix");
     this->viewMatrixUniform = glGetUniformLocation(this->ID, "ViewMatrix");
     this->modelMatrixUniform = glGetUniformLocation(this->ID, "ModelMatrix");
+    this->textureSamplerUniform = glGetUniformLocation(this->ID, "Textures");
 }
 
 Shader::~Shader() {
@@ -146,4 +148,12 @@ void Shader::setProjectionMatrix(const glm::mat4& projectionMatrix)
     if (this->projectionMatrixUniform == -1)
         this->projectionMatrixUniform = glGetUniformLocation(this->ID, "ProjectionMatrix");
     glUniformMatrix4fv(this->projectionMatrixUniform, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+}
+
+void Shader::setTextureSamplerId(const int samplerId)
+{
+    this->use();
+    if (this->textureSamplerUniform == -1)
+        this->textureSamplerUniform = glGetUniformLocation(this->ID, "Textures");
+    glUniform1i(this->textureSamplerUniform, samplerId);
 }
