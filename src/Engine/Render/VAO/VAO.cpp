@@ -10,7 +10,10 @@ VAO::~VAO()
     glDeleteVertexArrays(1, &this->ID);
 }
 
-void VAO::storeBlockData(const std::vector<PackedBlockVertex> &data) const {
+void VAO::storeBlockData(const std::vector<PackedBlockVertex> &data)
+{
+    this->size = static_cast<GLsizei>(data.size());
+
     this->vbo.addData(data);
 
     glEnableVertexAttribArray(0);
@@ -22,8 +25,10 @@ void VAO::storeBlockData(const std::vector<PackedBlockVertex> &data) const {
     this->vbo.unbind();
 }
 
-void VAO::storeGuiData(const std::vector<GuiVertex>& data) const
+void VAO::storeGuiData(const std::vector<GuiVertex>& data)
 {
+    this->size = static_cast<GLsizei>(data.size());
+
     this->vbo.addData<GuiVertex>(data);
 
     glEnableVertexAttribArray(0);
@@ -41,8 +46,10 @@ void VAO::storeGuiData(const std::vector<GuiVertex>& data) const
     this->vbo.unbind();
 }
 
-void VAO::storeOutlineData(const std::vector<GLfloat>& data) const
+void VAO::storeOutlineData(const std::vector<GLfloat>& data)
 {
+    this->size = static_cast<GLsizei>(data.size());
+
     this->vbo.addData<GLfloat>(data);
 
     glEnableVertexAttribArray(0);
@@ -51,8 +58,10 @@ void VAO::storeOutlineData(const std::vector<GLfloat>& data) const
     this->vbo.unbind();
 }
 
-void VAO::storeEntityMeshData(const std::vector<EntityVertex>& data) const
+void VAO::storeEntityMeshData(const std::vector<EntityVertex>& data)
 {
+    this->size = static_cast<GLsizei>(data.size());
+
     this->vbo.addData<EntityVertex>(data);
 
     glEnableVertexAttribArray(0);
@@ -67,8 +76,10 @@ void VAO::storeEntityMeshData(const std::vector<EntityVertex>& data) const
     this->vbo.unbind();
 }
 
-void VAO::storeMsdfData(const std::vector<MSDFVertex>& data) const
+void VAO::storeMsdfData(const std::vector<MSDFVertex>& data)
 {
+    this->size = static_cast<GLsizei>(data.size());
+
     this->vbo.addData<MSDFVertex>(data);
 
     glEnableVertexAttribArray(0);
@@ -91,4 +102,11 @@ void VAO::bind() const
 void VAO::unbind() const
 {
     glBindVertexArray(0);
+}
+
+void VAO::draw() const
+{
+    this->bind();
+    glDrawArrays(GL_TRIANGLES, 0, this->size);
+    this->unbind();
 }

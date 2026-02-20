@@ -10,21 +10,23 @@
 #include "VAOVertices.h"
 
 class VAO {
-    GLuint ID{};
     VBO vbo;
+    GLuint ID{};
+    GLsizei size{};
 
     public:
         VAO();
         ~VAO();
 
-        void storeBlockData(const std::vector<PackedBlockVertex> &data) const;
-        void storeGuiData(const std::vector<GuiVertex> &data) const;
-        void storeEntityMeshData(const std::vector<EntityVertex> &data) const;
-        void storeOutlineData(const std::vector<GLfloat> &data) const;
-        void storeMsdfData(const std::vector<MSDFVertex>& data) const;
+        void storeBlockData(const std::vector<PackedBlockVertex> &data);
+        void storeGuiData(const std::vector<GuiVertex> &data);
+        void storeEntityMeshData(const std::vector<EntityVertex> &data);
+        void storeOutlineData(const std::vector<GLfloat> &data);
+        void storeMsdfData(const std::vector<MSDFVertex>& data);
 
         void bind() const;
         void unbind() const;
+        void draw() const;
 };
 
 

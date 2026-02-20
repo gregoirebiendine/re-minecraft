@@ -95,7 +95,7 @@ namespace ECS
         DebugAABBSystem() :
             shader("/resources/shaders/Outline/")
         {
-            auto vertices = buildUnitCubeOutline();
+            const auto vertices = buildUnitCubeOutline();
             this->vertexCount = static_cast<int>(vertices.size()) / 3;
 
             this->vao.bind();

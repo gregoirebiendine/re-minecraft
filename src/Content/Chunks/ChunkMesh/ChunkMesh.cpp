@@ -33,9 +33,7 @@ void ChunkMesh::render() const
     if (vertexCounts[frontIndex] == 0)
         return;
 
-    buffers[frontIndex].bind();
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertexCounts[frontIndex]));
-    buffers[frontIndex].unbind();
+    this->buffers[frontIndex].draw();
 }
 
 bool ChunkMesh::hasGeometry() const

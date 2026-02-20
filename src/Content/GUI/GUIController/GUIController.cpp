@@ -48,9 +48,7 @@ void GUIController::renderBlockOutline(const glm::mat4& v, const glm::mat4& p, c
     this->shader.setViewMatrix(v);
     this->shader.setProjectionMatrix(p);
 
-    this->vao.bind();
-    glDrawArrays(GL_TRIANGLES, 0, 288);
-    this->vao.unbind();
+    this->vao.draw();
 
     glPolygonOffset(0, 0);
     glEnable(GL_CULL_FACE);

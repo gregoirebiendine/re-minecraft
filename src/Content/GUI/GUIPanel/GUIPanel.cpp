@@ -16,6 +16,7 @@ GUIPanel::GUIPanel(const MsdfFont& _font, const TextureRegistry& _textureRegistr
     // Set texture uniform
     this->shader.setTextureSamplerId(0);
     this->fontShader.setTextureSamplerId(1);
+    this->fontShader.setUniformFloat("ScreenPxRange", this->font.getDistanceRange());
 
     // Build widget tree
     this->root = std::make_unique<PanelWidget>();
@@ -179,15 +180,12 @@ void GUIPanel::rebuildVertexBuffer()
     this->fontVao.unbind();
 }
 
-void GUIPanel::update(const glm::vec3 &pos, const glm::vec3 &forward ,const ECS::Hotbar& hotbarInv)
+void GUIPanel::update(const glm::vec3 &pos, const glm::vec3 &forward, const ECS::Hotbar& hotbarInv)
 {
     this->currentPos = pos;
     this->currentForward = forward;
     this->hotbarInventory = hotbarInv;
-}
 
-void GUIPanel::render()
-{
     // Check for viewport resize
     const auto currentVp = this->viewport.getSize();
     if (currentVp != this->cachedViewportSize) {
@@ -201,27 +199,21 @@ void GUIPanel::render()
     // Rebuild VBO only if something changed
     if (this->root->isAnyDirty())
         this->rebuildVertexBuffer();
+}
 
+void GUIPanel::render()
+{
     const auto& projMatrix = this->getGUIProjectionMatrix();
 
-    // Draw
     this->shader.use();
     this->shader.setProjectionMatrix(projMatrix);
-
-    this->vao.bind();
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->vertexBuffer.size()));
-    this->vao.unbind();
+    this->vao.draw();
 
     if (!this->fontBuffer.empty()) {
         this->fontShader.use();
         this->fontShader.setProjectionMatrix(projMatrix);
-        this->fontShader.setUniformFloat("ScreenPxRange", this->font.getDistanceRange());
-
         this->font.bindTexture();
-
-        this->fontVao.bind();
-        glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->fontBuffer.size()));
-        this->fontVao.unbind();
+        this->fontVao.draw();
     }
 }
 
@@ -231,25 +223,15 @@ void GUIPanel::onViewportResize(const glm::ivec2 newSize) const
 {
     this->crosshair->setVertices(getCrosshairVertices(newSize));
 
-    const auto vpX = static_cast<float>(newSize.x);
-    const auto vpY = static_cast<float>(newSize.y);
-
     // Hotbar: centered horizontally, anchored to bottom
     {
+        const auto vpX = static_cast<float>(newSize.x);
+        const auto vpY = static_cast<float>(newSize.y);
         const auto texId = this->textureRegistry.getByName("hotbar");
         const auto& slot = this->textureRegistry.getSlot(texId);
         const float w = static_cast<float>(slot.width) * 1.5f;
         const float h = static_cast<float>(slot.height) * 1.5f;
         this->hotbar->setPosition({vpX / 2.f - w * 0.5f, vpY - h - 20.f});
-    }
-
-    // Hotbar selection: same positioning
-    {
-        const auto texId = this->textureRegistry.getByName("hotbar_selection");
-        const auto& slot = this->textureRegistry.getSlot(texId);
-        const float w = static_cast<float>(slot.width) * 1.5f;
-        const float h = static_cast<float>(slot.height) * 1.5f;
-        this->hotbarSelection->setPosition({vpX / 2.f - w * 0.5f, vpY - h - 20.f});
     }
 }
 

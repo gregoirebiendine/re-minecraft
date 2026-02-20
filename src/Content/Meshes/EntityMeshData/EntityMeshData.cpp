@@ -12,7 +12,5 @@ void EntityMeshData::upload(const std::vector<EntityVertex>& vertices)
 
 void EntityMeshData::render() const
 {
-    this->vao.bind();
-    glDrawArrays(GL_TRIANGLES, 0, this->vertexCount);
-    this->vao.unbind();
+    this->vao.draw();
 }

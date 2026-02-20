@@ -32,39 +32,40 @@ Engine::Engine() :
     this->world->getChunkManager().setViewDistance(this->settings.getViewDistance());
 }
 
-void Engine::preciseWait(const double seconds) const
-{
-    if (seconds <= 0.0) return;
-
-    #ifdef _WIN32
-        if (this->frameTimer) {
-            LARGE_INTEGER dueTime;
-            dueTime.QuadPart = -static_cast<LONGLONG>(seconds * 10'000'000.0);
-
-            if (SetWaitableTimerEx(this->frameTimer, &dueTime, 0, nullptr, nullptr, nullptr, 0)) {
-                WaitForSingleObject(this->frameTimer, INFINITE);
-                return;
-            }
-        }
-        std::this_thread::sleep_for(std::chrono::duration_cast<Clock::duration>(Duration(seconds)));
-
-    #elif defined(__linux__)
-        struct timespec req;
-        req.tv_sec = static_cast<time_t>(seconds);
-        req.tv_nsec = static_cast<long>((seconds - req.tv_sec) * 1'000'000'000.0);
-
-        while (clock_nanosleep(CLOCK_MONOTONIC, 0, &req, &req) == EINTR) {}
-
-    #else
-        std::this_thread::sleep_for(std::chrono::duration_cast<Clock::duration>(Duration(seconds)));
-    #endif
-}
-
 Engine::~Engine()
 {
     #ifdef _WIN32
     if (this->frameTimer)
         CloseHandle(this->frameTimer);
+    #endif
+}
+
+void Engine::preciseWait(const double seconds) const
+{
+    if (seconds <= 0.0)
+        return;
+
+    #ifdef _WIN32
+    if (this->frameTimer) {
+        LARGE_INTEGER dueTime;
+        dueTime.QuadPart = -static_cast<LONGLONG>(seconds * 10'000'000.0);
+
+        if (SetWaitableTimerEx(this->frameTimer, &dueTime, 0, nullptr, nullptr, nullptr, 0)) {
+            WaitForSingleObject(this->frameTimer, INFINITE);
+            return;
+        }
+    }
+    std::this_thread::sleep_for(std::chrono::duration_cast<Clock::duration>(Duration(seconds)));
+
+    #elif defined(__linux__)
+    struct timespec req;
+    req.tv_sec = static_cast<time_t>(seconds);
+    req.tv_nsec = static_cast<long>((seconds - req.tv_sec) * 1'000'000'000.0);
+
+    while (clock_nanosleep(CLOCK_MONOTONIC, 0, &req, &req) == EINTR) {}
+
+    #else
+    std::this_thread::sleep_for(std::chrono::duration_cast<Clock::duration>(Duration(seconds)));
     #endif
 }
 
