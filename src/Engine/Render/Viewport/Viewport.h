@@ -5,7 +5,7 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <stbi/stb_image.h>
+
 #include "Settings.h"
 #include "InputState.h"
 

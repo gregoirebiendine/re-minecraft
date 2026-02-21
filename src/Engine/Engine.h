@@ -36,11 +36,12 @@ class Engine {
     mutable Viewport viewport;
     InputState inputs;
     
-    TextureRegistry textureRegistry;
     BlockRegistry blockRegistry;
     PrefabRegistry prefabRegistry;
+    std::unique_ptr<TextureRegistry> textureRegistry;
     std::unique_ptr<ItemRegistry> itemRegistry;
     std::unique_ptr<MeshRegistry> meshRegistry;
+    Registries registries;
 
     std::unique_ptr<MsdfFont> font;
     std::unique_ptr<World> world;

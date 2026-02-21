@@ -16,6 +16,7 @@
 #include "ChunkMeshManager.h"
 #include "InputState.h"
 #include "ItemRegistry.h"
+#include "Registries.h"
 #include "Shader.h"
 #include "ECS/ISystem.h"
 
@@ -24,10 +25,7 @@ class World {
     static constexpr int SPAWN_RADIUS = 3;
     static constexpr int MAX_ENTITY = 100;
 
-    const BlockRegistry& blockRegistry;
-    const TextureRegistry& textureRegistry;
-    const ItemRegistry& itemRegistry;
-    const MeshRegistry& meshRegistry;
+    const Registries& registries;
     const InputState& inputs;
 
     Shader shader;
@@ -43,23 +41,15 @@ class World {
     bool isSimulationReady = false;
 
     public:
-        explicit World(
-            const BlockRegistry& _blockRegistry,
-            const TextureRegistry& _textureRegistry,
-            const PrefabRegistry& _prefabRegistry,
-            const ItemRegistry& _itemRegistry,
-            const MeshRegistry& _meshRegistry,
-            const InputState& _inputs
-        );
+        explicit World(const Registries& _registries, const InputState& _inputs);
 
+        // Get ECS members
         ECS::Handler& getECS() { return this->ecs; }
         ECS::SystemScheduler& getECSScheduler() { return this->scheduler; }
         ECS::IEntity& getPlayerEntity() { return this->player; }
 
-        const BlockRegistry& getBlockRegistry() const { return this->blockRegistry; }
-        const TextureRegistry& getTextureRegistry() const { return this->textureRegistry; }
-        const ItemRegistry& getItemRegistry() const { return this->itemRegistry; }
-        const MeshRegistry& getMeshRegistry() const { return this->meshRegistry; }
+        // Get other members
+        const Registries& getRegistries() const { return this->registries; }
         ChunkManager& getChunkManager() { return this->chunkManager; }
         Shader& getShader() { return this->shader; }
 

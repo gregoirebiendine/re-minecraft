@@ -30,9 +30,9 @@ class GUIPanel
 {
     // Classes from Engine
     const MsdfFont& font;
+    const Viewport& viewport;
     const TextureRegistry& textureRegistry;
     const ItemRegistry& itemRegistry;
-    const Viewport& viewport;
 
     // Render storage
     VAO vao;
@@ -65,7 +65,7 @@ class GUIPanel
     [[nodiscard]] glm::mat4 getGUIProjectionMatrix() const;
 
     public:
-        explicit GUIPanel(const MsdfFont& _font, const TextureRegistry& _textureRegistry, const ItemRegistry& _itemRegistry, const Viewport& _viewport);
+        explicit GUIPanel(const MsdfFont& _font, const Viewport& _viewport, const TextureRegistry& _textureRegistry, const ItemRegistry& _itemRegistry);
 
         // Events
         void toggleDebugPanel() const;

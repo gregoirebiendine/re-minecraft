@@ -7,7 +7,7 @@
 
 PlayerController::PlayerController(World& _world, const MsdfFont& _font, const Viewport& _viewport) :
     world(_world),
-    gui(_font, this->world.getTextureRegistry(), this->world.getItemRegistry(), _viewport),
+    gui(_font, _viewport, this->world.getRegistries().get<TextureRegistry>(), this->world.getRegistries().get<ItemRegistry>()),
     playerEntity(this->world.getPlayerEntity()),
     cameraSystem(this->world.getECSScheduler().getSystem<ECS::CameraSystem>()),
     hotbarComponent(this->world.getECS().getComponent<ECS::Hotbar>(this->playerEntity))
@@ -55,22 +55,22 @@ void PlayerController::handleInputs(const InputState& inputs, Viewport& viewport
 
     // Scroll
     if (inputs.scroll != Inputs::Scroll::NONE) {
-        this->selectedSlot = (this->selectedSlot + std::to_underlying(inputs.scroll) + 9) % 9;
+        this->selectedSlot = std::clamp(0, this->selectedSlot + std::to_underlying(inputs.scroll), 8);
         this->gui.onHotbarSlotChanged(this->selectedSlot);
     }
 
     // Toggle mouse capture
     if (inputs.isKeyPressed(Inputs::Keys::P)) {
-        const bool isCaptured = cameraSystem.isMouseCaptured();
+        const bool isCaptured = this->cameraSystem.isMouseCaptured();
         viewport.setCursorVisibility(isCaptured);
-        cameraSystem.setMouseCaptured(!isCaptured);
+        this->cameraSystem.setMouseCaptured(!isCaptured);
     }
 
     // Toggle debug screen (F3)
     if (inputs.isKeyPressed(Inputs::Keys::F3))
         this->getGUI().toggleDebugPanel();
 
-    // Toggle fullscreen
+    // Toggle fullscreen (F11)
     if (inputs.isKeyPressed(Inputs::Keys::F11))
         viewport.toggleFullscreen();
 }
@@ -83,8 +83,8 @@ void PlayerController::placeBlock(const glm::vec3& forward) const
     // if (amount == 0)
     //     return;
 
-    const auto& blockId = this->world.getBlockRegistry().getByName("core:grass");
-    const auto& selectedBlockMeta = this->world.getBlockRegistry().get(blockId);
+    const auto& blockId = this->world.getRegistries().get<BlockRegistry>().getByName("core:grass");
+    const auto& selectedBlockMeta = this->world.getRegistries().get<BlockRegistry>().get(blockId);
     BlockRotation rotation = 0;
 
     switch (selectedBlockMeta.rotation) {

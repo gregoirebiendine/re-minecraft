@@ -1,5 +1,4 @@
 #include "TextureRegistry.h"
-#include <cstring>
 
 stbi_uc* TextureRegistry::createExtrudedTexture(const stbi_uc* src, int srcW, int srcH, int border)
 {
@@ -95,6 +94,7 @@ TextureRegistry::TextureRegistry()
     this->registerTextureFromFolder("/resources/textures/items");
     this->registerTextureFromFolder("/resources/textures/entities");
     this->registerTextureFromFolder("/resources/textures/gui");
+    this->createTextures();
 }
 
 TextureRegistry::~TextureRegistry()
@@ -128,8 +128,8 @@ void TextureRegistry::createTextures()
     // Pack textures (using expanded dimensions to account for border extrusion)
     for (const size_t idx : sortedIndices) {
         const auto& tex = pending[idx];
-        int expandedW = tex.width + 2 * BORDER;
-        int expandedH = tex.height + 2 * BORDER;
+        const int expandedW = tex.width + 2 * BORDER;
+        const int expandedH = tex.height + 2 * BORDER;
         bool placed = false;
 
         for (size_t layerIdx = 0; layerIdx < layers.size(); layerIdx++) {

@@ -22,7 +22,7 @@ class GUIController
     VAO vao;
 
     public:
-        explicit GUIController(const MsdfFont& _font, const TextureRegistry& _textureRegistry, const ItemRegistry& _itemRegistry, const Viewport& _viewport);
+        explicit GUIController(const MsdfFont& _font, const Viewport& _viewport, const TextureRegistry& _textureRegistry, const ItemRegistry& _itemRegistry);
 
         void onHotbarSlotChanged(int slot) const;
         void toggleDebugPanel() const;

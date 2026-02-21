@@ -1,11 +1,11 @@
 #include "GUIPanel.h"
 #include "CrosshairVertices.h"
 
-GUIPanel::GUIPanel(const MsdfFont& _font, const TextureRegistry& _textureRegistry, const ItemRegistry& _itemRegistry, const Viewport& _viewport) :
+GUIPanel::GUIPanel(const MsdfFont& _font, const Viewport& _viewport, const TextureRegistry& _textureRegistry, const ItemRegistry& _itemRegistry) :
     font(_font),
+    viewport(_viewport),
     textureRegistry(_textureRegistry),
     itemRegistry(_itemRegistry),
-    viewport(_viewport),
     shader("/resources/shaders/UI/"),
     fontShader("/resources/shaders/UI/Font/")
 {

@@ -57,11 +57,12 @@ set(
     ${CMAKE_SOURCE_DIR}/src/Content/PlayerController
     ${CMAKE_SOURCE_DIR}/src/Content/TerrainGenerator
     ${CMAKE_SOURCE_DIR}/src/Content/World
+    ${CMAKE_SOURCE_DIR}/src/Content/Registries/
     ${CMAKE_SOURCE_DIR}/src/Content/Registries/BlockRegistry
-    ${CMAKE_SOURCE_DIR}/src/Content/Registries/TextureRegistry
-    ${CMAKE_SOURCE_DIR}/src/Content/Registries/PrefabRegistry
     ${CMAKE_SOURCE_DIR}/src/Content/Registries/MeshRegistry
     ${CMAKE_SOURCE_DIR}/src/Content/Registries/ItemRegistry
+    ${CMAKE_SOURCE_DIR}/src/Content/Registries/TextureRegistry
+    ${CMAKE_SOURCE_DIR}/src/Content/Registries/PrefabRegistry
 )
 
 #add_subdirectory(lib/flint) # Comment for now as the lib won't compile on Windows

@@ -59,9 +59,6 @@ void Viewport::initWindow(InputState* inputs)
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
         throw std::runtime_error("Cannot initialize GLAD");
 
-    // Setup STBI image load
-    stbi_set_flip_vertically_on_load(true);
-
     // Set window aspect ratio
     this->aspectRatio = static_cast<float>(this->size.x) / static_cast<float>(this->size.y);
 }

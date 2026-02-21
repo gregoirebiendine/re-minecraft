@@ -19,21 +19,11 @@
 #include "Components/Friction.h"
 #include "ECS/EntityCreator.h"
 
-World::World(
-    const BlockRegistry& _blockRegistry,
-    const TextureRegistry& _textureRegistry,
-    const PrefabRegistry& _prefabRegistry,
-    const ItemRegistry& _itemRegistry,
-    const MeshRegistry& _meshRegistry,
-    const InputState& _inputs
-) :
-    blockRegistry(_blockRegistry),
-    textureRegistry(_textureRegistry),
-    itemRegistry(_itemRegistry),
-    meshRegistry(_meshRegistry),
+World::World(const Registries& _registries, const InputState& _inputs) :
+    registries(_registries),
     inputs(_inputs),
     shader("/resources/shaders/World/"),
-    chunkManager(_blockRegistry, _prefabRegistry),
+    chunkManager(_registries.blockRegistry, _registries.prefabRegistry),
     meshManager(*this)
 {
     // Setup entity vector
@@ -76,7 +66,7 @@ Material World::getBlock(const int wx, const int wy, const int wz)
     const Chunk* chunk = this->chunkManager.getChunk(cx, cy, cz);
 
     if (!chunk)
-        return Material::pack(this->blockRegistry.getByName("core:air"), 0);
+        return Material::pack(this->registries.blockRegistry.getByName("core:air"), 0);
 
     const auto [x, y, z] = BlockPos::fromWorld(wx, wy, wz);
     return chunk->getBlock(x, y, z);
@@ -89,7 +79,7 @@ Material World::getBlock(const glm::ivec3 pos)
 
 bool World::isAir(const int wx, const int wy, const int wz)
 {
-    return this->blockRegistry.isAir(this->getBlock(wx, wy, wz).getBlockId());
+    return this->registries.blockRegistry.isAir(this->getBlock(wx, wy, wz).getBlockId());
 }
 
 void World::setBlock(const int wx, const int wy, const int wz, const Material mat)
@@ -110,7 +100,7 @@ void World::setBlock(const int wx, const int wy, const int wz, const Material ma
 
 void World::setBlock(const int wx, const int wy, const int wz, const std::string& blockName)
 {
-    const BlockId id = this->blockRegistry.getByName(blockName);
+    const BlockId id = this->registries.blockRegistry.getByName(blockName);
 
     this->setBlock(wx, wy, wz, Material::pack(id, 0));
 }

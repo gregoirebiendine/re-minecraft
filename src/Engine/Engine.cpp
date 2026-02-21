@@ -1,8 +1,10 @@
 #include "Engine.h"
+#include "Registries.h"
 
 Engine::Engine() :
     viewport(settings),
-    prefabRegistry(blockRegistry)
+    prefabRegistry(blockRegistry),
+    registries{blockRegistry, prefabRegistry}
 {
     #ifdef _WIN32
     this->frameTimer = CreateWaitableTimerExW(
@@ -18,14 +20,15 @@ Engine::Engine() :
     this->viewport.initWindow(&this->inputs);
     this->viewport.initViewport();
 
-    // Create textures
-    this->textureRegistry.createTextures();
+    // Instantiate registries (OpenGL context)
+    this->textureRegistry = std::make_unique<TextureRegistry>();
+    this->itemRegistry = std::make_unique<ItemRegistry>(*this->textureRegistry);
+    this->meshRegistry = std::make_unique<MeshRegistry>();
+    this->registries.setGL(*this->textureRegistry, *this->itemRegistry, *this->meshRegistry);
 
     // Instantiate members
-    this->meshRegistry = std::make_unique<MeshRegistry>();
-    this->itemRegistry = std::make_unique<ItemRegistry>(this->textureRegistry);
     this->font = std::make_unique<MsdfFont>("../resources/textures/font/font.json", "../resources/textures/font/font.png");
-    this->world = std::make_unique<World>(this->blockRegistry, this->textureRegistry, this->prefabRegistry, *this->itemRegistry, *this->meshRegistry, this->inputs);
+    this->world = std::make_unique<World>(this->registries, this->inputs);
     this->playerController = std::make_unique<PlayerController>(*this->world, *this->font, this->viewport);
 
     // Update view distance from settings
@@ -130,8 +133,8 @@ void Engine::render() const
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Render World
-    this->textureRegistry.bind();
-    this->textureRegistry.bindSlots();
+    this->textureRegistry->bind();
+    this->textureRegistry->bindSlots();
     this->world->render();
 
     // Render Player

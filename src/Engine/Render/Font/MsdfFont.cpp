@@ -40,9 +40,7 @@ MsdfFont::MsdfFont(const std::string &jsonPath, const std::string &pngPath)
     }
 
     int w, h, channels;
-    stbi_set_flip_vertically_on_load(false);
     unsigned char* data = stbi_load(pngPath.c_str(), &w, &h, &channels, 4);
-    stbi_set_flip_vertically_on_load(true);
 
     if (!data)
         throw std::runtime_error("[MsdfFont::load] Cannot load " + pngPath);

@@ -96,19 +96,20 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
     neighbors[4] = { up    != nullptr, up    ? up->getBlockSnapshot()    : BlockStorage{} };
     neighbors[5] = { down  != nullptr, down  ? down->getBlockSnapshot()  : BlockStorage{} };
 
-    const auto& textureRegistry = this->world.getTextureRegistry();
+    const auto& textureRegistry = this->world.getRegistries().get<TextureRegistry>();
+    const auto& blockRegistry = this->world.getRegistries().get<BlockRegistry>();
 
     MeshData data;
     data.reserve(36 * Chunk::VOLUME);
 
     for (int i = 0; i < Chunk::VOLUME; i++) {
-        if (this->world.getBlockRegistry().isAir(blockData[i].getBlockId())) // Skip AIR
+        if (blockRegistry.isAir(blockData[i].getBlockId())) // Skip AIR
             continue;
 
         const auto [x, y, z] = ChunkPos::indexToLocalCoords(i);
         const BlockId blockId = blockData[i].getBlockId();
         const BlockRotation rotation = blockData[i].getRotation();
-        const BlockMeta& meta = this->world.getBlockRegistry().get(blockId);
+        const BlockMeta& meta = blockRegistry.get(blockId);
 
         // NORTH face
         if (isAirAtSnapshot(blockData, neighbors, x, y, z - 1)) {
@@ -190,8 +191,9 @@ const ChunkMesh& ChunkMeshManager::getMesh(const ChunkPos &pos) const
     return this->meshes.at(pos);
 }
 
-bool ChunkMeshManager::isTransparentAtSnapshot(const BlockId blockId) const {
-    return this->world.getBlockRegistry().get(blockId).transparent;
+bool ChunkMeshManager::isTransparentAtSnapshot(const BlockId blockId) const
+{
+    return this->world.getRegistries().get<BlockRegistry>().get(blockId).transparent;
 }
 
 bool ChunkMeshManager::isAirAtSnapshot(

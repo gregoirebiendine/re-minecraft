@@ -21,8 +21,8 @@ namespace ECS::Creator
 {
     inline IEntity createPlayer(Handler& handler, const World& world)
     {
-        // const auto mesh = world.getMeshRegistry().get("player");
-        // const auto texture = world.getTextureRegistry().getByName("player");
+        // const auto mesh = world.getRegistries().get<MeshRegistry>().get("player");
+        // const auto texture = world.getRegistries().get<TextureRegistry>().getByName("player");
         const auto player = handler.createEntity();
 
         handler.addComponent(player, Position{11.5f, 73.f, 11.5f});
@@ -38,17 +38,17 @@ namespace ECS::Creator
         handler.addComponent(player, Equipments{});
         // handler.addComponent(player, ECS::MeshRef{ mesh, texture });
 
-        handler.getComponent<Hotbar>(player).items[0] = world.getItemRegistry().createStack("core:iron_ingot", 1);
-        handler.getComponent<Hotbar>(player).items[1] = world.getItemRegistry().createStack("core:iron_ingot", 9);
-        handler.getComponent<Hotbar>(player).items[2] = world.getItemRegistry().createStack("core:iron_ingot", 58);
+        handler.getComponent<Hotbar>(player).items[0] = world.getRegistries().get<ItemRegistry>().createStack("core:iron_ingot", 1);
+        handler.getComponent<Hotbar>(player).items[1] = world.getRegistries().get<ItemRegistry>().createStack("core:iron_ingot", 9);
+        handler.getComponent<Hotbar>(player).items[2] = world.getRegistries().get<ItemRegistry>().createStack("core:iron_ingot", 58);
 
         return player;
     }
 
     inline IEntity createZombie(Handler& handler, const World& world)
     {
-        const auto mesh = world.getMeshRegistry().get("zombie");
-        const auto texture = world.getTextureRegistry().getByName("zombie");
+        const auto mesh = world.getRegistries().get<MeshRegistry>().get("zombie");
+        const auto texture = world.getRegistries().get<TextureRegistry>().getByName("zombie");
         const auto zombie = handler.createEntity();
 
         handler.addComponent(zombie, Position{7.5f, 73.f, 7.5f});

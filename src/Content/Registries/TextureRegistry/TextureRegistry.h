@@ -1,6 +1,8 @@
 #ifndef FARFIELD_TEXTUREREGISTRY_H
 #define FARFIELD_TEXTUREREGISTRY_H
 
+#define STB_IMAGE_IMPLEMENTATION_ALREADY_DEFINED
+
 #include <unordered_map>
 #include <stdexcept>
 #include <vector>
@@ -10,6 +12,7 @@
 #include <utility>
 #include <algorithm>
 #include <climits>
+#include <cstring>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
