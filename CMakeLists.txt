@@ -23,6 +23,7 @@ set(
     ${CMAKE_SOURCE_DIR}/lib
     ${CMAKE_SOURCE_DIR}/lib/json
     ${CMAKE_SOURCE_DIR}/lib/fastnoiselite
+    ${CMAKE_SOURCE_DIR}/lib/fmt/include
 
     ${CMAKE_SOURCE_DIR}/src/Engine
     ${CMAKE_SOURCE_DIR}/src/Engine/Input
@@ -68,10 +69,12 @@ set(
 
 #add_subdirectory(lib/flint) # Comment for now as the lib won't compile on Windows
 add_subdirectory(lib/GLFW)
+add_subdirectory(lib/fmt)
 
 add_executable(farfield ${SOURCES})
 
 #target_link_libraries(farfield PRIVATE flint) # Comment for now as the lib won't compile on Windows
 target_link_libraries(farfield PRIVATE glfw)
+target_link_libraries(farfield PRIVATE fmt::fmt)
 
 target_include_directories(farfield PRIVATE ${HEADERS})

@@ -10,6 +10,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <fmt/format.h>
 
 #include "Shader.h"
 #include "VAO.h"

@@ -46,19 +46,16 @@ GUIPanel::GUIPanel(const MsdfFont& _font, const Viewport& _viewport, const Textu
 
         this->debugPanel->addChild(makeBoundText(5.f, [this] {
             const auto& frameTimer = this->viewport.getFrameTimer();
-            std::ostringstream ss;
-            ss << frameTimer.getFPS() << " | Ms: " << std::fixed << std::setprecision(2) << frameTimer.getFrameTimeMs();
-            return "FPS: " + ss.str();
+            return fmt::format("FPS: {} | Ms: {:.2f}", frameTimer.getFPS(), frameTimer.getFrameTimeMs());
         }));
 
         this->debugPanel->addChild(makeBoundText(35.f, [this] {
-            std::ostringstream ss;
-            ss << std::fixed << std::setprecision(1) << this->currentPos;
-            return "Pos: " + ss.str();
+            return fmt::format("Pos: {:.1f}, {:.1f}, {:.1f}", this->currentPos.x, this->currentPos.y, this->currentPos.z);
         }));
 
         this->debugPanel->addChild(makeBoundText(65.f, [this] {
-            return "Chunk: " + glm::floor(this->currentPos / 16.f);
+            const glm::ivec3 cp = glm::floor(this->currentPos / 16.f);
+            return fmt::format("Chunk: {}, {}, {}", cp.x, cp.y, cp.z);
         }));
 
         this->debugPanel->addChild(makeBoundText(95.f, [this] {
