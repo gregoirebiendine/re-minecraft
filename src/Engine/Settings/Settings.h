@@ -6,14 +6,13 @@
 class Settings
 {
     // FPS
-    double targetFrameRate{1.0};
-    double targetFrameTime{1.0};
-    double currentFps{0.0};
+    double targetFrameRate{60.0};
+    double targetFrameTime{0.016666667};
     bool vsync{true};
 
     // Camera settings
     uint8_t viewDistance{8};
-    uint8_t fov{100};
+    uint8_t fov{90};
 
     // Window settings
     bool fullscreen{false};
@@ -25,9 +24,6 @@ class Settings
         void setFpsTarget(double target);
         [[nodiscard]] double getFpsTarget() const;
         [[nodiscard]] double getFpsFrameTime() const;
-
-        void setCurrentFps(double _fps);
-        [[nodiscard]] double getCurrentFps() const;
 
         void setViewDistance(uint8_t distance);
         [[nodiscard]] uint8_t getViewDistance() const;

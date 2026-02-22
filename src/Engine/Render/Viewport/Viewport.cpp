@@ -31,14 +31,20 @@ void Viewport::initWindow(InputState* inputs)
 
     glfwMakeContextCurrent(this->window);
 
-    // Center window
+    // Auto resize window
     const auto* videoMode = getVideoMode();
+    const glm::ivec2 autoSize = getClosestResolution(videoMode);
+
+    this->setSize(autoSize, false);
+    glfwSetWindowSize(this->window, autoSize.x, autoSize.y);
+
+    // Center window
     this->centerWindow(videoMode);
 
     // Set fps target to screen refresh rate
     this->settings.setFpsTarget(videoMode->refreshRate);
 
-    // VSync
+    // Enable VSync
     this->useVSync(true);
 
     // Enable RAW mouse input
@@ -58,9 +64,6 @@ void Viewport::initWindow(InputState* inputs)
     // Initialize GLAD Manager
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
         throw std::runtime_error("Cannot initialize GLAD");
-
-    // Set window aspect ratio
-    this->aspectRatio = static_cast<float>(this->size.x) / static_cast<float>(this->size.y);
 }
 
 void Viewport::initViewport() const
@@ -81,79 +84,10 @@ void Viewport::initViewport() const
 
     // Disable integrated MSAA (will be used only for block outlines)
     glDisable(GL_MULTISAMPLE);
-
-    // Create MSAA framebuffer (should be removed because of weird texture artifacts)
-    // fbWidth = viewportSize.x;
-    // fbHeight = viewportSize.y;
-    // createMSAABuffers();
-}
-
-void Viewport::createMSAABuffers()
-{
-    // Create multisampled FBO
-    glGenFramebuffers(1, &msaaFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, msaaFBO);
-
-    // Create multisampled color buffer
-    glGenRenderbuffers(1, &msaaColorBuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, msaaColorBuffer);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, MSAA_SAMPLES, GL_RGBA8, fbWidth, fbHeight);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, msaaColorBuffer);
-
-    // Create multisampled depth buffer
-    glGenRenderbuffers(1, &msaaDepthBuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, msaaDepthBuffer);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, MSAA_SAMPLES, GL_DEPTH24_STENCIL8, fbWidth, fbHeight);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, msaaDepthBuffer);
-
-    // Check framebuffer completeness
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        throw std::runtime_error("MSAA Framebuffer is not complete");
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-void Viewport::deleteMSAABuffers()
-{
-    if (msaaFBO) {
-        glDeleteFramebuffers(1, &msaaFBO);
-        msaaFBO = 0;
-    }
-    if (msaaColorBuffer) {
-        glDeleteRenderbuffers(1, &msaaColorBuffer);
-        msaaColorBuffer = 0;
-    }
-    if (msaaDepthBuffer) {
-        glDeleteRenderbuffers(1, &msaaDepthBuffer);
-        msaaDepthBuffer = 0;
-    }
-}
-
-void Viewport::beginFrame() const
-{
-    glBindFramebuffer(GL_FRAMEBUFFER, msaaFBO);
-    glViewport(0, 0, fbWidth, fbHeight);
-}
-
-void Viewport::endFrame() const
-{
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, msaaFBO);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    glBlitFramebuffer(
-        0, 0, fbWidth, fbHeight,
-        0, 0, fbWidth, fbHeight,
-        GL_COLOR_BUFFER_BIT,
-        GL_NEAREST
-    );
-
-    // Bind default framebuffer for any post-processing or UI
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Viewport::closeWindow() const
 {
-    // deleteMSAABuffers();
-
     glfwDestroyWindow(this->window);
     glfwTerminate();
 }
@@ -178,15 +112,17 @@ void Viewport::centerWindow(const GLFWvidmode* videoMode) const
     glfwSetWindowPos(this->window, (videoMode->width / 2) - (this->size.x / 2),  (videoMode->height / 2) - (this->size.y / 2));
 }
 
-void Viewport::setSize(const glm::ivec2 _size)
+void Viewport::setSize(const glm::ivec2 _size, const bool modifyViewport)
 {
     if (_size == glm::ivec2(0))
         return;
 
+    this->lastSize = this->size;
     this->size = _size;
     this->setAspectRatio(static_cast<float>(_size.x) / static_cast<float>(_size.y));
 
-    glViewport(0, 0, _size.x, _size.y);
+    if (modifyViewport)
+        glViewport(0, 0, _size.x, _size.y);
 }
 
 glm::ivec2 Viewport::getSize() const
@@ -205,20 +141,11 @@ bool Viewport::isUsingVSync() const
     return this->settings.isUsingVSync();
 }
 
-void Viewport::setAspectRatio(const float aspect)
-{
-    this->aspectRatio = aspect;
-}
-
-float Viewport::getAspectRatio() const
-{
-    return this->aspectRatio;
-}
-
 void Viewport::setCursorVisibility(const bool showCursor) const
 {
     glfwSetInputMode(this->window, GLFW_CURSOR, showCursor ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
 }
+
 
 void Viewport::toggleFullscreen()
 {
@@ -229,12 +156,12 @@ void Viewport::toggleFullscreen()
 
     if (wouldBeFullscreen) {
         GLFWmonitor *monitor = getMonitor();
-        glfwSetWindowMonitor(this->window, monitor, 0, 0, videoMode->width, videoMode->height, videoMode->refreshRate);
         this->setSize({videoMode->width, videoMode->height});
+        glfwSetWindowMonitor(this->window, monitor, 0, 0, videoMode->width, videoMode->height, videoMode->refreshRate);
     }
     else {
-        glfwSetWindowMonitor(this->window, nullptr, 0, 0, this->baseSize.x, this->baseSize.y, videoMode->refreshRate);
-        this->setSize(this->baseSize);
+        glfwSetWindowMonitor(this->window, nullptr, 0, 0, this->lastSize.x, this->lastSize.y, videoMode->refreshRate);
+        this->setSize(this->lastSize);
         this->centerWindow(videoMode);
     }
 }
@@ -246,7 +173,7 @@ GLFWmonitor* Viewport::getMonitor()
 
     if (!monitor) {
         glfwTerminate();
-        throw std::runtime_error("Failed to get main monitor");
+        throw std::runtime_error("[Viewport::getMonitor] Failed to get main monitor");
     }
     return monitor;
 }
@@ -257,7 +184,22 @@ const GLFWvidmode* Viewport::getVideoMode()
 
     if (!videoMode) {
         glfwTerminate();
-        throw std::runtime_error("Failed to get video mode");
+        throw std::runtime_error("[Viewport::getVideoMode] Failed to get video mode");
     }
     return videoMode;
+}
+
+glm::ivec2 Viewport::getClosestResolution(const GLFWvidmode *videoMode)
+{
+    int closestHeight = 0;
+
+    for (const auto& h : SCREEN_SIZES | std::views::keys) {
+        if (h >= videoMode->height)
+            continue;
+
+        if (h >= closestHeight)
+            closestHeight = h;
+    }
+
+    return {SCREEN_SIZES.at(closestHeight), closestHeight};
 }

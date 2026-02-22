@@ -45,27 +45,20 @@ GUIPanel::GUIPanel(const MsdfFont& _font, const Viewport& _viewport, const Textu
         };
 
         this->debugPanel->addChild(makeBoundText(5.f, [this] {
+            const auto& frameTimer = this->viewport.getFrameTimer();
             std::ostringstream ss;
-            ss << std::fixed << std::setprecision(1) << this->viewport.getSettings().getCurrentFps();
+            ss << frameTimer.getFPS() << " | Ms: " << std::fixed << std::setprecision(2) << frameTimer.getFrameTimeMs();
             return "FPS: " + ss.str();
         }));
 
         this->debugPanel->addChild(makeBoundText(35.f, [this] {
             std::ostringstream ss;
-            ss << std::fixed << std::setprecision(1)
-               << this->currentPos.x << ", "
-               << this->currentPos.y << ", "
-               << this->currentPos.z;
+            ss << std::fixed << std::setprecision(1) << this->currentPos;
             return "Pos: " + ss.str();
         }));
 
         this->debugPanel->addChild(makeBoundText(65.f, [this] {
-            const ChunkPos cp{
-                static_cast<int>(this->currentPos.x) / 16,
-                static_cast<int>(this->currentPos.y) / 16,
-                static_cast<int>(this->currentPos.z) / 16
-            };
-            return "Chunk: " + cp;
+            return "Chunk: " + glm::floor(this->currentPos / 16.f);
         }));
 
         this->debugPanel->addChild(makeBoundText(95.f, [this] {

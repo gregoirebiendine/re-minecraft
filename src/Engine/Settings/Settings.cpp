@@ -29,16 +29,6 @@ double Settings::getFpsFrameTime() const
     return this->targetFrameTime;
 }
 
-void Settings::setCurrentFps(const double _fps)
-{
-    this->currentFps = _fps;
-}
-
-double Settings::getCurrentFps() const
-{
-    return this->currentFps;
-}
-
 void Settings::setViewDistance(const uint8_t distance)
 {
     this->viewDistance = distance;

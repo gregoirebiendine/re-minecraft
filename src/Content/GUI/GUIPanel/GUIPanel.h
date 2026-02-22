@@ -24,6 +24,7 @@
 #include "ChunkPos.h"
 #include "DirectionUtils.h"
 #include "RGBA.h"
+#include "Utils.h"
 #include "Components/Inventory.h"
 
 class GUIPanel

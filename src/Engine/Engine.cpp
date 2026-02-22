@@ -84,7 +84,7 @@ void Engine::loop()
         double frameTime = std::chrono::duration_cast<Duration>(frameStart - previousTime).count();
 
         if (frameTime > 0.0)
-            this->settings.setCurrentFps(1.0 / frameTime);
+            this->viewport.updateFrameTimer(frameTime);
 
         if (frameTime > 0.25)
             frameTime = 0.25;

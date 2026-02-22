@@ -2,39 +2,43 @@
 #define FARFIELD_VIEWPORT_H
 
 #include <iostream>
+#include <unordered_map>
+#include <ranges>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "FrameTimer.h"
 #include "Settings.h"
 #include "InputState.h"
 
+const std::unordered_map<int, int> SCREEN_SIZES = {
+    {4320, 7680},
+    {2160, 3840},
+    {1440, 2560},
+    {1080, 1920},
+    {720, 1280},
+    {480, 854}
+};
+
 class Viewport
 {
-    static constexpr int MSAA_SAMPLES = 4;
-
     GLFWwindow *window{nullptr};
     Settings& settings;
+    FrameTimer frameTimer;
 
     // Windows state
-    const glm::ivec2 baseSize{1600, 900};
-    glm::ivec2 size{baseSize};
-    float aspectRatio{static_cast<float>(size.x) / static_cast<float>(size.y)};
-
-    // MSAA FBO
-    GLuint msaaFBO{0};
-    GLuint msaaColorBuffer{0};
-    GLuint msaaDepthBuffer{0};
-    int fbWidth{0}, fbHeight{0};
+    glm::ivec2 size{1280, 720};
+    glm::ivec2 lastSize{size};
+    float aspectRatio{16.f / 9.f};
+    double currentFps{60.0};
 
     static void initGLFW();
     static GLFWmonitor *getMonitor();
     static const GLFWvidmode *getVideoMode();
 
+    static glm::ivec2 getClosestResolution(const GLFWvidmode* videoMode);
     void centerWindow(const GLFWvidmode* videoMode) const;
-
-    void createMSAABuffers();
-    void deleteMSAABuffers();
 
     public:
         static constexpr double dt = 1.f / 60.f; // 60Hz
@@ -45,30 +49,31 @@ class Viewport
         void initViewport() const;
         void closeWindow() const;
 
-        [[nodiscard]] Settings& getSettings() const { return this->settings; };
-        [[nodiscard]] GLFWwindow* getWindow() const { return this->window; };
+        [[nodiscard]] Settings& getSettings() const { return this->settings; }
+        [[nodiscard]] GLFWwindow* getWindow() const { return this->window; }
 
-        [[nodiscard]] bool shouldClose() const;
         static void pollEvents();
         void swapBuffers() const;
+        [[nodiscard]] bool shouldClose() const;
 
         // Resize update
-        void setSize(glm::ivec2 _size);
+        void toggleFullscreen();
+        void setSize(glm::ivec2 _size, bool modifyViewport = true);
         [[nodiscard]] glm::ivec2 getSize() const;
 
-        // MSAA methods
-        void beginFrame() const;
-        void endFrame() const;
-
+        // VSync
         void useVSync(bool use) const;
         [[nodiscard]] bool isUsingVSync() const;
 
-        void setAspectRatio(float aspect);
-        [[nodiscard]] float getAspectRatio() const;
+        // Aspect ratio
+        void setAspectRatio(const float aspect) { this->aspectRatio = aspect; }
+        [[nodiscard]] float getAspectRatio() const { return this->aspectRatio; }
+
+        // Current viewport FPS
+        void updateFrameTimer(const double _dt) { this->frameTimer.update(_dt); }
+        [[nodiscard]] const FrameTimer& getFrameTimer() const { return this->frameTimer; }
 
         void setCursorVisibility(bool showCursor) const;
-
-        void toggleFullscreen();
 };
 
 #endif
