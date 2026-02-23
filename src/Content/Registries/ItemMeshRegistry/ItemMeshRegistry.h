@@ -19,7 +19,7 @@ class ItemMeshRegistry
     public:
         explicit ItemMeshRegistry(const TextureRegistry& textureRegistry, const ItemRegistry& itemRegistry);
 
-        ItemMeshId registerItemMesh(const std::string& fullIdentifier, const stbi_uc* texData);
+        ItemMeshId registerItemMesh(const std::string& fullIdentifier, const glm::mat4& rot, const stbi_uc* texData);
 
         std::shared_ptr<EntityMeshData> get(ItemMeshId id) const;
 

@@ -88,9 +88,9 @@ namespace ECS
             static glm::vec3 getForwardVector(const Camera& camera)
             {
                 glm::vec3 forward;
-                forward.x = glm::cos(glm::radians(camera.yaw)) * glm::cos(glm::radians(camera.pitch));
-                forward.y = glm::sin(glm::radians(camera.pitch));
-                forward.z = glm::sin(glm::radians(camera.yaw)) * glm::cos(glm::radians(camera.pitch));
+                forward.x = -glm::sin(glm::radians(camera.yaw)) * glm::cos(glm::radians(camera.pitch));
+                forward.y =  glm::sin(glm::radians(camera.pitch));
+                forward.z =  glm::cos(glm::radians(camera.yaw)) * glm::cos(glm::radians(camera.pitch));
                 return glm::normalize(forward);
             }
     };

@@ -5,9 +5,13 @@
 #include <string>
 #include <utility>
 
+#include "glm/ext/matrix_transform.hpp"
+
 #include "TextureRegistry.h"
 
 using ItemId = std::uint16_t; // 16bits
+
+static const glm::mat4 DEFAULT_HOLD_ROTATION = glm::rotate(glm::mat4(1.0f), glm::radians(30.0f), {0.0f, 0.0f, 1.0f});
 
 struct NamespaceIdentifier
 {
@@ -46,20 +50,20 @@ class Item
 {
     protected:
         NamespaceIdentifier identifier; // e.g "core:iron_ingot"
+        TextureId textureId;
 
         std::string displayName;
         std::string lore;
-
         std::uint16_t maxStackSize;
 
-        TextureId textureId = 0;
+        glm::mat4 holdRotation = DEFAULT_HOLD_ROTATION;
 
     public:
-        Item(NamespaceIdentifier _identifier, std::string _displayName, std::string _lore, const TextureId texId, const std::uint16_t _maxStackSize) :
+        Item(NamespaceIdentifier _identifier, std::string _displayName, std::string _lore, const TextureId texId, const std::uint16_t _maxStackSize = 64) :
             identifier(std::move(_identifier)),
+            textureId(texId),
             displayName(std::move(_displayName)),
             lore(std::move(_lore)),
-            textureId(texId),
             maxStackSize(_maxStackSize)
         {}
 
@@ -91,6 +95,16 @@ class Item
         [[nodiscard]] std::uint16_t getMaxStackSize() const
         {
             return this->maxStackSize;
+        }
+
+        void setHoldRotation(const glm::mat4& _holdRotation)
+        {
+            this->holdRotation = _holdRotation;
+        }
+
+        [[nodiscard]] glm::mat4 getHoldRotation() const
+        {
+            return this->holdRotation;
         }
 };
 

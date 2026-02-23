@@ -1,9 +1,7 @@
 #ifndef FARFIELD_FACTORY_H
 #define FARFIELD_FACTORY_H
 
-#include <functional>
 #include <string>
-#include <unordered_map>
 
 #include "IEntity.h"
 #include "ISystem.h"
@@ -16,6 +14,14 @@
 #include "Components/Movements.h"
 #include "Components/PlayerInput.h"
 #include "Components/Inventory.h"
+
+namespace ECS::InventoryUtils
+{
+    inline void equipHand(Handler& handler, const IEntity& entity, const ItemStack& stack)
+    {
+        handler.getComponent<Equipments>(entity).rightHand = stack;
+    }
+}
 
 namespace ECS::Creator
 {
@@ -36,7 +42,7 @@ namespace ECS::Creator
         handler.addComponent(player, Hotbar{});
         handler.addComponent(player, InternalInventory{});
         handler.addComponent(player, Equipments{});
-        handler.addComponent(player, ECS::MeshRef{ mesh, texture });
+        handler.addComponent(player, MeshRef{ mesh, texture });
 
         handler.getComponent<Hotbar>(player).items[0] = world.getRegistries().get<ItemRegistry>().createStack("core:iron_sword", 1);
         handler.getComponent<Hotbar>(player).items[1] = world.getRegistries().get<ItemRegistry>().createStack("core:iron_ingot", 9);
@@ -58,8 +64,7 @@ namespace ECS::Creator
         handler.addComponent(zombie, Equipments{});
         handler.addComponent(zombie, MeshRef{ mesh, texture });
 
-        handler.getComponent<Equipments>(zombie).rightHand = world.getRegistries().get<ItemRegistry>().createStack("core:iron_sword", 1);
-
+        InventoryUtils::equipHand(handler, zombie, world.getRegistries().get<ItemRegistry>().createStack("core:iron_sword", 1));
 
         return zombie;
     }

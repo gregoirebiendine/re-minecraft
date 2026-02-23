@@ -1,6 +1,8 @@
 #include "TextureExtruder.h"
 
-std::vector<EntityVertex> TextureExtruder::generate(const uint8_t* pixels, const int w, const int h)
+#include <glm/gtc/matrix_inverse.hpp>
+
+std::vector<EntityVertex> TextureExtruder::generate(const uint8_t* pixels, const int w, const int h, const glm::mat4& transform)
 {
     constexpr float z0 = DEPTH/2.f;     // front
     constexpr float z1 = -z0;           // back
@@ -17,11 +19,11 @@ std::vector<EntityVertex> TextureExtruder::generate(const uint8_t* pixels, const
             if (!isSolid(pixels, w, h, u, v))
                 continue;
 
-            const float x0 = static_cast<float>(u) * pw;
-            const float x1 = static_cast<float>(u + 1) * pw;
+            const float x0 = static_cast<float>(u) * pw - 0.5f;
+            const float x1 = static_cast<float>(u + 1) * pw - 0.5f;
 
-            const float y0 = static_cast<float>(h - v - 1) * ph;
-            const float y1 = static_cast<float>(h - v) * ph;
+            const float y0 = static_cast<float>(h - v - 1) * ph - 0.5f;
+            const float y1 = static_cast<float>(h - v) * ph - 0.5f;
 
             const float tu0 = static_cast<float>(u) * pw;
             const float tu1 = static_cast<float>(u + 1) * pw;
@@ -65,6 +67,14 @@ std::vector<EntityVertex> TextureExtruder::generate(const uint8_t* pixels, const
                     {tu1, tv1},   {tu0, tv1},   {tu0, tv1},   {tu1, tv1},
                     {0.0f, -1.0f, 0.0f});
             }
+        }
+    }
+
+    if (transform != glm::mat4(1.0f)) {
+        const glm::mat3 normalMatrix = glm::mat3(glm::inverseTranspose(transform));
+        for (auto& vtx : vertices) {
+            vtx.position = glm::vec3(transform * glm::vec4(vtx.position, 1.0f));
+            vtx.normal   = glm::normalize(normalMatrix * vtx.normal);
         }
     }
 

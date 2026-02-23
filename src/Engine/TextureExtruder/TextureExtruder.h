@@ -20,9 +20,9 @@ class TextureExtruder {
 
     public:
         static constexpr uint8_t ALPHA_THRESHOLD = 1;
-        static constexpr float DEPTH = 1.0f / 32.0f;
+        static constexpr float DEPTH = 1.0f / 16.0f;
 
-        static std::vector<EntityVertex> generate(const uint8_t* pixels, int w, int h);
+        static std::vector<EntityVertex> generate(const uint8_t* pixels, int w, int h, const glm::mat4& transform = glm::mat4(1.0f));
 };
 
 #endif

@@ -1,5 +1,6 @@
 #include "ItemMeshRegistry.h"
 #include "TextureExtruder.h"
+#include "glm/ext/matrix_transform.hpp"
 
 ItemMeshRegistry::ItemMeshRegistry(const TextureRegistry &textureRegistry, const ItemRegistry &itemRegistry)
 {
@@ -9,13 +10,12 @@ ItemMeshRegistry::ItemMeshRegistry(const TextureRegistry &textureRegistry, const
         const Item& item = itemRegistry.get(itemId);
         const TextureId& texId = item.getTextureId();
         const stbi_uc* texData = textureRegistry.getTextureData(texId);
-        const std::string& name = item.getIdentifier().getFullIdentifier();
 
-        this->registerItemMesh(name, texData);
+        this->registerItemMesh(item.getIdentifier().getFullIdentifier(), item.getHoldRotation(), texData);
     }
 }
 
-ItemMeshId ItemMeshRegistry::registerItemMesh(const std::string &fullIdentifier, const stbi_uc* texData)
+ItemMeshId ItemMeshRegistry::registerItemMesh(const std::string &fullIdentifier, const glm::mat4& rot, const stbi_uc* texData)
 {
     // Prevent duplication
     const auto it = this->nameToId.find(fullIdentifier);
@@ -27,7 +27,7 @@ ItemMeshId ItemMeshRegistry::registerItemMesh(const std::string &fullIdentifier,
         throw std::runtime_error("[ItemMeshRegistry::registerItemMesh] ID overflow, maximum ItemMesh storage reached");
 
     const auto id = static_cast<ItemMeshId>(this->meshes.size());
-    const auto mesh = TextureExtruder::generate(texData, 32, 32);
+    const auto mesh = TextureExtruder::generate(texData, 32, 32, rot);
     auto meshData = std::make_shared<EntityMeshData>();
 
     meshData->upload(mesh);

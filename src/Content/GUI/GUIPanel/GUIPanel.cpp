@@ -227,8 +227,6 @@ void GUIPanel::onViewportResize(const glm::ivec2 newSize) const
 
 void GUIPanel::onHotbarSlotChanged(const int slot) const
 {
-    // TODO: Make responsive with viewport size
-
     if (!this->hotbarSelection)
         return;
 

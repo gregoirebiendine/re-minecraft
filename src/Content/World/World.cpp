@@ -29,7 +29,11 @@ World::World(const Registries& _registries, const InputState& _inputs) :
     // Setup entity vector
     this->entities.reserve(MAX_ENTITY);
 
-    // Register MovementSystem to ECS
+    // Create entities (player and zombie)
+    this->player = ECS::Creator::createPlayer(this->ecs, *this);
+    this->entities.emplace_back(ECS::Creator::createZombie(this->ecs, *this));
+
+    // Register ECS systems
     this->scheduler.registerSystem<ECS::PlayerInputSystem>(this->inputs);
     this->scheduler.registerSystem<ECS::CameraSystem>(this->inputs);
     this->scheduler.registerSystem<ECS::GravitySystem>();
@@ -37,12 +41,8 @@ World::World(const Registries& _registries, const InputState& _inputs) :
     this->scheduler.registerSystem<ECS::FacingSystem>();
     this->scheduler.registerSystem<ECS::MovementSystem>();
     this->scheduler.registerSystem<ECS::CollisionSystem>(*this);
-    this->scheduler.registerSystem<ECS::RenderSystem>(*this->registries.itemRegistry, *this->registries.itemMeshRegistry);
+    this->scheduler.registerSystem<ECS::RenderSystem>(*this->registries.itemRegistry, *this->registries.itemMeshRegistry, this->player.id);
     // this->scheduler.registerSystem<ECS::DebugAABBSystem>();
-
-    // Create entities entity
-    this->player = ECS::Creator::createPlayer(this->ecs, *this);
-    this->entities.emplace_back(ECS::Creator::createZombie(this->ecs, *this));
 
     // Set WorldShader uniform to use loaded textures
     this->shader.use();

@@ -7,7 +7,7 @@ ItemRegistry::ItemRegistry(const TextureRegistry& _textureRegistry) :
     const auto& ironSwordTex = this->textureRegistry.getByName("iron_sword");
 
     this->registerItem(
-        std::make_unique<Item>(NamespaceIdentifier{"iron_ingot"}, "Iron Ingot", "", ironIngotTex, 64)
+        std::make_unique<Item>(NamespaceIdentifier{"iron_ingot"}, "Iron Ingot", "", ironIngotTex)
     );
 
     this->registerItem(
@@ -20,7 +20,7 @@ ItemId ItemRegistry::registerItem(std::unique_ptr<Item> _item)
     const auto& fullIdentifier = _item->getIdentifier().getFullIdentifier();
 
     // Prevent duplication
-    auto it = this->nameToId.find(fullIdentifier);
+    const auto it = this->nameToId.find(fullIdentifier);
     if (it != this->nameToId.end())
         return it->second;
 

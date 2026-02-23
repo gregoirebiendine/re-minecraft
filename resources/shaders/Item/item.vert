@@ -16,7 +16,7 @@ layout (std430, binding = 0) readonly buffer TextureSlots {
 
 out vec2 currentUvs;
 out vec4 atlasUvBounds;
-out float shade;
+out vec3 fragNormal;
 flat out uint currentLayer;
 
 uniform mat4 ModelMatrix;
@@ -31,15 +31,7 @@ void main()
     atlasUvBounds = vec4(slot.u0, slot.v0, slot.u1, slot.v1);
     currentLayer = slot.layer;
 
-    vec3 n = normalize(normal);
-    if ( n.y >  0.5)
-        shade = 1.0;   // top
-    else if ( n.y < -0.5)
-        shade = 0.5;   // bottom
-    else if (abs(n.x) > 0.5)
-        shade = 0.8; // left / right sides
-    else
-        shade = 0.9;   // front / back (z faces)
+    fragNormal = normal;
 
     gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(pos, 1.0);
 }
