@@ -45,7 +45,7 @@ struct NamespaceIdentifier
 class Item
 {
     protected:
-        NamespaceIdentifier identifier; // "core:iron_ingot"
+        NamespaceIdentifier identifier; // e.g "core:iron_ingot"
 
         std::string displayName;
         std::string lore;
@@ -68,12 +68,12 @@ class Item
         virtual void use() {}
         virtual void useOn() {}
 
-        [[nodiscard]] TextureId getIcon() const
+        [[nodiscard]] TextureId getTextureId() const
         {
             return this->textureId;
         }
 
-        [[nodiscard]] const NamespaceIdentifier& getIdentifier()
+        [[nodiscard]] const NamespaceIdentifier& getIdentifier() const
         {
             return this->identifier;
         }

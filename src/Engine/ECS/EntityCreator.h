@@ -21,8 +21,8 @@ namespace ECS::Creator
 {
     inline IEntity createPlayer(Handler& handler, const World& world)
     {
-        // const auto mesh = world.getRegistries().get<MeshRegistry>().get("player");
-        // const auto texture = world.getRegistries().get<TextureRegistry>().getByName("player");
+        const auto mesh = world.getRegistries().get<MeshRegistry>().get("player");
+        const auto texture = world.getRegistries().get<TextureRegistry>().getByName("player");
         const auto player = handler.createEntity();
 
         handler.addComponent(player, Position{11.5f, 73.f, 11.5f});
@@ -36,11 +36,10 @@ namespace ECS::Creator
         handler.addComponent(player, Hotbar{});
         handler.addComponent(player, InternalInventory{});
         handler.addComponent(player, Equipments{});
-        // handler.addComponent(player, ECS::MeshRef{ mesh, texture });
+        handler.addComponent(player, ECS::MeshRef{ mesh, texture });
 
-        handler.getComponent<Hotbar>(player).items[0] = world.getRegistries().get<ItemRegistry>().createStack("core:iron_ingot", 1);
+        handler.getComponent<Hotbar>(player).items[0] = world.getRegistries().get<ItemRegistry>().createStack("core:iron_sword", 1);
         handler.getComponent<Hotbar>(player).items[1] = world.getRegistries().get<ItemRegistry>().createStack("core:iron_ingot", 9);
-        handler.getComponent<Hotbar>(player).items[2] = world.getRegistries().get<ItemRegistry>().createStack("core:iron_ingot", 58);
 
         return player;
     }
@@ -56,7 +55,11 @@ namespace ECS::Creator
         handler.addComponent(zombie, Velocity{});
         handler.addComponent(zombie, Gravity{});
         handler.addComponent(zombie, CollisionBox{{0.45f, 1.f, 0.3f}});
+        handler.addComponent(zombie, Equipments{});
         handler.addComponent(zombie, MeshRef{ mesh, texture });
+
+        handler.getComponent<Equipments>(zombie).rightHand = world.getRegistries().get<ItemRegistry>().createStack("core:iron_sword", 1);
+
 
         return zombie;
     }

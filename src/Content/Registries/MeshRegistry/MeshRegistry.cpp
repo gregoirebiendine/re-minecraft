@@ -29,10 +29,10 @@ std::shared_ptr<EntityMeshData> MeshRegistry::get(const std::string& name) const
 
 void MeshRegistry::unload(const std::string& name)
 {
-    cache.erase(name);
+    this->cache.erase(name);
 }
 
 void MeshRegistry::clear()
 {
-    cache.clear();
+    this->cache.clear();
 }

@@ -36,6 +36,7 @@ set(
     ${CMAKE_SOURCE_DIR}/src/Engine/Render/Font
     ${CMAKE_SOURCE_DIR}/src/Engine/Settings
     ${CMAKE_SOURCE_DIR}/src/Engine/FrameTimer
+    ${CMAKE_SOURCE_DIR}/src/Engine/TextureExtruder
     ${CMAKE_SOURCE_DIR}/src/Engine/ThreadPool
     ${CMAKE_SOURCE_DIR}/src/Engine/Utils
 
@@ -65,6 +66,7 @@ set(
     ${CMAKE_SOURCE_DIR}/src/Content/Registries/ItemRegistry
     ${CMAKE_SOURCE_DIR}/src/Content/Registries/TextureRegistry
     ${CMAKE_SOURCE_DIR}/src/Content/Registries/PrefabRegistry
+    ${CMAKE_SOURCE_DIR}/src/Content/Registries/ItemMeshRegistry
 )
 
 #add_subdirectory(lib/flint) # Comment for now as the lib won't compile on Windows

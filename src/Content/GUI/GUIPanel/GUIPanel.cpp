@@ -103,7 +103,7 @@ GUIPanel::GUIPanel(const MsdfFont& _font, const Viewport& _viewport, const Textu
                 icon->bind([this, i]() -> TextureId {
                     const auto& stack = this->hotbarInventory.items[i];
                     const auto& itemMeta = this->itemRegistry.get(stack.itemId);
-                    return itemMeta.getIcon();
+                    return itemMeta.getTextureId();
                 });
 
                 icon->bindVisibility([this, i]() -> bool {

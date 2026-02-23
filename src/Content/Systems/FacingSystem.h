@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <glm/glm.hpp>
+#include <glm/ext/scalar_constants.hpp>
 
 #include "ECS/ISystem.h"
 #include "Components/Movements.h"

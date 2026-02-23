@@ -1,5 +1,4 @@
 #include "Engine.h"
-#include "Registries.h"
 
 Engine::Engine() :
     viewport(settings),
@@ -20,11 +19,15 @@ Engine::Engine() :
     this->viewport.initWindow(&this->inputs);
     this->viewport.initViewport();
 
-    // Instantiate registries (OpenGL context)
+    // Instantiate registries
     this->textureRegistry = std::make_unique<TextureRegistry>();
     this->itemRegistry = std::make_unique<ItemRegistry>(*this->textureRegistry);
     this->meshRegistry = std::make_unique<MeshRegistry>();
-    this->registries.setGL(*this->textureRegistry, *this->itemRegistry, *this->meshRegistry);
+    this->itemMeshRegistry = std::make_unique<ItemMeshRegistry>(*this->textureRegistry, *this->itemRegistry);
+    this->registries.setGL(*this->textureRegistry, *this->itemRegistry, *this->meshRegistry, *this->itemMeshRegistry);
+
+    // Free loaded textures from memory
+    this->textureRegistry->freeData();
 
     // Instantiate members
     this->font = std::make_unique<MsdfFont>("../resources/textures/font/font.json", "../resources/textures/font/font.png");

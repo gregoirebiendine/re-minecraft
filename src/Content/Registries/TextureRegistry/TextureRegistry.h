@@ -85,12 +85,15 @@ class TextureRegistry
         TextureRegistry();
         ~TextureRegistry();
 
+        void freeData();
+
         TextureId registerTexture(const std::string& name, const std::string& path);
         void registerTextureFromFolder(const std::string& folderPath);
 
         void createTextures();
         const TextureSlot& getSlot(TextureId id) const;
         TextureId getByName(const std::string& name) const;
+        stbi_uc* getTextureData(TextureId id) const;
 
         void bind() const;
         void bindSlots() const;

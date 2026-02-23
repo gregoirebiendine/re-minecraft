@@ -13,16 +13,17 @@
 #include <thread>
 #include <memory>
 #include <chrono>
-
 #include "Viewport.h"
 #include "InputState.h"
 #include "BlockRegistry.h"
 #include "ItemRegistry.h"
 #include "TextureRegistry.h"
 #include "PrefabRegistry.h"
+#include "ItemMeshRegistry.h"
 #include "World.h"
 #include "PlayerController.h"
 #include "MsdfFont.h"
+#include "Registries.h"
 
 using Clock = std::chrono::steady_clock;
 using Duration = std::chrono::duration<double>;
@@ -41,6 +42,7 @@ class Engine {
     std::unique_ptr<TextureRegistry> textureRegistry;
     std::unique_ptr<ItemRegistry> itemRegistry;
     std::unique_ptr<MeshRegistry> meshRegistry;
+    std::unique_ptr<ItemMeshRegistry> itemMeshRegistry;
     Registries registries;
 
     std::unique_ptr<MsdfFont> font;
