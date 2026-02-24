@@ -80,3 +80,8 @@ target_link_libraries(farfield PRIVATE glfw)
 target_link_libraries(farfield PRIVATE fmt::fmt)
 
 target_include_directories(farfield PRIVATE ${HEADERS})
+
+target_compile_definitions(
+    farfield PRIVATE
+    RESOURCES_PATH="${CMAKE_SOURCE_DIR}/resources/"
+)

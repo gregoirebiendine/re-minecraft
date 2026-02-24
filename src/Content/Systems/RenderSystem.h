@@ -52,8 +52,8 @@ namespace ECS
                 itemRegistry(_itemRegistry),
                 itemMeshRegistry(_itemMeshRegistry),
                 playerId(_playerId),
-                shader("/resources/shaders/Entity/"),
-                itemShader("/resources/shaders/Item/")
+                shader("Entity/"),
+                itemShader("Item/")
             {
                 this->shader.setTextureSamplerId(0);
                 this->itemShader.setTextureSamplerId(0);

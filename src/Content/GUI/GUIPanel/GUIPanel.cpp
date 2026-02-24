@@ -6,8 +6,8 @@ GUIPanel::GUIPanel(const MsdfFont& _font, const Viewport& _viewport, const Textu
     viewport(_viewport),
     textureRegistry(_textureRegistry),
     itemRegistry(_itemRegistry),
-    shader("/resources/shaders/UI/"),
-    fontShader("/resources/shaders/UI/Font/")
+    shader("UI/"),
+    fontShader("UI/Font/")
 {
     const auto& vpSize = this->viewport.getSize();
     const auto vpX = static_cast<float>(vpSize.x);

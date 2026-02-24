@@ -4,12 +4,18 @@
 #pragma once
 
 #include <string>
+#include <array>
 #include <unordered_map>
-
+#include <fstream>
+#include <stdexcept>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
+#include <json.hpp>
+#include <stbi/stb_image.h>
+#include "Utils.h"
 
-// charset -> !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~€£²ÀÂÈÉÊÎÏÔÙÛàâçèéêîïôùû
+
+// charset-> !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~€£²ÀÂÈÉÊÎÏÔÙÛàâçèéêîïôùû
 
 struct GlyphInfo {
     int x, y;
@@ -29,7 +35,7 @@ class MsdfFont {
     float distanceRange{4.f};
 
     public:
-        explicit MsdfFont(const std::string& jsonPath, const std::string& pngPath);
+        MsdfFont();
         ~MsdfFont();
 
         void bindTexture() const;

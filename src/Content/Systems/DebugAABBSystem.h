@@ -93,7 +93,7 @@ namespace ECS
     public:
         // DEBUG - Reuses the Outline shader (simple MVP + solid color)
         DebugAABBSystem() :
-            shader("/resources/shaders/Outline/")
+            shader("Outline/")
         {
             const auto vertices = buildUnitCubeOutline();
             this->vertexCount = static_cast<int>(vertices.size()) / 3;

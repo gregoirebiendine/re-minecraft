@@ -21,7 +21,7 @@ Engine::Engine() :
     this->textureRegistry.freeData();
 
     // Instantiate members
-    this->font = std::make_unique<MsdfFont>("../resources/textures/font/font.json", "../resources/textures/font/font.png");
+    this->font = std::make_unique<MsdfFont>();
     this->world = std::make_unique<World>(this->registries, this->inputs);
     this->playerController = std::make_unique<PlayerController>(*this->world, *this->font, this->viewport);
 

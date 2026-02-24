@@ -1,4 +1,5 @@
 #include "PrefabRegistry.h"
+#include "Utils.h"
 
 PrefabRegistry::PrefabRegistry(const BlockRegistry& _blockRegistry) :
     blockRegistry(_blockRegistry)
@@ -8,7 +9,7 @@ PrefabRegistry::PrefabRegistry(const BlockRegistry& _blockRegistry) :
 
 PrefabId PrefabRegistry::registerPrefab(const std::string& prefabFile)
 {
-    const auto path = fs::current_path().parent_path().string().append("/resources/data/prefabs/").append(prefabFile);
+    const auto path = Files::getResourcesPath("/data/prefabs/").append(prefabFile);
     const auto name = fs::path(prefabFile).replace_extension().string();
 
     std::ifstream file(path);

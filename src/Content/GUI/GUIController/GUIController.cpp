@@ -3,7 +3,7 @@
 
 GUIController::GUIController(const MsdfFont& _font, const Viewport& _viewport, const TextureRegistry& _textureRegistry, const ItemRegistry& _itemRegistry) :
     panel(_font, _viewport, _textureRegistry, _itemRegistry),
-    shader("/resources/shaders/Outline/")
+    shader("Outline/")
 {
     this->vao.bind();
     this->vao.storeOutlineData(OUTLINE_VERTICES);

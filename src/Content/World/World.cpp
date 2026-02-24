@@ -22,7 +22,7 @@
 World::World(const Registries& _registries, const InputState& _inputs) :
     registries(_registries),
     inputs(_inputs),
-    shader("/resources/shaders/World/"),
+    shader("World/"),
     chunkManager(_registries.blockRegistry, _registries.prefabRegistry),
     meshManager(*this)
 {

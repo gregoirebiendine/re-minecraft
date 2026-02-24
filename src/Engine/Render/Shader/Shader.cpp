@@ -4,7 +4,7 @@
 
 Shader::Shader(const std::string& folder)
 {
-    const auto path = Files::SOURCE_FOLDER.string().append(folder);
+    const auto path = Files::getResourcesPath("/shaders/").append(folder);
     const auto entries = fs::directory_iterator(path);
     std::string vertContent;
     std::string fragContent;

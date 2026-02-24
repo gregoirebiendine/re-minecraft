@@ -42,7 +42,10 @@ namespace Maths
 
 namespace Files
 {
-    static const fs::path SOURCE_FOLDER =  fs::current_path().parent_path();
+    static std::string getResourcesPath(const std::string& path)
+    {
+        return RESOURCES_PATH + path;
+    }
 }
 
 #endif

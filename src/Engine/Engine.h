@@ -3,6 +3,10 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 
+#ifndef RESOURCES_PATH
+    #error "RESOURCES_PATH is not defined."
+#endif
+
 #ifdef _WIN32
     #include <windows.h>
 #elif defined(__linux__)

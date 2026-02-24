@@ -1,5 +1,7 @@
 #include "BlockRegistry.h"
 
+#include "Utils.h"
+
 BlockRegistry::BlockRegistry()
 {
     this->registerBlock({"core","air",true,0.f,RotationType::NONE,{}});
@@ -28,7 +30,7 @@ BlockId BlockRegistry::registerBlock(const BlockMeta& meta)
 
 void BlockRegistry::registerBlocksFromFile(const std::string& registerNamespace)
 {
-    const auto blocksFile = fs::current_path().parent_path().string().append("/resources/data/blocks/blocks.json");
+    const auto blocksFile = Files::getResourcesPath("/data/blocks/blocks.json");;
 
     std::ifstream file(blocksFile);
     json data = json::parse(file);

@@ -1,5 +1,7 @@
 #include "TextureRegistry.h"
 
+#include "Utils.h"
+
 stbi_uc* TextureRegistry::createExtrudedTexture(const stbi_uc* src, int srcW, int srcH, int border)
 {
     const int dstW = srcW + 2 * border;
@@ -87,10 +89,10 @@ std::pair<int, int> AtlasLayer::tryInsert(const int w, const int h)
 
 TextureRegistry::TextureRegistry()
 {
-    this->registerTextureFromFolder("/resources/textures/blocks");
-    this->registerTextureFromFolder("/resources/textures/items");
-    this->registerTextureFromFolder("/resources/textures/entities");
-    this->registerTextureFromFolder("/resources/textures/gui");
+    this->registerTextureFromFolder("blocks/");
+    this->registerTextureFromFolder("items/");
+    this->registerTextureFromFolder("entities/");
+    this->registerTextureFromFolder("gui/");
     this->createTextures();
 }
 
@@ -259,7 +261,7 @@ TextureId TextureRegistry::registerTexture(const std::string& name, const std::s
 
 void TextureRegistry::registerTextureFromFolder(const std::string &folderPath)
 {
-    const auto texturesFolder = fs::current_path().parent_path().string().append(folderPath);
+    const auto texturesFolder = Files::getResourcesPath("/textures/").append(folderPath);
 
     for (const auto& entry : fs::directory_iterator(texturesFolder)) {
         const auto& path = entry.path();

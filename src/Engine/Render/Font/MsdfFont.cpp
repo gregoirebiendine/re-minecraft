@@ -2,14 +2,11 @@
 
 #include "MsdfFont.h"
 
-#include <fstream>
-#include <stdexcept>
-
-#include <json.hpp>
-#include <stbi/stb_image.h>
-
-MsdfFont::MsdfFont(const std::string &jsonPath, const std::string &pngPath)
+MsdfFont::MsdfFont()
 {
+    const auto& jsonPath = Files::getResourcesPath("/textures/font/font.json");
+    const auto& pngPath = Files::getResourcesPath("/textures/font/font.png");
+
     std::ifstream f(jsonPath);
 
     if (!f)
