@@ -12,6 +12,7 @@ namespace ECS
     struct Hotbar
     {
         std::array<ItemStack, 9> items;
+        std::uint8_t selectedSlot = 0;
     };
 
     struct InternalInventory

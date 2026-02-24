@@ -17,7 +17,12 @@ void main()
     if (color.a < 0.01)
         discard;
 
-    vec3 n = normalize(gl_FrontFacing ? fragNormal : -fragNormal);
+    if (!gl_FrontFacing) {
+        FragColor = vec4(0.05, 0.05, 0.05, color.a);
+        return;
+    }
+
+    vec3 n = normalize(fragNormal);
     float shade;
     if (n.y > 0.5)
         shade = 1.0;

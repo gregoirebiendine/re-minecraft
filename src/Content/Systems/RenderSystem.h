@@ -21,35 +21,30 @@ namespace ECS
         Shader shader;
         Shader itemShader;
 
-        bool renderEquipment(const EntityId& id, const ComponentPool<Equipments>& equipmentsPool, const Position& pos, const Rotation& rot)
+        bool renderRightHandItem(const EntityId& id, const ItemStack& rightHandStack, const Position& pos, const Rotation& rot)
         {
-            const auto&[armor, rightHand] = equipmentsPool.get(id);
+            if (rightHandStack.stackSize == 0)
+                return false;
 
-            if (rightHand.stackSize > 0) {
-                const auto& item = this->itemRegistry.get(rightHand.itemId);
-                const auto itemMesh = this->itemMeshRegistry.get(item.getIdentifier().getFullIdentifier());
+            const auto& item = this->itemRegistry.get(rightHandStack.itemId);
+            const auto itemMesh = this->itemMeshRegistry.get(item.getIdentifier().getFullIdentifier());
 
-                // x -> near / far
-                // y -> up / down
-                // z -> left / right
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
+            model = glm::rotate(model, glm::radians(-rot.y + 90.0f), {0.0f, 1.0f, 0.0f});    // yaw
+            model = glm::translate(model, {0.0f, 1.75f, 0.0f});                                          // up to eye
+            model = glm::rotate(model, glm::radians(-rot.x), {0.0f, 0.0f, 1.0f});                   // pitch around eye
+            model = glm::translate(model, {-0.35f, -0.25f, -0.4f});                                      // hand offset from eye
+            model = glm::scale(model, glm::vec3{0.5f});
 
-                glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
-                model = glm::rotate(model, glm::radians(-rot.y + 90.0f), {0.0f, 1.0f, 0.0f});    // yaw
-                model = glm::translate(model, {0.0f, 1.75f, 0.0f});                                          // up to eye
-                model = glm::rotate(model, glm::radians(-rot.x), {0.0f, 0.0f, 1.0f});                   // pitch around eye
-                model = glm::translate(model, {-0.35f, -0.25f, -0.4f});                                      // hand offset from eye
-                model = glm::scale(model, glm::vec3{0.5f});
+            this->itemShader.use();
+            this->itemShader.setModelMatrix(model);
+            this->itemShader.setUniformUInt("LayerId", item.getTextureId());
 
-                this->itemShader.use();
-                this->itemShader.setModelMatrix(model);
-                this->itemShader.setUniformUInt("LayerId", item.getTextureId());
-                glDisable(GL_CULL_FACE);
-                itemMesh->render();
-                glEnable(GL_CULL_FACE);
+            glDisable(GL_CULL_FACE);
+            itemMesh->render();
+            glEnable(GL_CULL_FACE);
 
-                return id == this->playerId;
-            }
-            return false;
+            return id == this->playerId;
         }
 
         public:
@@ -80,15 +75,25 @@ namespace ECS
             {
                 auto view = handler.query<Position, Rotation, MeshRef>();
                 const auto& equipmentsPool = handler.getPool<Equipments>();
+                const auto& hotbarPool = handler.getPool<Hotbar>();
 
                 view.forEach([&](const EntityId id, const Position& pos, const Rotation& rot, const MeshRef& meshRef)
                 {
-                    // Render right hand item
-                    if (equipmentsPool.has(id)) {
-                        if (this->renderEquipment(id, equipmentsPool, pos, rot)) // Skip base mesh render if player is holding an item
-                            return;
-                        // TODO: For later usage : set RightArm bone not visible instead of skipping
+                    ItemStack rightHandStack;
+
+                    if (hotbarPool.has(id)) {
+                        const auto&[items, selectedSlot] = hotbarPool.get(id);
+                        rightHandStack = items[selectedSlot];
                     }
+                    else if (equipmentsPool.has(id)) {
+                        const auto&[armor, rightHand] = equipmentsPool.get(id);
+                        rightHandStack = rightHand;
+                    }
+
+                    // TODO: set RightArm bone not visible instead of skipping
+                    // Render right hand item & skip base mesh render if player is holding an item
+                    if (this->renderRightHandItem(id, rightHandStack, pos, rot))
+                        return;
 
                     // Skip if mesh doesn't exist
                     if (!meshRef.mesh)

@@ -4,6 +4,7 @@
 #include "Components/Movements.h"
 #include "Components/Camera.h"
 #include "Components/Inventory.h"
+#include "ECS/EntityCreator.h"
 
 PlayerController::PlayerController(World& _world, const MsdfFont& _font, const Viewport& _viewport) :
     world(_world),
@@ -55,9 +56,8 @@ void PlayerController::handleInputs(const InputState& inputs, Viewport& viewport
 
     // Scroll
     if (inputs.scroll != Inputs::Scroll::NONE) {
-        this->selectedSlot = std::clamp(0, this->selectedSlot - std::to_underlying(inputs.scroll), 8);
-        this->gui.onHotbarSlotChanged(this->selectedSlot);
-        this->world.getECS().getComponent<ECS::Equipments>(this->playerEntity).rightHand = this->hotbarComponent.items[this->selectedSlot];
+        this->hotbarComponent.selectedSlot = std::clamp(0, this->hotbarComponent.selectedSlot - std::to_underlying(inputs.scroll), 8);
+        this->gui.onHotbarSlotChanged(this->hotbarComponent.selectedSlot);
     }
 
     // Toggle mouse capture

@@ -12,9 +12,7 @@
 class PlayerController
 {
     World& world;
-
     GUIController gui;
-    int selectedSlot = 0;
 
     // Cache
     Raycast::Hit lastRaycast{};
