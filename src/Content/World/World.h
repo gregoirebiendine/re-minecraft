@@ -17,6 +17,7 @@
 #include "InputState.h"
 #include "ItemRegistry.h"
 #include "Registries.h"
+#include "Settings.h"
 #include "Shader.h"
 #include "ECS/ISystem.h"
 
@@ -41,7 +42,7 @@ class World {
     bool isSimulationReady = false;
 
     public:
-        explicit World(const Registries& _registries, const InputState& _inputs);
+        explicit World(const Registries& _registries, const InputState& _inputs, const Settings& _settings);
 
         // Get ECS members
         ECS::Handler& getECS() { return this->ecs; }

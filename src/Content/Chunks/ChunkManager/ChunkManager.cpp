@@ -1,7 +1,8 @@
 #include "ChunkManager.h"
 
-ChunkManager::ChunkManager(const BlockRegistry& _blockRegistry, const PrefabRegistry& _prefabRegistry) :
+ChunkManager::ChunkManager(const BlockRegistry& _blockRegistry, const PrefabRegistry& _prefabRegistry, const Settings& _settings) :
     blockRegistry(_blockRegistry),
+    settings(_settings),
     terrainWorkers(std::thread::hardware_concurrency()),
     decorationWorkers(std::thread::hardware_concurrency()),
     terrainGenerator(_blockRegistry, _prefabRegistry)
@@ -152,24 +153,21 @@ void ChunkManager::rebuildNeighbors(const ChunkPos& pos)
     }
 }
 
-void ChunkManager::setViewDistance(const uint8_t dist)
-{
-    this->viewDistance = dist;
-    this->unloadDistance = dist + 2;
-}
-
 void ChunkManager::updateStreaming(const glm::vec3& playerPos)
 {
-    auto [playerX, playerY, playerZ] = ChunkPos::fromWorld(playerPos);
+    const auto& viewDistance = this->settings.getViewDistance();
+    const auto& unloadDistance = this->settings.getViewDistance() + 2;
+
+    const auto [playerX, playerY, playerZ] = ChunkPos::fromWorld(playerPos);
     std::unordered_set<ChunkPos, ChunkPosHash> wanted;
 
-    wanted.reserve((2 * this->viewDistance + 1) * (2 * this->viewDistance + 1) * (2 * this->viewDistance + 1));
+    wanted.reserve((2 * viewDistance + 1) * (2 * viewDistance + 1) * (2 * viewDistance + 1));
 
-    for (int z = -this->viewDistance; z <= this->viewDistance; ++z) {
-        for (int y = -this->viewDistance; y <= this->viewDistance; ++y) {
+    for (int z = -viewDistance; z <= viewDistance; ++z) {
+        for (int y = -viewDistance; y <= viewDistance; ++y) {
             const int generatedY = playerY + y;
 
-            for (int x = -this->viewDistance; x <= this->viewDistance; ++x) {
+            for (int x = -viewDistance; x <= viewDistance; ++x) {
                 ChunkPos pos {
                     playerX + x,
                     generatedY < 0 ? 0 : generatedY,
@@ -196,9 +194,9 @@ void ChunkManager::updateStreaming(const glm::vec3& playerPos)
             const int dy = chunk.getPosition().y - playerY;
             const int dz = chunk.getPosition().z - playerZ;
 
-            if (std::abs(dx) > this->unloadDistance ||
-                std::abs(dy) > this->unloadDistance ||
-                std::abs(dz) > this->unloadDistance)
+            if (std::abs(dx) > unloadDistance ||
+                std::abs(dy) > unloadDistance ||
+                std::abs(dz) > unloadDistance)
             {
                 chunk.bumpGenerationID();
                 it = chunks.erase(it);
@@ -276,14 +274,14 @@ ChunkNeighbors ChunkManager::getNeighbors(const ChunkPos& cp)
 
 bool ChunkManager::tryAcquireDecorationLock(const ChunkPos& pos)
 {
-    std::lock_guard lock(decorationLockMutex);
+    std::lock_guard lock(this->decorationLockMutex);
 
     // Check if any chunk in 3x3x3 region is already locked
     for (int dy = -1; dy <= 1; dy++) {
         for (int dz = -1; dz <= 1; dz++) {
             for (int dx = -1; dx <= 1; dx++) {
                 ChunkPos check = {pos.x + dx, pos.y + dy, pos.z + dz};
-                if (decorationLocks.contains(check)) {
+                if (this->decorationLocks.contains(check)) {
                     return false;  // Conflict with another decoration job
                 }
             }
@@ -303,12 +301,12 @@ bool ChunkManager::tryAcquireDecorationLock(const ChunkPos& pos)
 
 void ChunkManager::releaseDecorationLock(const ChunkPos& pos)
 {
-    std::lock_guard lock(decorationLockMutex);
+    std::lock_guard lock(this->decorationLockMutex);
 
     for (int dy = -1; dy <= 1; dy++) {
         for (int dz = -1; dz <= 1; dz++) {
             for (int dx = -1; dx <= 1; dx++) {
-                decorationLocks.erase({pos.x + dx, pos.y + dy, pos.z + dz});
+                this->decorationLocks.erase({pos.x + dx, pos.y + dy, pos.z + dz});
             }
         }
     }

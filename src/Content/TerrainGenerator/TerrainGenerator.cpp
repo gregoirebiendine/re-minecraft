@@ -2,7 +2,11 @@
 
 TerrainGenerator::TerrainGenerator(const BlockRegistry& _blockRegistry, const PrefabRegistry& _prefabRegistry) :
     blockRegistry{_blockRegistry},
-    prefabRegistry{_prefabRegistry}
+    prefabRegistry{_prefabRegistry},
+    stone(this->blockRegistry.getByName("core:stone")),
+    dirt(this->blockRegistry.getByName("core:dirt")),
+    grass(this->blockRegistry.getByName("core:grass")),
+    air(this->blockRegistry.getByName("core:air"))
 {
     this->noise.SetFrequency(0.015);
 }
@@ -28,13 +32,13 @@ void TerrainGenerator::generate(Chunk& chunk) const
 
                 Material mat;
                 if (wy < 2)
-                    mat = Material::pack(this->blockRegistry.getByName("core:stone"), 0);
+                    mat = Material::pack(this->stone, 0);
                 else if (wy < height)
-                    mat = Material::pack(this->blockRegistry.getByName("core:dirt"), 0);
+                    mat = Material::pack(this->dirt, 0);
                 else if (wy == height)
-                    mat = Material::pack(this->blockRegistry.getByName("core:grass"), 0);
+                    mat = Material::pack(this->grass, 0);
                 else
-                    mat = Material::pack(this->blockRegistry.getByName("core:air"), 0);
+                    mat = Material::pack(this->air, 0);
 
                 chunk.setBlockDirect(x, y, z, mat);
             }

@@ -22,11 +22,8 @@ Engine::Engine() :
 
     // Instantiate members
     this->font = std::make_unique<MsdfFont>();
-    this->world = std::make_unique<World>(this->registries, this->inputs);
+    this->world = std::make_unique<World>(this->registries, this->inputs, this->settings);
     this->playerController = std::make_unique<PlayerController>(*this->world, *this->font, this->viewport);
-
-    // Update view distance from settings
-    this->world->getChunkManager().setViewDistance(this->settings.getViewDistance());
 }
 
 Engine::~Engine()

@@ -18,11 +18,19 @@ class TerrainGenerator
     static constexpr int BASE_HEIGHT = 64;
     static constexpr float AMPLITUDE = 8.f;
 
+    // Registries
     const BlockRegistry& blockRegistry;
     const PrefabRegistry& prefabRegistry;
 
+    // Seed & noise
     const int seed = 3120;
     FastNoiseLite noise{seed};
+
+    // BlockId cache
+    const BlockId stone;
+    const BlockId dirt;
+    const BlockId grass;
+    const BlockId air;
 
     [[nodiscard]] int getTerrainHeight(int worldX, int worldZ) const;
     [[nodiscard]] static int findGroundLevel(const NeighborAccess& neighbors, int worldX, int worldZ);

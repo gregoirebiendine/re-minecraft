@@ -21,6 +21,7 @@
 #include "Chunk.h"
 #include "ChunkNeighbors.h"
 #include "Frustum.h"
+#include "Settings.h"
 
 using ChunkMap = std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash>;
 
@@ -36,7 +37,7 @@ struct ChunkJob {
 
 class ChunkManager {
     public:
-        explicit ChunkManager(const BlockRegistry& _blockRegistry, const PrefabRegistry& _prefabRegistry);
+        explicit ChunkManager(const BlockRegistry& _blockRegistry, const PrefabRegistry& _prefabRegistry, const Settings& _settings);
 
         [[nodiscard]] std::shared_lock<std::shared_mutex> acquireReadLock() const;
         [[nodiscard]] ChunkMap& getChunks();
@@ -49,14 +50,13 @@ class ChunkManager {
         [[nodiscard]] ChunkNeighbors getNeighbors(const ChunkPos &cp);
         void rebuildNeighbors(const ChunkPos& pos);
 
-        void setViewDistance(uint8_t dist);
-
         void updateStreaming(const glm::vec3& playerPos);
         void updateFrustum(const glm::mat4& vpMatrix);
         void requestChunk(const ChunkPos& pos);
 
     private:
         const BlockRegistry& blockRegistry;
+        const Settings& settings;
 
         std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash> chunks;
         mutable std::shared_mutex chunksMutex;
@@ -67,9 +67,6 @@ class ChunkManager {
         Frustum frustum{};
         TerrainGenerator terrainGenerator;
 
-        uint8_t viewDistance{8};
-        uint8_t unloadDistance{10};
-
         // Decoration locking mechanism to prevent concurrent writes to the same chunks
         std::unordered_set<ChunkPos, ChunkPosHash> decorationLocks;
         std::mutex decorationLockMutex;
@@ -79,7 +76,6 @@ class ChunkManager {
         void decorationJob(const ChunkJob& job);
 
         // Check and queue chunks ready for decoration
-        void updateDecorationQueue();
         void tryQueueDecoration(const ChunkPos& pos);
 
         // Decoration lock management

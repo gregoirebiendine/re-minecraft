@@ -19,11 +19,11 @@
 #include "Components/Friction.h"
 #include "ECS/EntityCreator.h"
 
-World::World(const Registries& _registries, const InputState& _inputs) :
+World::World(const Registries& _registries, const InputState& _inputs, const Settings& _settings) :
     registries(_registries),
     inputs(_inputs),
     shader("World/"),
-    chunkManager(_registries.blockRegistry, _registries.prefabRegistry),
+    chunkManager(_registries.blockRegistry, _registries.prefabRegistry, _settings),
     meshManager(*this)
 {
     // Setup entity vector
