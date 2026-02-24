@@ -33,16 +33,16 @@ class Engine {
         HANDLE frameTimer = nullptr;
     #endif
 
-    Settings settings;
-    mutable Viewport viewport;
     InputState inputs;
-    
+    Settings settings;
+    Viewport viewport;
+
     BlockRegistry blockRegistry;
     PrefabRegistry prefabRegistry;
-    std::unique_ptr<TextureRegistry> textureRegistry;
-    std::unique_ptr<ItemRegistry> itemRegistry;
-    std::unique_ptr<MeshRegistry> meshRegistry;
-    std::unique_ptr<ItemMeshRegistry> itemMeshRegistry;
+    TextureRegistry textureRegistry;
+    ItemRegistry itemRegistry;
+    MeshRegistry meshRegistry;
+    ItemMeshRegistry itemMeshRegistry;
     Registries registries;
 
     std::unique_ptr<MsdfFont> font;

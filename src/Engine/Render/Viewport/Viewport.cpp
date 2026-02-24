@@ -1,8 +1,12 @@
 #include "Viewport.h"
 
-Viewport::Viewport(Settings &_settings) :
+Viewport::Viewport(Settings &_settings, InputState* inputs) :
     settings(_settings)
-{}
+{
+    initGLFW();
+    this->initWindow(inputs);
+    this->initViewport();
+}
 
 void Viewport::initGLFW()
 {
@@ -21,8 +25,6 @@ void Viewport::initGLFW()
 
 void Viewport::initWindow(InputState* inputs)
 {
-    initGLFW();
-
     this->window = glfwCreateWindow(this->size.x, this->size.y, "Farfield", nullptr, nullptr);
     if (!this->window) {
         glfwTerminate();

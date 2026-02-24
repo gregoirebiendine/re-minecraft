@@ -41,7 +41,7 @@ World::World(const Registries& _registries, const InputState& _inputs) :
     this->scheduler.registerSystem<ECS::FacingSystem>();
     this->scheduler.registerSystem<ECS::MovementSystem>();
     this->scheduler.registerSystem<ECS::CollisionSystem>(*this);
-    this->scheduler.registerSystem<ECS::RenderSystem>(*this->registries.itemRegistry, *this->registries.itemMeshRegistry, this->player.id);
+    this->scheduler.registerSystem<ECS::RenderSystem>(this->registries.itemRegistry, this->registries.itemMeshRegistry, this->player.id);
     // this->scheduler.registerSystem<ECS::DebugAABBSystem>();
 
     // Set WorldShader uniform to use loaded textures

@@ -1,9 +1,11 @@
 #include "Engine.h"
 
 Engine::Engine() :
-    viewport(settings),
+    viewport(settings, &inputs),
     prefabRegistry(blockRegistry),
-    registries{blockRegistry, prefabRegistry}
+    itemRegistry(textureRegistry),
+    itemMeshRegistry(this->textureRegistry, this->itemRegistry),
+    registries{blockRegistry, prefabRegistry, textureRegistry, itemRegistry, meshRegistry, itemMeshRegistry}
 {
     #ifdef _WIN32
     this->frameTimer = CreateWaitableTimerExW(
@@ -15,19 +17,8 @@ Engine::Engine() :
         this->frameTimer = CreateWaitableTimerW(nullptr, TRUE, nullptr);
     #endif
 
-    // Init GLFW window and viewport
-    this->viewport.initWindow(&this->inputs);
-    this->viewport.initViewport();
-
-    // Instantiate registries
-    this->textureRegistry = std::make_unique<TextureRegistry>();
-    this->itemRegistry = std::make_unique<ItemRegistry>(*this->textureRegistry);
-    this->meshRegistry = std::make_unique<MeshRegistry>();
-    this->itemMeshRegistry = std::make_unique<ItemMeshRegistry>(*this->textureRegistry, *this->itemRegistry);
-    this->registries.setGL(*this->textureRegistry, *this->itemRegistry, *this->meshRegistry, *this->itemMeshRegistry);
-
     // Free loaded textures from memory
-    this->textureRegistry->freeData();
+    this->textureRegistry.freeData();
 
     // Instantiate members
     this->font = std::make_unique<MsdfFont>("../resources/textures/font/font.json", "../resources/textures/font/font.png");
@@ -136,8 +127,8 @@ void Engine::render() const
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Render World
-    this->textureRegistry->bind();
-    this->textureRegistry->bindSlots();
+    this->textureRegistry.bind();
+    this->textureRegistry.bindSlots();
     this->world->render();
 
     // Render Player

@@ -37,16 +37,17 @@ class Viewport
     static GLFWmonitor *getMonitor();
     static const GLFWvidmode *getVideoMode();
 
+    void initWindow(InputState* inputs);
+    void initViewport() const;
+
     static glm::ivec2 getClosestResolution(const GLFWvidmode* videoMode);
     void centerWindow(const GLFWvidmode* videoMode) const;
 
     public:
         static constexpr double dt = 1.f / 60.f; // 60Hz
 
-        explicit Viewport(Settings& _settings);
+        explicit Viewport(Settings& _settings, InputState* inputs);
 
-        void initWindow(InputState* inputs);
-        void initViewport() const;
         void closeWindow() const;
 
         [[nodiscard]] Settings& getSettings() const { return this->settings; }

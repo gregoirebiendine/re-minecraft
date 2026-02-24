@@ -13,32 +13,36 @@ struct Registries
 {
     BlockRegistry& blockRegistry;
     PrefabRegistry& prefabRegistry;
-    TextureRegistry* textureRegistry{nullptr};
-    ItemRegistry* itemRegistry{nullptr};
-    MeshRegistry* meshRegistry{nullptr};
-    ItemMeshRegistry* itemMeshRegistry{nullptr};
+    TextureRegistry& textureRegistry;
+    ItemRegistry& itemRegistry;
+    MeshRegistry& meshRegistry;
+    ItemMeshRegistry& itemMeshRegistry;
 
-    Registries(BlockRegistry& br, PrefabRegistry& pr) :
-        blockRegistry(br), prefabRegistry(pr)
+    Registries(
+        BlockRegistry& br,
+        PrefabRegistry& pr,
+        TextureRegistry& tr,
+        ItemRegistry& ir,
+        MeshRegistry& mr,
+        ItemMeshRegistry& imr
+    ) :
+        blockRegistry(br),
+        prefabRegistry(pr),
+        textureRegistry(tr),
+        itemRegistry(ir),
+        meshRegistry(mr),
+        itemMeshRegistry(imr)
     {}
-
-    void setGL(TextureRegistry& tr, ItemRegistry& ir, MeshRegistry& mr, ItemMeshRegistry& imr)
-    {
-        this->textureRegistry = &tr;
-        this->itemRegistry = &ir;
-        this->meshRegistry = &mr;
-        this->itemMeshRegistry = &imr;
-    }
 
     template<typename T>
     T& get() const
     {
-        if constexpr (std::is_same_v<T, BlockRegistry>)            return blockRegistry;
-        else if constexpr (std::is_same_v<T, PrefabRegistry>)      return prefabRegistry;
-        else if constexpr (std::is_same_v<T, TextureRegistry>)     return *textureRegistry;
-        else if constexpr (std::is_same_v<T, ItemRegistry>)        return *itemRegistry;
-        else if constexpr (std::is_same_v<T, MeshRegistry>)        return *meshRegistry;
-        else if constexpr (std::is_same_v<T, ItemMeshRegistry>)    return *itemMeshRegistry;
+        if constexpr (std::is_same_v<T, BlockRegistry>)            return this->blockRegistry;
+        else if constexpr (std::is_same_v<T, PrefabRegistry>)      return this->prefabRegistry;
+        else if constexpr (std::is_same_v<T, TextureRegistry>)     return this->textureRegistry;
+        else if constexpr (std::is_same_v<T, ItemRegistry>)        return this->itemRegistry;
+        else if constexpr (std::is_same_v<T, MeshRegistry>)        return this->meshRegistry;
+        else if constexpr (std::is_same_v<T, ItemMeshRegistry>)    return this->itemMeshRegistry;
         else static_assert(!sizeof(T), "Unknown registry type");
     }
 };
