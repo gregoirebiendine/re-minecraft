@@ -9,14 +9,15 @@ class World; // Forward declaration
 #include <queue>
 #include <mutex>
 
-#include "Utils.h"
 #include "ChunkNeighbors.h"
 #include "ChunkManager.h"
 #include "ChunkMesh.h"
 #include "ThreadPool.h"
+#include "Utils.h"
+
 
 struct NeighborData {
-    bool exists;
+    bool exists{};
     BlockStorage blocks;
 };
 
@@ -31,6 +32,8 @@ class ChunkMeshManager {
         const ChunkMesh& getMesh(const ChunkPos& pos) const;
 
     private:
+        static constexpr int MAX_UPLOADS_PER_FRAME = 4;
+
         static void buildFaceMesh(MeshData& mesh, const glm::ivec3& pos, MaterialFace face, uint16_t texId, BlockRotation rotation);
         static std::string getTextureFromRotation(const BlockMeta& meta, MaterialFace face, BlockRotation rotation);
 

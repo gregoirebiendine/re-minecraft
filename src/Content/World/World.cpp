@@ -176,8 +176,8 @@ void World::update(const float aspect)
 
     // Swap chunks pending changes
     {
-        auto lock = chunkManager.acquireReadLock();
-        for (auto& chunk : chunkManager.getChunks() | std::views::values) {
+        auto lock = this->chunkManager.acquireReadLock();
+        for (auto& chunk : this->chunkManager.getChunks() | std::views::values) {
             if (chunk->hasPendingChanges())
                 chunk->swapBuffers();
         }

@@ -58,20 +58,22 @@ void ChunkMeshManager::scheduleMeshing(const glm::vec3& playerPos)
 void ChunkMeshManager::update()
 {
     std::lock_guard lock(uploadMutex);
+    int i = 0;
 
-    while (!uploadQueue.empty()) {
+    while (!this->uploadQueue.empty() && i < MAX_UPLOADS_PER_FRAME) {
         auto [pos, data] = std::move(uploadQueue.front());
 
-        uploadQueue.pop();
+        this->uploadQueue.pop();
 
-        auto& mesh = meshes.try_emplace(pos, pos).first->second;
+        auto& mesh = this->meshes.try_emplace(pos, pos).first->second;
         mesh.upload(std::move(data));
         mesh.swapBuffers();
 
-        if (Chunk* c = world.getChunkManager().getChunk(pos.x, pos.y, pos.z)) {
+        if (Chunk* c = this->world.getChunkManager().getChunk(pos.x, pos.y, pos.z)) {
             if (c->getState() == ChunkState::MESHED)
                 c->setState(ChunkState::READY);
         }
+        i++;
     }
 }
 
