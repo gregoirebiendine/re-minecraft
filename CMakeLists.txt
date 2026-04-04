@@ -42,6 +42,7 @@ set(
 
     ${CMAKE_SOURCE_DIR}/src/Content/
     ${CMAKE_SOURCE_DIR}/src/Content/Vertices
+    ${CMAKE_SOURCE_DIR}/src/Content/Chunks/
     ${CMAKE_SOURCE_DIR}/src/Content/Chunks/Chunk
     ${CMAKE_SOURCE_DIR}/src/Content/Chunks/ChunkManager
     ${CMAKE_SOURCE_DIR}/src/Content/Chunks/ChunkMesh

@@ -16,7 +16,6 @@ class ChunkMesh {
     public:
         explicit ChunkMesh(const ChunkPos& pos);
 
-
         void upload(MeshData&& data);
         void swapBuffers();
         void render() const;

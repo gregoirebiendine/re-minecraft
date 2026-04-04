@@ -85,7 +85,7 @@ void Engine::loop()
 
         // INPUTS
         Viewport::pollEvents();
-        this->viewport.setSize(this->inputs.viewportSize);
+        this->viewport.setSize(this->inputs.viewportSize); // TODO: replace by Event driven data update
         this->playerController->handleInputs(this->inputs, this->viewport);
 
         // UPDATES

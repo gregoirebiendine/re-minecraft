@@ -9,14 +9,10 @@
 #include "Systems/FacingSystem.h"
 #include "Systems/MovementSystem.h"
 #include "Systems/CollisionSystem.h"
-#include "Systems/DebugAABBSystem.h" // DEBUG - AABB outline renderer
+#include "Systems/DebugAABBSystem.h"
 
 #include "Components/Movements.h"
-#include "Components/Gravity.h"
 #include "Components/CollisionBox.h"
-#include "Components/MeshRef.h"
-#include "Components/PlayerInput.h"
-#include "Components/Friction.h"
 #include "ECS/EntityCreator.h"
 
 World::World(const Registries& _registries, const InputState& _inputs, const Settings& _settings) :
@@ -24,7 +20,7 @@ World::World(const Registries& _registries, const InputState& _inputs, const Set
     inputs(_inputs),
     shader("World/"),
     chunkManager(_registries.blockRegistry, _registries.prefabRegistry, _settings),
-    meshManager(*this)
+    chunkMeshManager(*this)
 {
     // Setup entity vector
     this->entities.reserve(MAX_ENTITY);
@@ -186,8 +182,8 @@ void World::update(const float aspect)
     // Update chunk meshing
     this->chunkManager.updateStreaming(playerPos);
     this->chunkManager.updateFrustum(p * v);
-    this->meshManager.scheduleMeshing(playerPos);
-    this->meshManager.update();
+    this->chunkMeshManager.scheduleMeshing(playerPos);
+    this->chunkMeshManager.uploadMeshes();
 }
 
 void World::render()
@@ -196,7 +192,7 @@ void World::render()
 
     // Render chunks
     for (const auto chunk : this->chunkManager.getRenderableChunks()) {
-        const auto& mesh = this->meshManager.getMesh(chunk->getPosition());
+        const auto& mesh = this->chunkMeshManager.getMesh(chunk->getPosition());
 
         this->shader.setModelMatrix(chunk->getChunkModel());
         mesh.render();

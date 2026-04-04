@@ -43,9 +43,8 @@ class ChunkManager {
         [[nodiscard]] ChunkMap& getChunks();
         [[nodiscard]] std::vector<Chunk*> getRenderableChunks();
 
-        bool isAreaReady(ChunkPos center, int radius);
         [[nodiscard]] Chunk* getChunk(int cx, int cy, int cz);
-        bool canDecorate(const ChunkPos& pos);
+        bool isAreaReady(ChunkPos center, int radius);
 
         [[nodiscard]] ChunkNeighbors getNeighbors(const ChunkPos &cp);
         void rebuildNeighbors(const ChunkPos& pos);
@@ -62,25 +61,12 @@ class ChunkManager {
         mutable std::shared_mutex chunksMutex;
 
         ThreadPool<ChunkJob> terrainWorkers;
-        ThreadPool<ChunkJob> decorationWorkers;
 
         Frustum frustum{};
         TerrainGenerator terrainGenerator;
 
-        // Decoration locking mechanism to prevent concurrent writes to the same chunks
-        std::unordered_set<ChunkPos, ChunkPosHash> decorationLocks;
-        std::mutex decorationLockMutex;
-
         // Job handlers
         void terrainJob(const ChunkJob& job);
-        void decorationJob(const ChunkJob& job);
-
-        // Check and queue chunks ready for decoration
-        void tryQueueDecoration(const ChunkPos& pos);
-
-        // Decoration lock management
-        bool tryAcquireDecorationLock(const ChunkPos& pos);
-        void releaseDecorationLock(const ChunkPos& pos);
 };
 
 #endif

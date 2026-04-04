@@ -1,7 +1,7 @@
 #ifndef FARFIELD_CHUNKNEIGHBORS_H
 #define FARFIELD_CHUNKNEIGHBORS_H
 
-#include "Chunk.h"
+#include "Chunk/Chunk.h"
 
 struct ChunkNeighbors {
     const Chunk* north;

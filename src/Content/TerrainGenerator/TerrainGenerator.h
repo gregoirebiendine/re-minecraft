@@ -42,7 +42,6 @@ class TerrainGenerator
         explicit TerrainGenerator(const BlockRegistry& _blockRegistry, const PrefabRegistry& _prefabRegistry);
 
         void generate(Chunk& chunk) const;
-        void decorate(const Chunk& chunk, NeighborAccess& neighbors) const;
 };
 
 #endif

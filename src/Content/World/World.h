@@ -26,20 +26,24 @@ class World {
     static constexpr int SPAWN_RADIUS = 3;
     static constexpr int MAX_ENTITY = 100;
 
+    // From Engine
     const Registries& registries;
     const InputState& inputs;
 
+    // Internal state
     Shader shader;
     ChunkManager chunkManager;
-    ChunkMeshManager meshManager;
+    ChunkMeshManager chunkMeshManager;
+    bool isSimulationReady = false;
 
+    // ECS handlers
     ECS::Handler ecs{MAX_ENTITY};
     ECS::SystemScheduler scheduler{};
 
+    // ECS Entities cache
     std::vector<ECS::IEntity> entities{};
     ECS::IEntity player;
 
-    bool isSimulationReady = false;
 
     public:
         explicit World(const Registries& _registries, const InputState& _inputs, const Settings& _settings);

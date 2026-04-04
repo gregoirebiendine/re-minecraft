@@ -126,7 +126,7 @@ bool Chunk::swapBuffers()
 
 bool Chunk::hasPendingChanges() const
 {
-    return pendingChanges.load(std::memory_order_acquire);
+    return this->pendingChanges.load(std::memory_order_acquire);
 }
 
 void Chunk::finalizeGeneration()

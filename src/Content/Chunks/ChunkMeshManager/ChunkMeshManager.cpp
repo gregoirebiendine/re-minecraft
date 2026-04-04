@@ -27,9 +27,10 @@ void ChunkMeshManager::requestRebuild(Chunk& chunk, const float distance)
 
 void ChunkMeshManager::scheduleMeshing(const glm::vec3& playerPos)
 {
-    auto lock = world.getChunkManager().acquireReadLock();
-    for (auto&[pos, chunk] : world.getChunkManager().getChunks()) {
-        const bool needsFirstMesh = chunk->getState() == ChunkState::DECOR_DONE;
+    auto lock = this->world.getChunkManager().acquireReadLock();
+
+    for (auto&[pos, chunk] : this->world.getChunkManager().getChunks()) {
+        const bool needsFirstMesh = chunk->getState() == ChunkState::TERRAIN_DONE;
         const bool needsRemesh = chunk->getState() == ChunkState::READY && chunk->isDirty();
 
         if (!needsFirstMesh && !needsRemesh)
@@ -42,12 +43,12 @@ void ChunkMeshManager::scheduleMeshing(const glm::vec3& playerPos)
         chunk->setDirty(false);
 
         const auto center = glm::vec3(
-            pos.x * Chunk::SIZE + Chunk::SIZE / 2.0f,
-            pos.y * Chunk::SIZE + Chunk::SIZE / 2.0f,
-            pos.z * Chunk::SIZE + Chunk::SIZE / 2.0f
+            static_cast<float>(pos.x) * Chunk::SIZE + Chunk::SIZE / 2.0f,
+            static_cast<float>(pos.y) * Chunk::SIZE + Chunk::SIZE / 2.0f,
+            static_cast<float>(pos.z) * Chunk::SIZE + Chunk::SIZE / 2.0f
         );
 
-        workers.enqueue({
+        this->workers.enqueue({
             pos,
             glm::distance(playerPos, center),
             chunk->getGenerationID()
@@ -55,13 +56,13 @@ void ChunkMeshManager::scheduleMeshing(const glm::vec3& playerPos)
     }
 }
 
-void ChunkMeshManager::update()
+void ChunkMeshManager::uploadMeshes()
 {
-    std::lock_guard lock(uploadMutex);
+    std::lock_guard lock(this->uploadMutex);
     int i = 0;
 
     while (!this->uploadQueue.empty() && i < MAX_UPLOADS_PER_FRAME) {
-        auto [pos, data] = std::move(uploadQueue.front());
+        auto [pos, data] = std::move(this->uploadQueue.front());
 
         this->uploadQueue.pop();
 
@@ -79,7 +80,7 @@ void ChunkMeshManager::update()
 
 void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
 {
-    Chunk* chunk = world.getChunkManager().getChunk(job.pos.x, job.pos.y, job.pos.z);
+    Chunk* chunk = this->world.getChunkManager().getChunk(job.pos.x, job.pos.y, job.pos.z);
 
     if (!chunk)
         return;
@@ -88,7 +89,7 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
         return;
 
     const auto blockData = chunk->getBlockSnapshot();
-    const auto [north, south, east, west, up, down] = world.getChunkManager().getNeighbors(job.pos);
+    const auto [north, south, east, west, up, down] = this->world.getChunkManager().getNeighbors(job.pos);
 
     NeighborData neighbors[6];
     neighbors[0] = { north != nullptr, north ? north->getBlockSnapshot() : BlockStorage{} };
@@ -181,8 +182,8 @@ void ChunkMeshManager::buildMeshJob(const ChunkJob& job)
     }
 
     {
-        std::lock_guard lock(uploadMutex);
-        uploadQueue.emplace(job.pos, std::move(data));
+        std::lock_guard lock(this->uploadMutex);
+        this->uploadQueue.emplace(job.pos, std::move(data));
         if (chunk->getState() == ChunkState::MESHING)
             chunk->setState(ChunkState::MESHED);
     }
@@ -319,22 +320,22 @@ MaterialFace ChunkMeshManager::remapFaceForAxisRotation(const MaterialFace face,
     if (rotation == 5)
         switch (face)
         {
-        case UP:    return SOUTH;
-        case DOWN:  return NORTH;
-        case NORTH: return DOWN;
-        case SOUTH: return UP;
-        default:    return face;
+            case UP:    return SOUTH;
+            case DOWN:  return NORTH;
+            case NORTH: return DOWN;
+            case SOUTH: return UP;
+            default:    return face;
         }
 
     // Rotation 6 = X-axis (log pointing E/W)
     if (rotation == 6)
         switch (face)
         {
-        case UP:    return EAST;
-        case DOWN:  return WEST;
-        case EAST:  return DOWN;
-        case WEST:  return UP;
-        default:    return face;
+            case UP:    return EAST;
+            case DOWN:  return WEST;
+            case EAST:  return DOWN;
+            case WEST:  return UP;
+            default:    return face;
         }
 
     return face;

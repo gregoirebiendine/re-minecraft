@@ -46,12 +46,6 @@ void TerrainGenerator::generate(Chunk& chunk) const
     }
 }
 
-void TerrainGenerator::decorate(const Chunk& chunk, NeighborAccess& neighbors) const
-{
-    this->placePrefab(neighbors, "oak_tree_1", chunk.getPosition());
-    neighbors.markDirtyChunks();
-}
-
 uint32_t TerrainGenerator::getDecorationSeed(const int chunkX, const int chunkZ) const
 {
     return static_cast<uint32_t>(this->seed) ^
